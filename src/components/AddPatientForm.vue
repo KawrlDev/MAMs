@@ -11,17 +11,90 @@
         </div>
       </div>
 
-      <div class="section-header">
-        <h6 class="section-title">Patient Form</h6>
-        <q-btn icon="group" label="Browse Existing Patients" unelevated class="btn-browse-patients"
-          @click="openPatientBrowser" />
-      </div>
+      <h6 class="section-title">Patient Form</h6>
 
       <div class="grid-4">
-        <div class="field">
+        <div class="field lastname-field">
           <label>Last Name <span>*</span></label>
-          <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
+          <q-input 
+            v-model="lastNameValue" 
+            placeholder="Last Name" 
+            dense 
+            outlined
+            :rules="[val => !!val || 'This field is required']" 
+            @update:model-value="onLastNameChange"
+            @focus="lastNameFocused = true"
+            @blur="onLastNameBlur"
+          >
+            <template v-slot:append v-if="searchingPatients">
+              <q-spinner color="primary" size="20px" />
+            </template>
+          </q-input>
+
+          <!-- Patient Search Dropdown -->
+          <div 
+            v-if="showPatientDropdown && filteredSearchResults.length > 0" 
+            class="patient-dropdown"
+          >
+            <div class="dropdown-header">
+              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
+              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
+            </div>
+            <q-scroll-area style="height: 300px;">
+              <q-list separator>
+                <q-item 
+                  v-for="patient in filteredSearchResults" 
+                  :key="patient.patient_id" 
+                  clickable
+                  :disable="!patient.eligible"
+                  @click="selectPatientFromDropdown(patient)"
+                  :class="{
+                    'dropdown-patient-item': true,
+                    'patient-eligible': patient.eligible,
+                    'patient-ineligible': !patient.eligible
+                  }"
+                >
+                  <q-item-section>
+                    <q-item-label class="patient-name-dropdown">
+                      {{ patient.lastname }}, {{ patient.firstname }}
+                      <span v-if="patient.middlename"> {{ patient.middlename }}</span>
+                      <span v-if="patient.suffix"> {{ patient.suffix }}</span>
+                    </q-item-label>
+                    <q-item-label caption class="patient-details-dropdown">
+                      <div class="detail-row-dropdown">
+                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
+                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
+                        <span><strong>Age:</strong> {{ calculateAgeFromDate(patient.birthdate) || 'N/A' }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                      </div>
+                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
+                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
+                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
+                      </div>
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side top>
+                    <div class="eligibility-badge-container-dropdown">
+                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
+                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
+                        ELIGIBLE
+                      </q-badge>
+                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
+                        <q-icon name="block" size="xs" class="q-mr-xs" />
+                        NOT ELIGIBLE
+                      </q-badge>
+                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
+                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
+                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                      </div>
+                    </div>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-scroll-area>
+          </div>
         </div>
 
         <div class="field">
@@ -45,11 +118,10 @@
 
       <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
 
-
-      <div class="grid-3">
+      <div class="grid-4">
         <div class="field">
           <label>Birthdate <span>*</span></label>
-          <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
+          <q-input v-model="birthdateValue" @change="" dense outlined placeholder="DD/MM/YYYY"
             :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits"
             mask="##/##/####">
             <template #append>
@@ -65,6 +137,10 @@
               </q-icon>
             </template>
           </q-input>
+        </div>
+        <div class="field">
+          <label>Age </label>
+          <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" readonly />
         </div>
 
         <div class="field">
@@ -126,7 +202,6 @@
         </div>
       </div>
 
-
       <div v-if="!isChecked">
         <q-separator color="grey-5" size="2px" class="q-my-lg" />
         <h6 class="section-title">Client's Name</h6>
@@ -163,111 +238,13 @@
       </div>
 
       <div class="actions">
-        <q-btn class="btn-cancel" icon="close" label="CANCEL" @click="showCancelDialog = true" dense />
+        <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
         <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
         <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
       </div>
     </q-form>
 
-    <q-dialog v-model="showPatientBrowser" persistent full-width>
-      <q-card style="max-width: 1200px; width: 100%; margin: auto;">
-        <q-card-section class="bg-blue-6 text-white">
-          <div class="text-h6">
-            <q-icon name="group" size="sm" class="q-mr-sm" />
-            Browse Existing Patients
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <div class="filters-container">
-            <q-input v-model="patientSearchQuery" outlined dense
-              placeholder="Search by name, ID, address, sex, or preference..." class="search-input">
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-              <template v-slot:append v-if="patientSearchQuery">
-                <q-icon name="close" @click="patientSearchQuery = ''" class="cursor-pointer" />
-              </template>
-            </q-input>
-          </div>
-
-          <!-- Loading State -->
-          <div v-if="loadingPatients" class="text-center q-py-lg">
-            <q-spinner color="primary" size="3em" />
-            <div class="q-mt-md">Loading patients...</div>
-          </div>
-
-          <!-- Empty State -->
-          <div v-else-if="filteredPatientsList.length === 0" class="text-center q-py-lg text-grey-6">
-            <q-icon name="inbox" size="4em" />
-            <div class="q-mt-md">No patients found</div>
-          </div>
-
-          <!-- Patient List -->
-          <q-scroll-area v-else style="height: 500px;" class="patient-list-scroll">
-            <q-list bordered separator>
-              <q-item v-for="patient in filteredPatientsList" :key="patient.patient_id + '-' + patient.gl_no" clickable
-                :disable="!patient.eligible" @click="selectPatientFromBrowser(patient)" :class="{
-                  'patient-item': true,
-                  'patient-eligible': patient.eligible,
-                  'patient-ineligible': !patient.eligible
-                }">
-                <q-item-section>
-                  <q-item-label class="text-weight-bold patient-name">
-                    {{ patient.lastname }}, {{ patient.firstname }}
-                    <span v-if="patient.middlename"> {{ patient.middlename }}</span>
-                    <span v-if="patient.suffix"> {{ patient.suffix }}</span>
-                  </q-item-label>
-                  <q-item-label caption class="patient-details">
-                    <div class="detail-row">
-                      <span><strong>ID:</strong> {{ patient.patient_id }}</span>
-                      <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                      <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                        }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span><strong>Preference:</strong> {{ patient.preference || 'N/A' }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span><strong>Latest GL:</strong> {{ patient.gl_no || 'N/A' }}</span>
-                      <span v-if="patient.last_issued_at">
-                        <strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}
-                      </span>
-                    </div>
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side top>
-                  <div class="eligibility-badge-container">
-                    <q-badge v-if="patient.eligible" color="green" class="eligibility-badge">
-                      <q-icon name="check_circle" size="xs" class="q-mr-xs" />
-                      ELIGIBLE
-                    </q-badge>
-                    <q-badge v-else color="red" class="eligibility-badge">
-                      <q-icon name="block" size="xs" class="q-mr-xs" />
-                      NOT ELIGIBLE
-                    </q-badge>
-                    <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info">
-                      <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                      <small class="text-red">{{ patient.days_remaining }} days remaining</small>
-                    </div>
-                  </div>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-scroll-area>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closePatientBrowser" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
+    <!-- All the dialog components remain the same... -->
     <!-- PATIENT EDIT CONFIRMATION DIALOG (when browser patient is edited) -->
     <q-dialog v-model="showPatientEditDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
@@ -280,7 +257,7 @@
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You have modified the patient information that was loaded from the browser.
+            You have modified the patient information that was loaded from the dropdown.
           </div>
 
           <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
@@ -386,7 +363,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- PATIENT ID CONFIRMATION DIALOG (when using browser-selected patient without edits) -->
+    <!-- PATIENT ID CONFIRMATION DIALOG (when using dropdown-selected patient without edits) -->
     <q-dialog v-model="showPatientIdConfirmDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
         <q-card-section class="bg-blue-6 text-white">
@@ -398,7 +375,7 @@
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You selected an existing patient from the browser.
+            You selected an existing patient from the dropdown.
           </div>
 
           <!-- Show patient info -->
@@ -448,8 +425,7 @@
               <div class="option-title">Use Existing Patient</div>
               <div class="option-description">
                 Link this record to Patient ID {{ selectedBrowserPatient?.patient_id }}. This will add a new GL record
-                under
-                the same patient.
+                under the same patient.
               </div>
             </div>
 
@@ -460,8 +436,7 @@
               <div class="option-title">Create New Patient</div>
               <div class="option-description">
                 Create a completely new patient with a new Patient ID. Use this if this is actually a different person
-                with
-                the same name.
+                with the same name.
               </div>
             </div>
           </div>
@@ -516,7 +491,7 @@
         <q-separator />
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelEligibilityWarning" />
+          <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closeEligibilityWarning" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -563,11 +538,11 @@
     <q-dialog v-model="showCancelDialog">
       <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6">Cancel Form?</div>
+          <div class="text-h6">Close Form?</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          Are you sure you want to cancel? All unsaved changes will be lost.
+          Are you sure you want to close? All unsaved changes will be lost.
         </q-card-section>
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
@@ -665,7 +640,6 @@
   </div>
 </template>
 
-
 <script setup>
 import axios from 'axios'
 import { ref, computed, watch } from 'vue';
@@ -674,6 +648,11 @@ import { useRouter } from 'vue-router';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { toWords } from 'number-to-words'
 import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(relativeTime)
+dayjs.extend(customParseFormat)
 
 const router = useRouter()
 const $q = useQuasar()
@@ -698,6 +677,7 @@ const firstNameValue = ref(null)
 const middleNameValue = ref(null)
 const suffixValue = ref(null)
 const birthdateValue = ref(null)
+const ageValue = ref(null)
 const sexValue = ref(null)
 const preferenceValue = ref(null)
 const isChecked = ref(false);
@@ -719,13 +699,13 @@ const relationshipValue = ref(null)
 
 const dateToday = ref(null)
 
-const showPatientBrowser = ref(false)
-const patientsList = ref([])
-const patientSearchQuery = ref('')
-const dateFilter = ref(null)
-const dateRangeFrom = ref(null)
-const dateRangeTo = ref(null)
-const loadingPatients = ref(false)
+// Auto-search related refs
+const showPatientDropdown = ref(false)
+const searchingPatients = ref(false)
+const patientSearchResults = ref([])
+const lastNameFocused = ref(false)
+const searchDebounceTimer = ref(null)
+
 const selectedBrowserPatient = ref(null)
 const originalBrowserPatient = ref(null)
 const showPatientIdConfirmDialog = ref(false)
@@ -744,66 +724,26 @@ const partnerOptions = computed(() => {
   return []
 })
 
-const filteredPatientsList = computed(() => {
-  let filtered = patientsList.value
-
-  if (patientSearchQuery.value) {
-    const query = patientSearchQuery.value.toLowerCase()
-    filtered = filtered.filter(patient => {
-      const fullName = `${patient.lastname} ${patient.firstname} ${patient.middlename || ''} ${patient.suffix || ''}`.toLowerCase()
-      const patientId = (patient.patient_id || '').toString().toLowerCase()
-      const address = formatAddress(patient).toLowerCase()
-      const sex = (patient.sex || '').toLowerCase()
-      const preference = (patient.preference || '').toLowerCase()
-
-      return fullName.includes(query) ||
-        patientId.includes(query) ||
-        address.includes(query) ||
-        sex.includes(query) ||
-        preference.includes(query)
-    })
+const filteredSearchResults = computed(() => {
+  if (!lastNameValue.value || lastNameValue.value.trim().length < 2) {
+    return []
   }
 
-  if (dateFilter.value) {
-    filtered = filtered.filter(patient => {
-      if (!patient.last_issued_at) return false
-      const issuedDate = dayjs(patient.last_issued_at).format('YYYY-MM-DD')
-      return issuedDate === dateFilter.value
+  const query = lastNameValue.value.toLowerCase().trim()
+  
+  return patientSearchResults.value
+    .filter(patient => patient.lastname.toLowerCase().startsWith(query))
+    .sort((a, b) => {
+      // Sort eligible patients first
+      if (a.eligible && !b.eligible) return -1
+      if (!a.eligible && b.eligible) return 1
+      // Then by days remaining if both ineligible
+      if (!a.eligible && !b.eligible) {
+        return (a.days_remaining || 0) - (b.days_remaining || 0)
+      }
+      // Then alphabetically by last name
+      return a.lastname.localeCompare(b.lastname)
     })
-  }
-
-  if (dateRangeFrom.value && dateRangeTo.value) {
-    filtered = filtered.filter(patient => {
-      if (!patient.last_issued_at) return false
-      const issuedDate = dayjs(patient.last_issued_at)
-      const from = dayjs(dateRangeFrom.value)
-      const to = dayjs(dateRangeTo.value)
-      return issuedDate.isBetween(from, to, 'day', '[]')
-    })
-  } else if (dateRangeFrom.value) {
-    filtered = filtered.filter(patient => {
-      if (!patient.last_issued_at) return false
-      const issuedDate = dayjs(patient.last_issued_at)
-      const from = dayjs(dateRangeFrom.value)
-      return issuedDate.isSameOrAfter(from, 'day')
-    })
-  } else if (dateRangeTo.value) {
-    filtered = filtered.filter(patient => {
-      if (!patient.last_issued_at) return false
-      const issuedDate = dayjs(patient.last_issued_at)
-      const to = dayjs(dateRangeTo.value)
-      return issuedDate.isSameOrBefore(to, 'day')
-    })
-  }
-
-  return filtered.sort((a, b) => {
-    if (a.eligible && !b.eligible) return -1
-    if (!a.eligible && b.eligible) return 1
-    if (!a.eligible && !b.eligible) {
-      return (a.days_remaining || 0) - (b.days_remaining || 0)
-    }
-    return 0
-  })
 })
 
 const showCancelDialog = ref(false)
@@ -821,6 +761,16 @@ const existingPatients = ref([])
 const selectedExistingPatient = ref(null)
 const selectedAction = ref(null)
 const eligibilityWarningData = ref(null)
+
+// AUTOMATIC AGE CALCULATION - Watch birthdate changes
+watch(birthdateValue, (newBirthdate) => {
+  if (newBirthdate) {
+    const age = calculateAge(newBirthdate)
+    ageValue.value = age !== null ? String(age) : null
+  } else {
+    ageValue.value = null
+  }
+})
 
 // Helper functions for date formatting
 const formatDate = (dateString) => {
@@ -864,6 +814,22 @@ const calculateAge = (birthdate) => {
   return age
 }
 
+// Calculate age from MySQL date format (YYYY-MM-DD)
+const calculateAgeFromDate = (dateString) => {
+  if (!dateString) return null
+  
+  const birthDate = new Date(dateString)
+  const today = new Date()
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const monthDiff = today.getMonth() - birthDate.getMonth()
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--
+  }
+  
+  return age
+}
+
 // Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
@@ -896,82 +862,83 @@ const convertFromMySQLDate = (dateString) => {
   return `${day}/${month}/${year}`
 }
 
-// Check if browser patient details have been edited
-const checkForPatientEdits = () => {
-  if (!usedBrowserPatient.value || !originalBrowserPatient.value) return
+// Auto-search when last name changes
+const onLastNameChange = (value) => {
+  // Clear previous timer
+  if (searchDebounceTimer.value) {
+    clearTimeout(searchDebounceTimer.value)
+  }
 
-  const edited =
-    lastNameValue.value !== originalBrowserPatient.value.lastname ||
-    firstNameValue.value !== originalBrowserPatient.value.firstname ||
-    (middleNameValue.value || null) !== (originalBrowserPatient.value.middlename || null) ||
-    (suffixValue.value || null) !== (originalBrowserPatient.value.suffix || null) ||
-    birthdateValue.value !== originalBrowserPatient.value.birthdate ||
-    sexValue.value !== originalBrowserPatient.value.sex ||
-    (preferenceValue.value || null) !== (originalBrowserPatient.value.preference || null) ||
-    barangayValue.value !== originalBrowserPatient.value.barangay ||
-    houseAddressValue.value !== originalBrowserPatient.value.house_address
+  // If less than 2 characters, hide dropdown
+  if (!value || value.trim().length < 2) {
+    showPatientDropdown.value = false
+    patientSearchResults.value = []
+    return
+  }
 
-  browserPatientEdited.value = edited
+  // Debounce the search
+  searchDebounceTimer.value = setTimeout(async () => {
+    await searchPatients(value)
+  }, 300) // Wait 300ms after user stops typing
 }
 
-// Patient Browser Functions
-const openPatientBrowser = async () => {
-  showPatientBrowser.value = true
-  loadingPatients.value = true
-  patientSearchQuery.value = ''
-  dateFilter.value = null
-  dateRangeFrom.value = null
-  dateRangeTo.value = null
+const onLastNameBlur = () => {
+  // Delay hiding dropdown to allow click events to register
+  setTimeout(() => {
+    lastNameFocused.value = false
+    // Only hide if user didn't click on a patient
+    if (!usedBrowserPatient.value) {
+      showPatientDropdown.value = false
+    }
+  }, 200)
+}
+
+const searchPatients = async (query) => {
+  if (!query || query.trim().length < 2) return
+
+  searchingPatients.value = true
 
   try {
-    // Fetch all patients with eligibility check
     const res = await axios.get('http://localhost:8000/api/patients/all-with-eligibility')
-    patientsList.value = res.data
+    patientSearchResults.value = res.data
+    showPatientDropdown.value = true
   } catch (err) {
     console.error('Failed to fetch patients', err)
     $q.notify({
       type: 'negative',
-      message: 'Failed to load patients',
+      message: 'Failed to search patients',
       position: 'top'
     })
   } finally {
-    loadingPatients.value = false
+    searchingPatients.value = false
   }
 }
 
-const closePatientBrowser = () => {
-  showPatientBrowser.value = false
-  patientSearchQuery.value = ''
-  dateFilter.value = null
-  dateRangeFrom.value = null
-  dateRangeTo.value = null
-}
-
-const selectPatientFromBrowser = (patient) => {
+const selectPatientFromDropdown = (patient) => {
   if (!patient.eligible) {
-    $q.notify({
-      type: 'warning',
-      message: 'This patient is not yet eligible for a new GL',
-      position: 'top'
-    })
+    eligibilityWarningData.value = {
+      last_gl_no: patient.gl_no,
+      last_issued_at: patient.last_issued_at,
+      eligibility_date: patient.eligibility_date,
+      days_remaining: patient.days_remaining
+    }
+    showEligibilityWarning.value = true
+    showPatientDropdown.value = false
     return
   }
 
   selectedBrowserPatient.value = patient
-  originalBrowserPatient.value = { ...patient } // Store original values
-  showPatientBrowser.value = false
+  originalBrowserPatient.value = { ...patient }
+  showPatientDropdown.value = false
   usedBrowserPatient.value = true
   browserPatientEdited.value = false
 
-  // Fill form with patient data - convert birthdate to DD/MM/YYYY
+  // Fill form with patient data
   lastNameValue.value = patient.lastname
   firstNameValue.value = patient.firstname
   middleNameValue.value = patient.middlename
   suffixValue.value = patient.suffix
-  
-  // Convert birthdate from YYYY-MM-DD to DD/MM/YYYY
   birthdateValue.value = convertFromMySQLDate(patient.birthdate)
-  
   sexValue.value = patient.sex
   preferenceValue.value = patient.preference
   provinceValue.value = patient.province || 'Davao del Norte'
@@ -984,6 +951,29 @@ const selectPatientFromBrowser = (patient) => {
     message: 'Patient information loaded. Fill in the remaining details.',
     position: 'top'
   })
+}
+
+const closeEligibilityWarning = () => {
+  showEligibilityWarning.value = false
+  eligibilityWarningData.value = null
+}
+
+// Check if browser patient details have been edited
+const checkForPatientEdits = () => {
+  if (!usedBrowserPatient.value || !originalBrowserPatient.value) return
+
+  const edited =
+    lastNameValue.value !== originalBrowserPatient.value.lastname ||
+    firstNameValue.value !== originalBrowserPatient.value.firstname ||
+    (middleNameValue.value || null) !== (originalBrowserPatient.value.middlename || null) ||
+    (suffixValue.value || null) !== (originalBrowserPatient.value.suffix || null) ||
+    birthdateValue.value !== convertFromMySQLDate(originalBrowserPatient.value.birthdate) ||
+    sexValue.value !== originalBrowserPatient.value.sex ||
+    (preferenceValue.value || null) !== (originalBrowserPatient.value.preference || null) ||
+    barangayValue.value !== originalBrowserPatient.value.barangay ||
+    houseAddressValue.value !== originalBrowserPatient.value.house_address
+
+  browserPatientEdited.value = edited
 }
 
 const cancelPatientIdConfirm = () => {
@@ -1007,10 +997,8 @@ const proceedWithEdit = async () => {
 
   try {
     if (editDialogAction.value === 'update') {
-      // Update existing patient and create new GL
       await submitForm(pendingAction.value === 'print', selectedBrowserPatient.value.patient_id, true)
     } else {
-      // Create completely new patient
       await submitForm(pendingAction.value === 'print', null)
     }
 
@@ -1035,10 +1023,8 @@ const proceedWithPatientIdConfirm = async () => {
 
   try {
     if (confirmDialogAction.value === 'existing') {
-      // Use the browser-selected patient ID
       await submitForm(pendingAction.value === 'print', selectedBrowserPatient.value.patient_id)
     } else {
-      // Create new patient
       await submitForm(pendingAction.value === 'print', null)
     }
 
@@ -1071,24 +1057,23 @@ const checkEligibility = async () => {
     return res.data;
   } catch (err) {
     console.error('Failed checking eligibility', err)
-    return { eligible: true }; // Allow submission if check fails
+    return { eligible: true };
   }
 }
 
 const checkExistingPatients = async (isPrint = false) => {
   if (!lastNameValue.value || !firstNameValue.value) return;
 
-  // Store the pending action
   pendingAction.value = isPrint ? 'print' : 'save'
 
-  // If user selected from browser and edited the info, show edit confirmation
+  // If user selected from dropdown and edited the info
   if (usedBrowserPatient.value && selectedBrowserPatient.value && browserPatientEdited.value) {
     editDialogAction.value = null
     showPatientEditDialog.value = true
     return
   }
 
-  // If user selected from browser without edits, show confirmation dialog
+  // If user selected from dropdown without edits
   if (usedBrowserPatient.value && selectedBrowserPatient.value && !browserPatientEdited.value) {
     confirmDialogAction.value = null
     showPatientIdConfirmDialog.value = true
@@ -1096,7 +1081,6 @@ const checkExistingPatients = async (isPrint = false) => {
   }
 
   try {
-    // Check for existing patients first
     const res = await axios.post('http://localhost:8000/api/patients/existing', {
       lastname: lastNameValue.value,
       firstname: firstNameValue.value,
@@ -1111,7 +1095,6 @@ const checkExistingPatients = async (isPrint = false) => {
       selectedAction.value = null;
       selectedExistingPatient.value = null;
     } else {
-      // No existing patients, check eligibility before creating new
       const eligibilityCheck = await checkEligibility()
 
       if (!eligibilityCheck.eligible) {
@@ -1132,25 +1115,6 @@ const checkExistingPatients = async (isPrint = false) => {
   }
 }
 
-// -----------------------------
-// ELIGIBILITY WARNING HANDLERS
-// -----------------------------
-const cancelEligibilityWarning = () => {
-  showEligibilityWarning.value = false
-  eligibilityWarningData.value = null
-
-  // If we came from the existing patients dialog, show it again
-  if (selectedAction.value && existingPatients.value.length > 0) {
-    showExistingDialog.value = true
-  } else {
-    // Otherwise clear everything
-    pendingAction.value = null
-  }
-}
-
-// -----------------------------
-// DIALOG ACTIONS
-// -----------------------------
 const proceedWithAction = async () => {
   if (!selectedAction.value) return
 
@@ -1158,10 +1122,8 @@ const proceedWithAction = async () => {
 
   try {
     if (selectedAction.value === 'existing') {
-      // User selected to use existing patient - check eligibility
       await checkEligibilityAndProceed(selectedExistingPatient.value.patient_id)
     } else if (selectedAction.value === 'new') {
-      // User selected to create new patient - check eligibility for the name match
       const eligibilityCheck = await checkEligibility()
 
       if (!eligibilityCheck.eligible) {
@@ -1188,20 +1150,17 @@ const proceedWithAction = async () => {
 
 const checkEligibilityAndProceed = async (patientId) => {
   try {
-    // Check eligibility using patient_id
     const res = await axios.post('http://localhost:8000/api/patients/check-eligibility-by-id', {
       patient_id: patientId
     })
 
     if (!res.data.eligible) {
-      // Not eligible - show warning
       showExistingDialog.value = false
       eligibilityWarningData.value = res.data
       showEligibilityWarning.value = true
       return
     }
 
-    // Eligible - proceed
     await useExistingPatient()
   } catch (err) {
     console.error('Failed checking eligibility', err)
@@ -1231,9 +1190,6 @@ const cancelExistingDialog = () => {
   pendingAction.value = null
 }
 
-// -----------------------------
-// SAVE / PRINT HANDLERS
-// -----------------------------
 const handleCancel = () => {
   showCancelDialog.value = false
   router.push('/patient-records')
@@ -1263,9 +1219,6 @@ const handleSaveAndPrintClick = () => {
   }
 }
 
-// -----------------------------
-// CONFIRMATIONS
-// -----------------------------
 const confirmSave = async () => {
   showSaveDialog.value = false
   saveLoading.value = true
@@ -1286,13 +1239,9 @@ const confirmSaveAndPrint = async () => {
   }
 }
 
-// -----------------------------
-// MAIN FORM SUBMIT
-// -----------------------------
 const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = false) => {
   dateToday.value = date.formatDate(new Date(), 'YYYY-MM-DD')
 
-  // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
   
   if (!mysqlBirthdate) {
@@ -1329,11 +1278,8 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   formData.append('client_suffix', clientSuffixValue.value || '')
   formData.append('relationship', relationshipValue.value || '')
 
-  // If patientId is provided, use existing patient
   if (patientId) {
     formData.append('patient_id', patientId)
-
-    // If updating patient info, add flag
     if (updatePatientInfo) {
       formData.append('update_patient_info', '1')
     }
@@ -1364,9 +1310,6 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   }
 }
 
-// -----------------------------
-// PDF GENERATION
-// -----------------------------
 const generatePDF = async () => {
   const pdfMap = {
     MEDICINE: '/med.pdf',
@@ -1375,18 +1318,12 @@ const generatePDF = async () => {
   }
 
   const pdfPath = pdfMap[categoryValue.value]
-
   const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
-
   const pdfDoc = await PDFDocument.load(existingPdfBytes)
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-
   const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
-
   const page = pdfDoc.getPages()[0]
-
   const parsedDate = new Date(dateToday.value)
-
   const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
   const monthName = parsedDate.toLocaleString('default', { month: 'long' })
 
@@ -1396,8 +1333,8 @@ const generatePDF = async () => {
     (suffixValue.value ? " " + suffixValue.value : "");
 
   const clientValue = ref(null);
-
   const fullAddressValue = houseAddressValue.value + ", " + barangayValue.value + ", " + cityValue.value + ", " + provinceValue.value
+  
   if (isChecked.value == true) {
     clientValue.value = fullNameValue;
   } else {
@@ -1406,109 +1343,54 @@ const generatePDF = async () => {
       (clientSuffixValue.value ? " " + clientSuffixValue.value : "") + " / " + (relationshipValue.value ? " " + relationshipValue.value : "");
   }
 
-  // Calculate age from birthdate
   const age = calculateAge(birthdateValue.value)
 
   page.drawText(glNum.value + ' / ' + partnerValue.value, {
-    x: 600,
-    y: 489,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 600, y: 489, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(fullNameValue.toUpperCase(), {
-    x: 140,
-    y: 375,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 140, y: 375, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(String(age), {
-    x: 400,
-    y: 375,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 400, y: 375, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(sexValue.value.toUpperCase(), {
-    x: 455,
-    y: 375,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 455, y: 375, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(fullAddressValue.toUpperCase(), {
-    x: 95,
-    y: 350,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 95, y: 350, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(clientValue.value.toUpperCase(), {
-    x: 70,
-    y: 300,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 70, y: 300, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
 
   if (categoryValue.value == 'MEDICINE') {
     page.drawText(amountWords, {
-      x: 245,
-      y: 273,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 245, y: 273, size: 12, color: rgb(0, 0, 0), font: boldFont,
     })
   } else {
     page.drawText(amountWords, {
-      x: 260,
-      y: 273,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 260, y: 273, size: 12, color: rgb(0, 0, 0), font: boldFont,
     })
   }
 
-  page.drawText(
-    Number(issuedAmountValue.value).toFixed(2),
-    {
-      x: 90,
-      y: 248,
-      size: 14,
-      color: rgb(0, 0, 0),
-      font: boldFont,
-    },
-  )
+  page.drawText(Number(issuedAmountValue.value).toFixed(2), {
+    x: 90, y: 248, size: 14, color: rgb(0, 0, 0), font: boldFont,
+  })
   page.drawText(dayNum, {
-    x: 137,
-    y: 197,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 137, y: 197, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(monthName.toUpperCase(), {
-    x: 225,
-    y: 197,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 225, y: 197, size: 14, color: rgb(0, 0, 0), font: boldFont,
   })
   page.drawText(issuedByValue.value.toUpperCase(), {
-    x: 350,
-    y: 65,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
+    x: 350, y: 65, size: 12, color: rgb(0, 0, 0), font: boldFont,
   })
 
   const pdfBytes = await pdfDoc.save()
-
   const blob = new Blob([pdfBytes], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
-
   window.open(url)
-
   setTimeout(() => URL.revokeObjectURL(url), 100)
 }
 
@@ -1523,8 +1405,8 @@ function getDaySuffix(day) {
 }
 </script>
 
-
 <style scoped>
+/* All existing styles remain the same... */
 /* =========================
    PAGE & CARD
 ========================= */
@@ -1560,29 +1442,9 @@ function getDaySuffix(day) {
    SECTION TITLES
 ========================= */
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
 .section-title {
-  margin: 1px 0 0;
+  margin: 30px 0 12px;
   font-weight: 600;
-}
-
-.btn-browse-patients {
-  background: #2196f3;
-  color: white;
-  font-weight: 600;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-}
-
-.btn-browse-patients .q-icon {
-  margin-right: 6px;
 }
 
 /* =========================
@@ -1592,7 +1454,6 @@ function getDaySuffix(day) {
 div.category {
   margin-top: 30px;
 }
-
 
 label {
   font-size: 14px;
@@ -1639,22 +1500,103 @@ label span {
 }
 
 /* =========================
-   FILTERS CONTAINER
+   LASTNAME FIELD & DROPDOWN
 ========================= */
 
-.filters-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+.lastname-field {
+  position: relative;
+}
+
+.patient-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #2196f3;
+  border-radius: 4px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.dropdown-header {
+  background: #e3f2fd;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1976d2;
+  border-bottom: 1px solid #bbdefb;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-patient-item {
+  padding: 12px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-patient-item:hover:not(.patient-ineligible) {
+  background-color: #f5f5f5;
+}
+
+.dropdown-patient-item.patient-eligible {
+  cursor: pointer;
+}
+
+.dropdown-patient-item.patient-ineligible {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #fafafa;
+}
+
+.patient-name-dropdown {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f8f2e;
+  margin-bottom: 4px;
+}
+
+.patient-details-dropdown {
+  font-size: 11px;
+  color: #666;
+}
+
+.detail-row-dropdown {
+  display: flex;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 2px;
 }
 
-.search-input {
-  grid-column: 1;
+.detail-row-dropdown span {
+  color: #666;
 }
 
-.date-input {
-  min-width: 150px;
+.eligibility-badge-container-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.eligibility-badge-dropdown {
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.eligibility-info-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 9px;
+  color: #666;
+  margin-top: 2px;
 }
 
 /* =========================
@@ -1733,7 +1675,6 @@ label span {
   margin-top: -20px;
 }
 
-
 /* =========================
    ACTION BUTTONS
 ========================= */
@@ -1753,22 +1694,18 @@ label span {
   color: white;
 }
 
-/* CANCEL */
 .btn-cancel {
   background: #ff3b3b;
 }
 
-/* SAVE */
 .btn-save {
   background: #0aa64f;
 }
 
-/* SAVE & PRINT */
 .btn-print {
   background: #0aa64f;
 }
 
-/* ICON SPACING */
 .actions .q-btn .q-icon {
   margin-right: 6px;
 }
@@ -1796,78 +1733,6 @@ label span {
 .dialog-cancel-btn .q-icon,
 .dialog-goback-btn .q-icon {
   margin-right: 6px;
-}
-
-/* =========================
-   PATIENT BROWSER STYLES
-========================= */
-
-.patient-list-scroll {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-}
-
-.patient-item {
-  transition: all 0.2s ease;
-  padding: 16px;
-}
-
-.patient-item:hover:not(.patient-ineligible) {
-  background-color: #f5f5f5;
-}
-
-.patient-eligible {
-  cursor: pointer;
-}
-
-.patient-ineligible {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: #fafafa;
-}
-
-.patient-name {
-  font-size: 15px;
-  color: #1f8f2e;
-}
-
-.patient-details {
-  margin-top: 8px;
-  font-size: 12px;
-}
-
-.detail-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-
-.detail-row span {
-  color: #666;
-}
-
-.eligibility-badge-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.eligibility-badge {
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-}
-
-.eligibility-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: 10px;
-  color: #666;
-  margin-top: 4px;
 }
 
 /* =========================
