@@ -16,55 +16,40 @@
       <div class="grid-4">
         <div class="field lastname-field">
           <label>Last Name <span>*</span></label>
-          <q-input 
-            v-model="lastNameValue" 
-            placeholder="Last Name" 
-            dense 
-            outlined
-            :rules="[val => !!val || 'This field is required']" 
-            @update:model-value="onLastNameChange"
-            @focus="lastNameFocused = true"
-            @blur="onLastNameBlur"
-          >
+          <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
+            :rules="[val => !!val || 'This field is required']" @update:model-value="onLastNameChange"
+            @focus="lastNameFocused = true" @blur="onLastNameBlur">
             <template v-slot:append v-if="searchingPatients">
               <q-spinner color="primary" size="20px" />
             </template>
           </q-input>
 
           <!-- Patient Search Dropdown -->
-          <div 
-            v-if="showPatientDropdown && filteredSearchResults.length > 0" 
-            class="patient-dropdown"
-          >
+          <div v-if="showPatientDropdown && filteredSearchResults.length > 0" class="patient-dropdown">
             <div class="dropdown-header">
               <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
               <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
             </div>
             <q-scroll-area style="height: 300px;">
               <q-list separator>
-                <q-item 
-                  v-for="patient in filteredSearchResults" 
-                  :key="patient.patient_id" 
-                  clickable
-                  :disable="!patient.eligible"
-                  @click="selectPatientFromDropdown(patient)"
-                  :class="{
+                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
+                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
                     'dropdown-patient-item': true,
                     'patient-eligible': patient.eligible,
                     'patient-ineligible': !patient.eligible
-                  }"
-                >
+                  }">
                   <q-item-section>
-                    <q-item-label class="patient-name-dropdown">
-                      {{ patient.lastname }}, {{ patient.firstname }}
-                      <span v-if="patient.middlename"> {{ patient.middlename }}</span>
-                      <span v-if="patient.suffix"> {{ patient.suffix }}</span>
-                    </q-item-label>
                     <q-item-label caption class="patient-details-dropdown">
                       <div class="detail-row-dropdown">
                         <span><strong>ID:</strong> {{ patient.patient_id }}</span>
                         <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                        <span><strong>Age:</strong> {{ calculateAgeFromDate(patient.birthdate) || 'N/A' }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                          'N/A'
+                          }}</span>
                       </div>
                       <div class="detail-row-dropdown">
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
@@ -323,7 +308,7 @@
               </div>
               <div class="info-item info-item-full">
                 <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
-                provinceValue }}
+                  provinceValue }}
               </div>
             </div>
           </div>
@@ -730,7 +715,7 @@ const filteredSearchResults = computed(() => {
   }
 
   const query = lastNameValue.value.toLowerCase().trim()
-  
+
   return patientSearchResults.value
     .filter(patient => patient.lastname.toLowerCase().startsWith(query))
     .sort((a, b) => {
@@ -797,68 +782,68 @@ const formatAddress = (patient) => {
 // Calculate age from birthdate
 const calculateAge = (birthdate) => {
   if (!birthdate) return null
-  
+
   // Parse DD/MM/YYYY format
   const parts = birthdate.split('/')
   if (parts.length !== 3) return null
-  
+
   const birthDate = new Date(parts[2], parts[1] - 1, parts[0])
   const today = new Date()
   let age = today.getFullYear() - birthDate.getFullYear()
   const monthDiff = today.getMonth() - birthDate.getMonth()
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--
   }
-  
+
   return age
 }
 
 // Calculate age from MySQL date format (YYYY-MM-DD)
 const calculateAgeFromDate = (dateString) => {
   if (!dateString) return null
-  
+
   const birthDate = new Date(dateString)
   const today = new Date()
   let age = today.getFullYear() - birthDate.getFullYear()
   const monthDiff = today.getMonth() - birthDate.getMonth()
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--
   }
-  
+
   return age
 }
 
 // Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
-  
+
   // Handle if already in YYYY-MM-DD format
   if (dateString.includes('-') && dateString.split('-').length === 3) {
     return dateString
   }
-  
+
   const parts = dateString.split('/')
   if (parts.length !== 3) return null
-  
+
   // parts[0] = day, parts[1] = month, parts[2] = year
   const day = parts[0].padStart(2, '0')
   const month = parts[1].padStart(2, '0')
   const year = parts[2]
-  
+
   return `${year}-${month}-${day}`
 }
 
 // Convert MySQL YYYY-MM-DD to DD/MM/YYYY format
 const convertFromMySQLDate = (dateString) => {
   if (!dateString) return null
-  
+
   const date = new Date(dateString)
   const day = String(date.getDate()).padStart(2, '0')
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const year = date.getFullYear()
-  
+
   return `${day}/${month}/${year}`
 }
 
@@ -1243,7 +1228,7 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   dateToday.value = date.formatDate(new Date(), 'YYYY-MM-DD')
 
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
-  
+
   if (!mysqlBirthdate) {
     $q.notify({
       type: 'negative',
@@ -1334,7 +1319,7 @@ const generatePDF = async () => {
 
   const clientValue = ref(null);
   const fullAddressValue = houseAddressValue.value + ", " + barangayValue.value + ", " + cityValue.value + ", " + provinceValue.value
-  
+
   if (isChecked.value == true) {
     clientValue.value = fullNameValue;
   } else {
