@@ -1,1 +1,50 @@
-// app global css in SCSS form
+body {
+  padding: 30px;
+}
+.budget-table {
+  width: 100%;
+}
+
+.budget-table thead tr {
+  background: #1f8f2e;
+}
+
+.budget-table thead th {
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+}
+
+.budget-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.budget-table .q-table__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f8f2e;
+}
+
+.budget-table .action-cell {
+  height: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+.btn-cancel {
+    background: #ff3b3b;
+    color: white;
+    font-weight: bold;
+}
+.btn-save {
+    background: #0aa64f;
+    color: white;
+    font-weight: bold;
+}

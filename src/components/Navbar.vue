@@ -1,0 +1,126 @@
+<template>
+  <div>
+    <!-- TOP HEADER -->
+    <q-header elevated class="bg-green-7 text-white">
+      <q-toolbar>
+        <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
+
+        <q-toolbar-title class="row items-center q-gutter-sm">
+          <q-img src="~assets/logo.png" width="34px" height="34px" fit="contain" />
+          <span class="text-weight-bold text-h6">MAMs</span>
+        </q-toolbar-title>
+
+        <!-- USER ICON WITH DROPDOWN MENU -->
+        <q-btn flat round icon="account_circle">
+          <q-menu>
+            <q-list style="min-width: 200px">
+              <!-- User Info Section -->
+              <q-item>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">{{ user?.USERNAME || 'User' }}</q-item-label>
+                  <q-item-label caption>{{ user?.ROLE || 'Role' }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-separator />
+
+              <!-- Logout Button -->
+              <q-item clickable v-close-popup @click="logout">
+                <q-item-section avatar>
+                  <q-icon name="logout" />
+                </q-item-section>
+                <q-item-section>Logout</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </q-toolbar>
+    </q-header>
+
+    <!-- OVERLAY DRAWER -->
+    <q-drawer v-model="drawer" overlay modal side="left" :width='200' class="drawer-bg">
+      <!-- IMPORTANT: inner content background -->
+      <div class="drawer-content q-pa-sm column q-gutter-sm items-center">
+        <q-btn to="/" exact left rounded unelevated no-caps icon="dashboard" label="Dashboard" class="nav-btn"
+          :class="{ 'active-btn': route.path === '/' }" />
+
+        <q-btn to="/patient-records" exact left rounded unelevated no-caps icon="description" label="Patients"
+          class="nav-btn" :class="{ 'active-btn': route.path === '/patient-records' }" />
+
+        <q-btn v-if="role === 'HEAD' || role === 'ADMIN'" to="/budget-table" exact left rounded unelevated no-caps
+          icon="add_circle" label="Budget" class="nav-btn" :class="{ 'active-btn': route.path === '/budget-table' }" />
+      </div>
+    </q-drawer>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+
+const data = JSON.parse(localStorage.getItem('user'))
+const role = data.ROLE
+
+const drawer = ref(false);
+const route = useRoute();
+const router = useRouter();
+const $q = useQuasar();
+
+// Get user from localStorage
+const user = computed(() => {
+  const userData = localStorage.getItem('user');
+  return userData ? JSON.parse(userData) : null;
+});
+
+const logout = () => {
+  // Clear local storage
+  localStorage.removeItem('user');
+
+  $q.notify({
+    type: 'positive',
+    message: 'Logged out successfully',
+    position: 'top'
+  });
+
+  // Force reload to login (this clears all state)
+  router.push('/login');
+};
+</script>
+
+<style scoped>
+/* DRAWER BACKGROUND (outer) */
+.drawer-bg {
+  background-color: #19ad19;
+}
+
+.drawer-content {
+  background-color: #60ba60;
+  height: 100%;
+  padding: 20px;
+}
+
+/* SMALLER BUTTONS */
+.nav-btn,
+.test-btn {
+  margin-top: 10px;
+  min-width: 150px;
+  height: 40px;
+  padding: 6px 0;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 20px;
+  color: white;
+  border: 2px solid #ffffe0;
+}
+
+.nav-btn.active-btn {
+  background-color: #ffffe0;
+  color: #59b259;
+}
+
+/* ICON SIZE */
+.nav-btn .q-icon {
+  font-size: 22px;
+}
+</style>
