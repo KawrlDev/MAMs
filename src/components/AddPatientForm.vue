@@ -662,7 +662,18 @@ const firstNameValue = ref(null)
 const middleNameValue = ref(null)
 const suffixValue = ref(null)
 const birthdateValue = ref(null)
-const ageValue = ref(null)
+const ageValue = computed(() => {
+  if (!birthdateValue.value) return null
+
+  const birth = dayjs(birthdateValue.value, 'DD/MM/YYYY', true)
+
+  if (!birth.isValid()) return null
+  if (birth.isAfter(dayjs())) return null
+
+  return dayjs().diff(birth, 'year')
+
+})
+
 const sexValue = ref(null)
 const preferenceValue = ref(null)
 const isChecked = ref(false);
@@ -748,14 +759,6 @@ const selectedAction = ref(null)
 const eligibilityWarningData = ref(null)
 
 // AUTOMATIC AGE CALCULATION - Watch birthdate changes
-watch(birthdateValue, (newBirthdate) => {
-  if (newBirthdate) {
-    const age = calculateAge(newBirthdate)
-    ageValue.value = age !== null ? String(age) : null
-  } else {
-    ageValue.value = null
-  }
-})
 
 // Helper functions for date formatting
 const formatDate = (dateString) => {
