@@ -8,12 +8,11 @@
         <div class="actions">
           <!-- View Mode Buttons -->
           <template v-if="!edit">
-            <q-btn label="DELETE" icon="delete" class="action-btn delete-btn"
-              @click="showDeleteDialog = true" dense />
+            <q-btn label="DELETE" icon="delete" class="action-btn delete-btn" @click="showDeleteDialog = true" dense />
             <q-btn label="EDIT" icon="edit" class="action-btn edit-btn" dense @click="edit = true" />
             <q-btn icon="picture_as_pdf" class="action-btn pdf-btn" dense round @click="generatePDF" />
           </template>
-          
+
           <!-- Edit Mode Buttons -->
           <template v-if="edit">
             <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="showCancelDialog = true" dense />
@@ -62,7 +61,7 @@
           <q-checkbox v-model="isChecked" label="Patient is same as client?" class="form-checkbox" :disable="!edit" />
         </div>
 
-        <div class="col-4">
+        <div class="col-3">
           <label class="form-label">Birthdate <span class="required">*</span></label>
           <q-input v-model="birthdateValue" dense outlined class="flat-input"
             :rules="[val => !!val || 'This field is required']" :readonly="!edit" placeholder="DD/MM/YYYY">
@@ -79,14 +78,18 @@
             </template>
           </q-input>
         </div>
+        <div class="col-3">
+          <label class="form-label">Age </label>
+          <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" class="flat-input" readonly />
+        </div>
 
-        <div class="col-4">
+        <div class="col-3">
           <label class="form-label">Sex <span class="required">*</span></label>
           <q-select v-model="sexValue" :options="options[0]" dense outlined class="flat-input"
             :rules="[val => !!val || 'This field is required']" :disable="!edit" />
         </div>
 
-        <div class="col-4">
+        <div class="col-3">
           <label class="form-label">Preference</label>
           <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input"
             :disable="!edit" />
@@ -127,7 +130,7 @@
 
         <div class="col-6">
           <label class="form-label">Issued By</label>
-          <q-input v-model="issuedByValue" dense outlined class="flat-input" readonly />
+          <q-input v-model="issuedByValue" dense outlined class="flat-input" :hint="'Cannot be edited!'" :persistent-hint="true" readonly />
         </div>
 
         <div class="col-6" v-if="categoryValue === 'HOSPITAL'">
@@ -304,7 +307,7 @@
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-icon v-if="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id" 
+                  <q-icon v-if="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
                     name="check_circle" color="blue" size="sm" />
                 </q-item-section>
               </q-item>
@@ -318,7 +321,7 @@
           <div class="text-subtitle2 text-weight-bold q-mb-sm">Available Actions:</div>
           <div class="options-grid">
             <!-- Option 1: Replace All Names -->
-            <div class="option-card" @click="selectedAction = 'replace'" 
+            <div class="option-card" @click="selectedAction = 'replace'"
               :class="{ 'option-selected': selectedAction === 'replace' }">
               <q-icon name="sync_alt" size="md" color="orange" />
               <div class="option-title">Replace All Names</div>
@@ -329,7 +332,7 @@
             </div>
 
             <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="selectedAction = 'new'" 
+            <div class="option-card" @click="selectedAction = 'new'"
               :class="{ 'option-selected': selectedAction === 'new' }">
               <q-icon name="person_add" size="md" color="green" />
               <div class="option-title">Create New Patient</div>
@@ -339,13 +342,12 @@
             </div>
 
             <!-- Option 3: Use Existing Patient (only if matches found) -->
-            <div v-if="existingPatients.length > 0" class="option-card" 
-              @click="selectedAction = 'existing'"
+            <div v-if="existingPatients.length > 0" class="option-card" @click="selectedAction = 'existing'"
               :class="{ 'option-selected': selectedAction === 'existing', 'option-disabled': !selectedExistingPatient }">
               <q-icon name="link" size="md" color="blue" />
               <div class="option-title">Link to Existing Patient</div>
               <div class="option-description">
-                Link this GL record to the selected existing patient. 
+                Link this GL record to the selected existing patient.
                 <span v-if="!selectedExistingPatient" class="text-red">Please select a patient above first.</span>
               </div>
             </div>
@@ -461,30 +463,30 @@ const partnerOptions = computed(() => {
 // Calculate age from birthdate
 const calculateAge = (birthdate) => {
   if (!birthdate) return null
-  
+
   // Parse DD/MM/YYYY format
   const parts = birthdate.split('/')
   if (parts.length !== 3) return null
-  
+
   const birthDate = new Date(parts[2], parts[1] - 1, parts[0])
   const today = new Date()
   let age = today.getFullYear() - birthDate.getFullYear()
   const monthDiff = today.getMonth() - birthDate.getMonth()
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--
   }
-  
+
   return age
 }
 
 // Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
-  
+
   const parts = dateString.split('/')
   if (parts.length !== 3) return null
-  
+
   // parts[0] = day, parts[1] = month, parts[2] = year
   return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
 }
@@ -492,12 +494,12 @@ const convertToMySQLDate = (dateString) => {
 // Convert MySQL YYYY-MM-DD to DD/MM/YYYY format
 const convertFromMySQLDate = (dateString) => {
   if (!dateString) return null
-  
+
   const date = new Date(dateString)
   const day = String(date.getDate()).padStart(2, '0')
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const year = date.getFullYear()
-  
+
   return `${day}/${month}/${year}`
 }
 
@@ -530,6 +532,19 @@ const handleDelete = async () => {
     deleteLoading.value = false
   }
 }
+
+const ageValue = computed(() => {
+  if (!birthdateValue.value) return null
+
+  const birth = dayjs(birthdateValue.value, 'DD/MM/YYYY', true)
+
+  if (!birth.isValid()) return null
+  if (birth.isAfter(dayjs())) return null
+
+  return dayjs().diff(birth, 'year')
+
+})
+
 
 const handleCancel = async () => {
   showCancelDialog.value = false
@@ -630,7 +645,7 @@ const performUpdate = async () => {
     })
 
     edit.value = false
-    await getPatientDetails(glNum.value) 
+    await getPatientDetails(glNum.value)
   } catch (error) {
     console.error("Failed to save changes:", error)
 
@@ -696,11 +711,11 @@ const createNewPatient = async () => {
     formData.append('firstname', firstNameValue.value)
     formData.append('middlename', middleNameValue.value || '')
     formData.append('suffix', suffixValue.value || '')
-    
+
     // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
     const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
     formData.append('birthdate', mysqlBirthdate)
-    
+
     formData.append('sex', sexValue.value)
     formData.append('preference', preferenceValue.value || '')
     formData.append('is_checked', isChecked.value ? 1 : 0)
@@ -747,11 +762,11 @@ const useExistingPatient = async () => {
     formData.append('glNum', glNum.value)
     formData.append('use_existing_patient_id', selectedExistingPatient.value.patient_id)
     formData.append('category', categoryValue.value)
-    
+
     // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
     const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
     formData.append('birthdate', mysqlBirthdate)
-    
+
     formData.append('sex', sexValue.value)
     formData.append('preference', preferenceValue.value || '')
     formData.append('is_checked', isChecked.value ? 1 : 0)
@@ -796,11 +811,11 @@ const updateDetails = async () => {
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
-  
+
   // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
   formData.append('birthdate', mysqlBirthdate)
-  
+
   formData.append('sex', sexValue.value)
   formData.append('preference', preferenceValue.value || '')
   formData.append('is_checked', isChecked.value ? 1 : 0)
@@ -854,10 +869,10 @@ const getPatientDetails = async (id) => {
   firstNameValue.value = patientDetails.patient_firstname
   middleNameValue.value = patientDetails.patient_middlename
   suffixValue.value = patientDetails.patient_suffix
-  
+
   // Convert birthdate from YYYY-MM-DD to DD/MM/YYYY
   birthdateValue.value = convertFromMySQLDate(patientDetails.birthdate)
-  
+
   sexValue.value = patientDetails.sex
   preferenceValue.value = patientDetails.preference
   provinceValue.value = patientDetails.province
@@ -879,7 +894,7 @@ const getPatientDetails = async (id) => {
   hospitalBillValue.value = patientDetails.hospital_bill
   issuedAmountValue.value = patientDetails.issued_amount
   issuedByValue.value = patientDetails.issued_by
-  dateToday.value = patientDetails.issued_at
+  dateToday.value = patientDetails.date_issued
 
   if (patientDetails.client_lastname != null) {
     isChecked.value = false

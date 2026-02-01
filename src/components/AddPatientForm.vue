@@ -46,10 +46,10 @@
                       </div>
                       <div class="detail-row-dropdown">
                         <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                          }}</span>
+                        }}</span>
                         <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
                           'N/A'
-                          }}</span>
+                        }}</span>
                       </div>
                       <div class="detail-row-dropdown">
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
@@ -106,14 +106,13 @@
       <div class="grid-4">
         <div class="field">
           <label>Birthdate <span>*</span></label>
-          <q-input v-model="birthdateValue" @change="" dense outlined placeholder="DD/MM/YYYY"
+          <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
             :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits"
             mask="##/##/####">
             <template #append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately
-                    :options="date => date <= new Date().toISOString().split('T')[0].split('-').reverse().join('/')">
+                  <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately :options="dateOptions">
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup label="Close" color="primary" flat />
                     </div>
@@ -782,11 +781,9 @@ const formatAddress = (patient) => {
   return parts.join(', ') || 'N/A'
 }
 
-// Calculate age from birthdate
 const calculateAge = (birthdate) => {
   if (!birthdate) return null
 
-  // Parse DD/MM/YYYY format
   const parts = birthdate.split('/')
   if (parts.length !== 3) return null
 
@@ -802,7 +799,6 @@ const calculateAge = (birthdate) => {
   return age
 }
 
-// Calculate age from MySQL date format (YYYY-MM-DD)
 const calculateAgeFromDate = (dateString) => {
   if (!dateString) return null
 
@@ -939,6 +935,13 @@ const selectPatientFromDropdown = (patient) => {
     message: 'Patient information loaded. Fill in the remaining details.',
     position: 'top'
   })
+}
+
+// Add this function with your other helper functions
+const dateOptions = (date) => {
+  // date comes in format 'YYYY/MM/DD' from q-date
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '/')
+  return date <= today
 }
 
 const closeEligibilityWarning = () => {
