@@ -937,9 +937,7 @@ const selectPatientFromDropdown = (patient) => {
   })
 }
 
-// Add this function with your other helper functions
 const dateOptions = (date) => {
-  // date comes in format 'YYYY/MM/DD' from q-date
   const today = new Date().toISOString().split('T')[0].replace(/-/g, '/')
   return date <= today
 }
@@ -949,7 +947,6 @@ const closeEligibilityWarning = () => {
   eligibilityWarningData.value = null
 }
 
-// Check if browser patient details have been edited
 const checkForPatientEdits = () => {
   if (!usedBrowserPatient.value || !originalBrowserPatient.value) return
 

@@ -130,7 +130,8 @@
 
         <div class="col-6">
           <label class="form-label">Issued By</label>
-          <q-input v-model="issuedByValue" dense outlined class="flat-input" :hint="'Cannot be edited!'" :persistent-hint="true" readonly />
+          <q-input v-model="issuedByValue" dense outlined class="flat-input" :hint="'Cannot be edited!'"
+            :persistent-hint="true" readonly />
         </div>
 
         <div class="col-6" v-if="categoryValue === 'HOSPITAL'">
@@ -961,7 +962,7 @@ const generatePDF = async () => {
   page.drawText(fullNameValue.toUpperCase(), {
     x: 140,
     y: 375,
-    size: 14,
+    size: 12,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
