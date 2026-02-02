@@ -962,35 +962,35 @@ const generatePDF = async () => {
   page.drawText(fullNameValue.toUpperCase(), {
     x: 140,
     y: 375,
-    size: 12,
+    size: 10,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
   page.drawText(String(age), {
     x: 400,
     y: 375,
-    size: 14,
+    size: 12,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
   page.drawText(sexValue.value.toUpperCase(), {
     x: 455,
     y: 375,
-    size: 14,
+    size: 10,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
   page.drawText(fullAddressValue.toUpperCase(), {
     x: 95,
     y: 350,
-    size: 14,
+    size: 10,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
   page.drawText(clientValue.value.toUpperCase(), {
     x: 70,
     y: 300,
-    size: 14,
+    size: 10,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
@@ -999,7 +999,7 @@ const generatePDF = async () => {
     page.drawText(amountWords, {
       x: 245,
       y: 273,
-      size: 12,
+      size: 10,
       color: rgb(0, 0, 0),
       font: boldFont,
     })
@@ -1007,7 +1007,7 @@ const generatePDF = async () => {
     page.drawText(amountWords, {
       x: 260,
       y: 273,
-      size: 12,
+      size: 10,
       color: rgb(0, 0, 0),
       font: boldFont,
     })
@@ -1018,7 +1018,7 @@ const generatePDF = async () => {
     {
       x: 90,
       y: 248,
-      size: 14,
+      size: 12,
       color: rgb(0, 0, 0),
       font: boldFont,
     },
@@ -1026,19 +1026,19 @@ const generatePDF = async () => {
   page.drawText(dayNum, {
     x: 137,
     y: 197,
-    size: 14,
+    size: 12,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
   page.drawText(monthName.toUpperCase(), {
     x: 225,
     y: 197,
-    size: 14,
+    size: 12,
     color: rgb(0, 0, 0),
     font: boldFont,
   })
   page.drawText(issuedByValue.value.toUpperCase(), {
-    x: 350,
+    x: 340,
     y: 65,
     size: 12,
     color: rgb(0, 0, 0),
