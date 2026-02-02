@@ -163,7 +163,8 @@
             @update:model-value="checkForPatientEdits" />
         </div>
       </div>
-
+      <q-separator color="grey-5" size="2px" class="q-my-lg" />
+      <h4 class="q-mb-md">Transaction Details</h4>
       <div class="grid-3">
         <div class="field">
           <label>Partner <span>*</span></label>
@@ -188,7 +189,7 @@
 
       <div v-if="!isChecked">
         <q-separator color="grey-5" size="2px" class="q-my-lg" />
-        <h6 class="section-title">Client's Name</h6>
+        <h4 class="q-mb-md">Client's Name</h4>
 
         <div class="grid-4">
           <div class="field">

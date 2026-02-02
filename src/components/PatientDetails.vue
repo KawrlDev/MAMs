@@ -129,6 +129,8 @@
         </div>
       </div>
 
+      <q-separator color="grey-5" size="2px" class="q-my-lg" />
+      <h4 class="q-mb-md">Transaction Details</h4>
       <!-- ================= ISSUANCE ================= -->
       <div class="row q-col-gutter-md">
         <div class="col-6">
@@ -284,8 +286,7 @@
               </div>
               <div class="info-item info-item-full">
                 <strong>Address:</strong> {{ originalPatientData.house_address }}, {{ originalPatientData.barangay }},
-                {{
-                originalPatientData.city }}, {{ originalPatientData.province }}
+                {{ originalPatientData.city }}, {{ originalPatientData.province }}
               </div>
             </div>
           </div>
@@ -311,7 +312,7 @@
               </div>
               <div class="info-item info-item-full">
                 <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
-                provinceValue }}
+                  provinceValue }}
               </div>
             </div>
           </div>
@@ -347,6 +348,104 @@
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
           <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn" :disable="!editDialogAction"
             @click="proceedWithEdit" :loading="editActionLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- TRANSACTION/CLIENT DETAILS EDIT CONFIRMATION DIALOG -->
+    <q-dialog v-model="showTransactionEditDialog" persistent>
+      <q-card style="min-width: 600px; max-width: 700px;">
+        <q-card-section class="bg-blue-6 text-white">
+          <div class="text-h6">
+            <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
+            Transaction/Client Details Changed
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-subtitle1 q-mb-md">
+            You have modified the transaction or client details for this record.
+          </div>
+
+          <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
+            <template v-slot:avatar>
+              <q-icon name="info" color="blue" />
+            </template>
+            These changes will only affect this specific GL Number record ({{ glNum }}).
+          </q-banner>
+
+          <!-- Show changed fields -->
+          <div class="patient-info-box q-mb-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Changed Fields:</div>
+            <div class="changes-list">
+              <div v-if="partnerValue !== originalPatientData.partner" class="change-item">
+                <strong>Partner:</strong>
+                <span class="old-value">{{ originalPatientData.partner }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ partnerValue }}</span>
+              </div>
+              <div v-if="hospitalBillValue !== originalPatientData.hospital_bill" class="change-item">
+                <strong>Hospital Bill:</strong>
+                <span class="old-value">{{ originalPatientData.hospital_bill || 'N/A' }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ hospitalBillValue }}</span>
+              </div>
+              <div v-if="issuedAmountValue !== originalPatientData.issued_amount" class="change-item">
+                <strong>Issued Amount:</strong>
+                <span class="old-value">{{ originalPatientData.issued_amount }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ issuedAmountValue }}</span>
+              </div>
+              <div v-if="clientLastNameValue !== originalPatientData.client_lastname" class="change-item">
+                <strong>Client Last Name:</strong>
+                <span class="old-value">{{ originalPatientData.client_lastname || 'N/A' }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ clientLastNameValue || 'N/A' }}</span>
+              </div>
+              <div v-if="clientFirstNameValue !== originalPatientData.client_firstname" class="change-item">
+                <strong>Client First Name:</strong>
+                <span class="old-value">{{ originalPatientData.client_firstname || 'N/A' }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ clientFirstNameValue || 'N/A' }}</span>
+              </div>
+              <div v-if="(clientMiddleNameValue || null) !== (originalPatientData.client_middlename || null)"
+                class="change-item">
+                <strong>Client Middle Name:</strong>
+                <span class="old-value">{{ originalPatientData.client_middlename || 'N/A' }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ clientMiddleNameValue || 'N/A' }}</span>
+              </div>
+              <div v-if="(clientSuffixValue || null) !== (originalPatientData.client_suffix || null)"
+                class="change-item">
+                <strong>Client Suffix:</strong>
+                <span class="old-value">{{ originalPatientData.client_suffix || 'N/A' }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ clientSuffixValue || 'N/A' }}</span>
+              </div>
+              <div v-if="(relationshipValue || null) !== (originalPatientData.relationship || null)"
+                class="change-item">
+                <strong>Relationship:</strong>
+                <span class="old-value">{{ originalPatientData.relationship || 'N/A' }}</span>
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <span class="new-value">{{ relationshipValue || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <q-banner class="bg-grey-2 text-grey-8">
+            <template v-slot:avatar>
+              <q-icon name="check_circle" color="green" />
+            </template>
+            Click "CONFIRM" to save these changes to GL Number {{ glNum }}.
+          </q-banner>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelTransactionEdit" />
+          <q-btn label="CONFIRM" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithTransactionUpdate"
+            :loading="editActionLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -422,10 +521,12 @@ const dateToday = ref(null)
 const showDeleteDialog = ref(false)
 const showCancelDialog = ref(false)
 const showPatientEditDialog = ref(false)
+const showTransactionEditDialog = ref(false)
 const deleteLoading = ref(false)
 const editActionLoading = ref(false)
 const editDialogAction = ref(null)
-const hasChanges = ref(false)
+const hasPatientChanges = ref(false)
+const hasTransactionChanges = ref(false)
 
 const originalPatientData = ref({
   lastname: null,
@@ -459,26 +560,6 @@ const partnerOptions = computed(() => {
   return []
 })
 
-// Calculate age from birthdate
-const calculateAge = (birthdate) => {
-  if (!birthdate) return null
-
-  // Parse DD/MM/YYYY format
-  const parts = birthdate.split('/')
-  if (parts.length !== 3) return null
-
-  const birthDate = new Date(parts[2], parts[1] - 1, parts[0])
-  const today = new Date()
-  let age = today.getFullYear() - birthDate.getFullYear()
-  const monthDiff = today.getMonth() - birthDate.getMonth()
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--
-  }
-
-  return age
-}
-
 // Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
@@ -506,12 +587,11 @@ watch(categoryValue, () => {
   partnerValue.value = null
 })
 
-// Check if any patient-related fields have changed
-const checkForChanges = () => {
-  if (!edit.value) return
+// Check for patient information changes
+const checkPatientChanges = () => {
+  if (!edit.value) return false
 
-  const changed =
-    lastNameValue.value !== originalPatientData.value.lastname ||
+  return lastNameValue.value !== originalPatientData.value.lastname ||
     firstNameValue.value !== originalPatientData.value.firstname ||
     (middleNameValue.value || null) !== (originalPatientData.value.middlename || null) ||
     (suffixValue.value || null) !== (originalPatientData.value.suffix || null) ||
@@ -519,8 +599,14 @@ const checkForChanges = () => {
     sexValue.value !== originalPatientData.value.sex ||
     (preferenceValue.value || null) !== (originalPatientData.value.preference || null) ||
     barangayValue.value !== originalPatientData.value.barangay ||
-    houseAddressValue.value !== originalPatientData.value.house_address ||
-    categoryValue.value !== originalPatientData.value.category ||
+    houseAddressValue.value !== originalPatientData.value.house_address
+}
+
+// Check for transaction/client details changes
+const checkTransactionChanges = () => {
+  if (!edit.value) return false
+
+  return categoryValue.value !== originalPatientData.value.category ||
     partnerValue.value !== originalPatientData.value.partner ||
     (hospitalBillValue.value || 0) !== (originalPatientData.value.hospital_bill || 0) ||
     issuedAmountValue.value !== originalPatientData.value.issued_amount ||
@@ -530,8 +616,12 @@ const checkForChanges = () => {
     (clientMiddleNameValue.value || null) !== (originalPatientData.value.client_middlename || null) ||
     (clientSuffixValue.value || null) !== (originalPatientData.value.client_suffix || null) ||
     (relationshipValue.value || null) !== (originalPatientData.value.relationship || null)
+}
 
-  hasChanges.value = changed
+// Combined check for any changes
+const checkForChanges = () => {
+  hasPatientChanges.value = checkPatientChanges()
+  hasTransactionChanges.value = checkTransactionChanges()
 }
 
 const handleDelete = async () => {
@@ -569,13 +659,25 @@ const ageValue = computed(() => {
   if (birth.isAfter(dayjs())) return null
 
   return dayjs().diff(birth, 'year')
-
 })
+
+// Helper function to calculate age from birthdate string (DD/MM/YYYY)
+const calculateAgeFromDate = (birthdateString) => {
+  if (!birthdateString) return null
+
+  const birth = dayjs(birthdateString, 'DD/MM/YYYY', true)
+
+  if (!birth.isValid()) return null
+  if (birth.isAfter(dayjs())) return null
+
+  return dayjs().diff(birth, 'year')
+}
 
 const handleCancel = async () => {
   showCancelDialog.value = false
   edit.value = false
-  hasChanges.value = false
+  hasPatientChanges.value = false
+  hasTransactionChanges.value = false
 
   await getPatientDetails(glNum.value)
 }
@@ -590,10 +692,26 @@ const handleSaveClick = () => {
     return
   }
 
-  // If changes were made, show the confirmation dialog
-  if (hasChanges.value) {
+  // Check which type of changes were made
+  const patientChanged = checkPatientChanges()
+  const transactionChanged = checkTransactionChanges()
+
+  if (patientChanged && transactionChanged) {
+    // Both changed - show patient dialog first
+    $q.notify({
+      type: 'warning',
+      message: 'Both patient and transaction details changed. Please handle patient changes first.',
+      position: 'top'
+    })
     editDialogAction.value = null
     showPatientEditDialog.value = true
+  } else if (patientChanged) {
+    // Only patient info changed
+    editDialogAction.value = null
+    showPatientEditDialog.value = true
+  } else if (transactionChanged) {
+    // Only transaction/client details changed
+    showTransactionEditDialog.value = true
   } else {
     $q.notify({
       type: 'info',
@@ -607,6 +725,10 @@ const handleSaveClick = () => {
 const cancelPatientEdit = () => {
   showPatientEditDialog.value = false
   editDialogAction.value = null
+}
+
+const cancelTransactionEdit = () => {
+  showTransactionEditDialog.value = false
 }
 
 const proceedWithEdit = async () => {
@@ -625,14 +747,44 @@ const proceedWithEdit = async () => {
 
     showPatientEditDialog.value = false
     editDialogAction.value = null
-    edit.value = false
-    hasChanges.value = false
-    await getPatientDetails(glNum.value)
+
+    // If there are also transaction changes, show that dialog next
+    if (checkTransactionChanges()) {
+      showTransactionEditDialog.value = true
+    } else {
+      edit.value = false
+      hasPatientChanges.value = false
+      hasTransactionChanges.value = false
+      await getPatientDetails(glNum.value)
+    }
   } catch (error) {
     console.error('Action failed:', error)
     $q.notify({
       type: 'negative',
       message: 'Operation failed',
+      position: 'top'
+    })
+  } finally {
+    editActionLoading.value = false
+  }
+}
+
+const proceedWithTransactionUpdate = async () => {
+  editActionLoading.value = true
+
+  try {
+    await updateTransactionDetails()
+
+    showTransactionEditDialog.value = false
+    edit.value = false
+    hasPatientChanges.value = false
+    hasTransactionChanges.value = false
+    await getPatientDetails(glNum.value)
+  } catch (error) {
+    console.error('Transaction update failed:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to update transaction details',
       position: 'top'
     })
   } finally {
@@ -718,6 +870,30 @@ const createNewPatient = async () => {
   $q.notify({
     type: 'positive',
     message: 'New patient created successfully',
+    position: 'top'
+  })
+}
+
+const updateTransactionDetails = async () => {
+  const formData = new FormData()
+  formData.append('glNum', glNum.value)
+  formData.append('update_transaction_only', '1')
+  formData.append('category', categoryValue.value)
+  formData.append('partner', partnerValue.value)
+  formData.append('hospital_bill', hospitalBillValue.value || 0)
+  formData.append('issued_amount', issuedAmountValue.value)
+  formData.append('is_checked', isChecked.value ? 1 : 0)
+  formData.append('client_lastname', clientLastNameValue.value || '')
+  formData.append('client_firstname', clientFirstNameValue.value || '')
+  formData.append('client_middlename', clientMiddleNameValue.value || '')
+  formData.append('client_suffix', clientSuffixValue.value || '')
+  formData.append('relationship', relationshipValue.value || '')
+
+  await axios.post('http://localhost:8000/api/patient-details/update', formData)
+
+  $q.notify({
+    type: 'positive',
+    message: 'Transaction details updated successfully',
     position: 'top'
   })
 }
@@ -810,7 +986,8 @@ const getPatientDetails = async (id) => {
     relationshipValue.value = null
   }
 
-  hasChanges.value = false
+  hasPatientChanges.value = false
+  hasTransactionChanges.value = false
 }
 
 const generatePDF = async () => {
@@ -849,7 +1026,7 @@ const generatePDF = async () => {
   }
 
   // Calculate age from birthdate
-  const age = calculateAge(birthdateValue.value)
+  const age = calculateAgeFromDate(birthdateValue.value)
 
   page.drawText(glNum.value + ' / ' + partnerValue.value, {
     x: 600,
@@ -865,13 +1042,17 @@ const generatePDF = async () => {
     color: rgb(0, 0, 0),
     font: boldFont,
   })
-  page.drawText(String(age), {
-    x: 400,
-    y: 375,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
+
+  // Only draw age if it's valid
+  if (age !== null) {
+    page.drawText(String(age), {
+      x: 400,
+      y: 375,
+      size: 12,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+  }
   page.drawText(sexValue.value.toUpperCase(), {
     x: 455,
     y: 375,
@@ -1202,6 +1383,39 @@ function getDaySuffix(day) {
 
 .info-item-full {
   grid-column: 1 / -1;
+}
+
+/* =========================
+   CHANGES LIST (for transaction dialog)
+========================= */
+.changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.change-item {
+  font-size: 13px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.change-item strong {
+  color: #1976d2;
+  min-width: 140px;
+}
+
+.old-value {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.new-value {
+  color: #388e3c;
+  font-weight: 600;
 }
 
 /* =========================
