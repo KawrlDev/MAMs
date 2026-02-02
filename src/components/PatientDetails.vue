@@ -16,7 +16,7 @@
           <!-- Edit Mode Buttons -->
           <template v-if="edit">
             <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="showCancelDialog = true" dense />
-            <q-btn label="Save" icon="save" class="action-btn save-btn" @click="showSaveDialog = true" dense />
+            <q-btn label="Save" icon="save" class="action-btn save-btn" @click="handleSaveClick" dense />
           </template>
         </div>
       </div>
@@ -32,39 +32,46 @@
         <div class="col-12">
           <label class="form-label">Category <span class="required">*</span></label>
           <q-select v-model="categoryValue" :options="categoryOptions" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :disable="!edit" />
+            :rules="[val => !!val || 'This field is required']" :disable="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-6">
           <label class="form-label">Last Name <span class="required">*</span></label>
           <q-input v-model="lastNameValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-6">
           <label class="form-label">First Name <span class="required">*</span></label>
           <q-input v-model="firstNameValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-6">
           <label class="form-label">Middle Name</label>
-          <q-input v-model="middleNameValue" dense outlined class="flat-input" :readonly="!edit" />
+          <q-input v-model="middleNameValue" dense outlined class="flat-input" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-6">
           <label class="form-label">Suffix</label>
-          <q-input v-model="suffixValue" dense outlined class="flat-input" :readonly="!edit" />
+          <q-input v-model="suffixValue" dense outlined class="flat-input" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-12">
-          <q-checkbox v-model="isChecked" label="Patient is same as client?" class="form-checkbox" :disable="!edit" />
+          <q-checkbox v-model="isChecked" label="Patient is same as client?" class="form-checkbox" :disable="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-3">
           <label class="form-label">Birthdate <span class="required">*</span></label>
           <q-input v-model="birthdateValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" placeholder="DD/MM/YYYY">
+            :rules="[val => !!val || 'This field is required']" :readonly="!edit" placeholder="DD/MM/YYYY"
+            @update:model-value="checkForChanges">
             <template #append v-if="edit">
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -86,13 +93,14 @@
         <div class="col-3">
           <label class="form-label">Sex <span class="required">*</span></label>
           <q-select v-model="sexValue" :options="options[0]" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :disable="!edit" />
+            :rules="[val => !!val || 'This field is required']" :disable="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-3">
           <label class="form-label">Preference</label>
-          <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input"
-            :disable="!edit" />
+          <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input" :disable="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-4">
@@ -110,13 +118,14 @@
         <div class="col-4">
           <label class="form-label">Barangay <span class="required">*</span></label>
           <q-select v-model="barangayValue" :options="options[2]" :rules="[val => !!val || 'This field is required']"
-            dense outlined class="flat-input" :disable="!edit" />
+            dense outlined class="flat-input" :disable="!edit" @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-12">
           <label class="form-label">House Address <span class="required">*</span></label>
           <q-input v-model="houseAddressValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
       </div>
 
@@ -125,7 +134,8 @@
         <div class="col-6">
           <label class="form-label">Partner <span class="required">*</span></label>
           <q-select v-model="partnerValue" :options="partnerOptions" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :disable="!edit" />
+            :rules="[val => !!val || 'This field is required']" :disable="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-6">
@@ -137,13 +147,15 @@
         <div class="col-6" v-if="categoryValue === 'HOSPITAL'">
           <label class="form-label">Hospital Bill <span class="required">*</span></label>
           <q-input v-model="hospitalBillValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
 
         <div class="col-6">
           <label class="form-label">Issued Amount <span class="required">*</span></label>
           <q-input v-model="issuedAmountValue" dense outlined type="number" class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+            @update:model-value="checkForChanges" />
         </div>
       </div>
 
@@ -156,29 +168,34 @@
           <div class="col-6">
             <label class="form-label">Last Name <span class="required">*</span></label>
             <q-input v-model="clientLastNameValue" dense outlined class="flat-input"
-              :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+              @update:model-value="checkForChanges" />
           </div>
 
           <div class="col-6">
             <label class="form-label">First Name <span class="required">*</span></label>
             <q-input v-model="clientFirstNameValue" dense outlined class="flat-input"
-              :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+              @update:model-value="checkForChanges" />
           </div>
 
           <div class="col-6">
             <label class="form-label">Middle Name</label>
-            <q-input v-model="clientMiddleNameValue" dense outlined class="flat-input" :readonly="!edit" />
+            <q-input v-model="clientMiddleNameValue" dense outlined class="flat-input" :readonly="!edit"
+              @update:model-value="checkForChanges" />
           </div>
 
           <div class="col-6">
             <label class="form-label">Suffix</label>
-            <q-input v-model="clientSuffixValue" dense outlined class="flat-input" :readonly="!edit" />
+            <q-input v-model="clientSuffixValue" dense outlined class="flat-input" :readonly="!edit"
+              @update:model-value="checkForChanges" />
           </div>
 
           <div class="col-12">
             <label class="form-label">Relationship to Patient <span class="required">*</span></label>
             <q-input v-model="relationshipValue" dense outlined class="flat-input"
-              :rules="[val => !!val || 'This field is required']" :readonly="!edit" />
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+              @update:model-value="checkForChanges" />
           </div>
         </div>
       </div>
@@ -203,25 +220,6 @@
       </q-card>
     </q-dialog>
 
-    <!-- SAVE CONFIRMATION DIALOG -->
-    <q-dialog v-model="showSaveDialog">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Save Changes?</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          Are you sure you want to save your changes?
-        </q-card-section>
-
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleSave"
-            :loading="saveLoading" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
     <!-- CANCEL CONFIRMATION DIALOG -->
     <q-dialog v-model="showCancelDialog">
       <q-card style="min-width: 350px">
@@ -240,116 +238,104 @@
       </q-card>
     </q-dialog>
 
-    <!-- EXISTING PATIENTS DIALOG (NAME CONFLICT) -->
-    <q-dialog v-model="showExistingDialog" persistent>
+    <!-- PATIENT EDIT CONFIRMATION DIALOG (when patient info is edited) -->
+    <q-dialog v-model="showPatientEditDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
         <q-card-section class="bg-orange-6 text-white">
           <div class="text-h6">
-            <q-icon name="warning" size="sm" class="q-mr-sm" />
-            Name Change Detected
+            <q-icon name="edit" size="sm" class="q-mr-sm" />
+            Patient Information Changed
           </div>
         </q-card-section>
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You are changing the patient's name from:
+            You have modified the patient information.
           </div>
-          <div class="name-change-display q-mb-md q-pa-md bg-grey-2 rounded-borders">
-            <div class="row items-center">
-              <div class="col-5 text-center">
-                <div class="text-caption text-grey-7">OLD NAME</div>
-                <div class="text-bold text-h6">
-                  {{ originalPatientData.lastname }}, {{ originalPatientData.firstname }}
-                  <span v-if="originalPatientData.middlename"> {{ originalPatientData.middlename }}</span>
-                  <span v-if="originalPatientData.suffix"> {{ originalPatientData.suffix }}</span>
-                </div>
+
+          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+            <template v-slot:avatar>
+              <q-icon name="info" color="orange" />
+            </template>
+            Please choose whether to update the existing patient's information or create a new patient.
+          </q-banner>
+
+          <!-- Show original patient info -->
+          <div class="patient-info-box q-mb-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Original Patient Information:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Name:</strong>
+                {{ originalPatientData.lastname }}, {{ originalPatientData.firstname }}
+                <span v-if="originalPatientData.middlename"> {{ originalPatientData.middlename }}</span>
+                <span v-if="originalPatientData.suffix"> {{ originalPatientData.suffix }}</span>
               </div>
-              <div class="col-2 text-center">
-                <q-icon name="arrow_forward" size="md" color="orange" />
+              <div class="info-item">
+                <strong>Patient ID:</strong> {{ originalPatientData.patient_id }}
               </div>
-              <div class="col-5 text-center">
-                <div class="text-caption text-grey-7">NEW NAME</div>
-                <div class="text-bold text-h6 text-orange">
-                  {{ lastNameValue }}, {{ firstNameValue }}
-                  <span v-if="middleNameValue"> {{ middleNameValue }}</span>
-                  <span v-if="suffixValue"> {{ suffixValue }}</span>
-                </div>
+              <div class="info-item">
+                <strong>Birthdate:</strong> {{ originalPatientData.birthdate }}
+              </div>
+              <div class="info-item">
+                <strong>Sex:</strong> {{ originalPatientData.sex || 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Preference:</strong> {{ originalPatientData.preference || 'N/A' }}
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Address:</strong> {{ originalPatientData.house_address }}, {{ originalPatientData.barangay }},
+                {{
+                originalPatientData.city }}, {{ originalPatientData.province }}
               </div>
             </div>
           </div>
 
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">
-            What would you like to do?
+          <!-- Show current form values -->
+          <div class="patient-info-box">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Current Form Values:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Name:</strong>
+                {{ lastNameValue }}, {{ firstNameValue }}
+                <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                <span v-if="suffixValue"> {{ suffixValue }}</span>
+              </div>
+              <div class="info-item">
+                <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Sex:</strong> {{ sexValue || 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                provinceValue }}
+              </div>
+            </div>
           </div>
 
-          <div v-if="existingPatients.length > 0" class="q-mb-md">
-            <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
-              <template v-slot:avatar>
-                <q-icon name="info" color="blue" />
-              </template>
-              A patient with this new name already exists in the system.
-            </q-banner>
-
-            <div class="text-subtitle2 q-mb-sm">Existing Patient(s) Found:</div>
-            <q-list bordered separator>
-              <q-item v-for="patient in existingPatients" :key="patient.patient_id" clickable
-                @click="selectedExistingPatient = patient"
-                :active="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
-                active-class="bg-blue-1">
-                <q-item-section>
-                  <q-item-label class="text-weight-bold">
-                    {{ patient.lastname }}, {{ patient.firstname }}
-                    <span v-if="patient.middlename"> {{ patient.middlename }}</span>
-                    <span v-if="patient.suffix"> {{ patient.suffix }}</span>
-                  </q-item-label>
-                  <q-item-label caption>Patient ID: {{ patient.patient_id }}</q-item-label>
-                  <q-item-label caption v-if="patient.gl_numbers">
-                    GL Numbers: {{ patient.gl_numbers }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-icon v-if="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
-                    name="check_circle" color="blue" size="sm" />
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-pt-md">
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Available Actions:</div>
-          <div class="options-grid">
-            <!-- Option 1: Replace All Names -->
-            <div class="option-card" @click="selectedAction = 'replace'"
-              :class="{ 'option-selected': selectedAction === 'replace' }">
-              <q-icon name="sync_alt" size="md" color="orange" />
-              <div class="option-title">Replace All Names</div>
+          <div class="options-grid q-mt-md">
+            <!-- Option 1: Update Existing Patient -->
+            <div class="option-card" @click="editDialogAction = 'update'"
+              :class="{ 'option-selected': editDialogAction === 'update' }">
+              <q-icon name="update" size="md" color="blue" />
+              <div class="option-title">Update Patient Information</div>
               <div class="option-description">
-                Update the name for Patient ID {{ originalPatientData.patient_id }} across ALL GL records.
-                This affects all past and future records.
+                Update Patient ID {{ originalPatientData.patient_id }} with the new information.
+                This will affect ALL future records for this patient.
               </div>
             </div>
 
             <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="selectedAction = 'new'"
-              :class="{ 'option-selected': selectedAction === 'new' }">
+            <div class="option-card" @click="editDialogAction = 'new'"
+              :class="{ 'option-selected': editDialogAction === 'new' }">
               <q-icon name="person_add" size="md" color="green" />
               <div class="option-title">Create New Patient</div>
               <div class="option-description">
-                Create a new patient with a new Patient ID. This GL record will be separated from previous records.
-              </div>
-            </div>
-
-            <!-- Option 3: Use Existing Patient (only if matches found) -->
-            <div v-if="existingPatients.length > 0" class="option-card" @click="selectedAction = 'existing'"
-              :class="{ 'option-selected': selectedAction === 'existing', 'option-disabled': !selectedExistingPatient }">
-              <q-icon name="link" size="md" color="blue" />
-              <div class="option-title">Link to Existing Patient</div>
-              <div class="option-description">
-                Link this GL record to the selected existing patient.
-                <span v-if="!selectedExistingPatient" class="text-red">Please select a patient above first.</span>
+                Create a completely new patient with the modified information.
+                The original patient record will remain unchanged.
               </div>
             </div>
           </div>
@@ -358,10 +344,9 @@
         <q-separator />
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelNameChange" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
-            :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
-            @click="proceedWithAction" :loading="actionLoading" />
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
+          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn" :disable="!editDialogAction"
+            @click="proceedWithEdit" :loading="editActionLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -435,23 +420,36 @@ const relationshipValue = ref(null)
 const dateToday = ref(null)
 
 const showDeleteDialog = ref(false)
-const showSaveDialog = ref(false)
 const showCancelDialog = ref(false)
-const showExistingDialog = ref(false)
+const showPatientEditDialog = ref(false)
 const deleteLoading = ref(false)
-const saveLoading = ref(false)
-const actionLoading = ref(false)
-
-const existingPatients = ref([])
-const selectedExistingPatient = ref(null)
-const selectedAction = ref(null)
+const editActionLoading = ref(false)
+const editDialogAction = ref(null)
+const hasChanges = ref(false)
 
 const originalPatientData = ref({
   lastname: null,
   firstname: null,
   middlename: null,
   suffix: null,
-  patient_id: null
+  patient_id: null,
+  birthdate: null,
+  sex: null,
+  preference: null,
+  barangay: null,
+  house_address: null,
+  province: null,
+  city: null,
+  category: null,
+  partner: null,
+  hospital_bill: null,
+  issued_amount: null,
+  is_checked: null,
+  client_lastname: null,
+  client_firstname: null,
+  client_middlename: null,
+  client_suffix: null,
+  relationship: null
 })
 
 const partnerOptions = computed(() => {
@@ -508,6 +506,34 @@ watch(categoryValue, () => {
   partnerValue.value = null
 })
 
+// Check if any patient-related fields have changed
+const checkForChanges = () => {
+  if (!edit.value) return
+
+  const changed =
+    lastNameValue.value !== originalPatientData.value.lastname ||
+    firstNameValue.value !== originalPatientData.value.firstname ||
+    (middleNameValue.value || null) !== (originalPatientData.value.middlename || null) ||
+    (suffixValue.value || null) !== (originalPatientData.value.suffix || null) ||
+    birthdateValue.value !== originalPatientData.value.birthdate ||
+    sexValue.value !== originalPatientData.value.sex ||
+    (preferenceValue.value || null) !== (originalPatientData.value.preference || null) ||
+    barangayValue.value !== originalPatientData.value.barangay ||
+    houseAddressValue.value !== originalPatientData.value.house_address ||
+    categoryValue.value !== originalPatientData.value.category ||
+    partnerValue.value !== originalPatientData.value.partner ||
+    (hospitalBillValue.value || 0) !== (originalPatientData.value.hospital_bill || 0) ||
+    issuedAmountValue.value !== originalPatientData.value.issued_amount ||
+    isChecked.value !== originalPatientData.value.is_checked ||
+    (clientLastNameValue.value || null) !== (originalPatientData.value.client_lastname || null) ||
+    (clientFirstNameValue.value || null) !== (originalPatientData.value.client_firstname || null) ||
+    (clientMiddleNameValue.value || null) !== (originalPatientData.value.client_middlename || null) ||
+    (clientSuffixValue.value || null) !== (originalPatientData.value.client_suffix || null) ||
+    (relationshipValue.value || null) !== (originalPatientData.value.relationship || null)
+
+  hasChanges.value = changed
+}
+
 const handleDelete = async () => {
   deleteLoading.value = true
   try {
@@ -546,17 +572,16 @@ const ageValue = computed(() => {
 
 })
 
-
 const handleCancel = async () => {
   showCancelDialog.value = false
   edit.value = false
+  hasChanges.value = false
 
   await getPatientDetails(glNum.value)
 }
 
-const handleSave = async () => {
+const handleSaveClick = () => {
   if (!patientForm.value.validate()) {
-    showSaveDialog.value = false
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',
@@ -565,63 +590,44 @@ const handleSave = async () => {
     return
   }
 
-  showSaveDialog.value = false
-
-  const nameChanged =
-    lastNameValue.value !== originalPatientData.value.lastname ||
-    firstNameValue.value !== originalPatientData.value.firstname ||
-    middleNameValue.value !== originalPatientData.value.middlename ||
-    suffixValue.value !== originalPatientData.value.suffix
-
-  if (nameChanged) {
-    await checkExistingPatients()
+  // If changes were made, show the confirmation dialog
+  if (hasChanges.value) {
+    editDialogAction.value = null
+    showPatientEditDialog.value = true
   } else {
-    await performUpdate()
-  }
-}
-
-const checkExistingPatients = async () => {
-  try {
-    const res = await axios.post('http://localhost:8000/api/patients/existing', {
-      lastname: lastNameValue.value,
-      firstname: firstNameValue.value,
-      middlename: middleNameValue.value,
-      suffix: suffixValue.value
-    })
-
-    existingPatients.value = res.data
-
-    existingPatients.value = existingPatients.value.filter(
-      p => p.patient_id !== originalPatientData.value.patient_id
-    )
-
-    showExistingDialog.value = true
-    selectedAction.value = null
-    selectedExistingPatient.value = null
-
-  } catch (err) {
-    console.error('Failed checking existing patients', err)
     $q.notify({
-      type: 'negative',
-      message: 'Failed to check for existing patients',
+      type: 'info',
+      message: 'No changes detected',
       position: 'top'
     })
+    edit.value = false
   }
 }
 
-const proceedWithAction = async () => {
-  if (!selectedAction.value) return
+const cancelPatientEdit = () => {
+  showPatientEditDialog.value = false
+  editDialogAction.value = null
+}
 
-  actionLoading.value = true
+const proceedWithEdit = async () => {
+  if (!editDialogAction.value) return
+
+  editActionLoading.value = true
 
   try {
-    if (selectedAction.value === 'replace') {
-      await replaceAllNames()
-    } else if (selectedAction.value === 'new') {
+    if (editDialogAction.value === 'update') {
+      // Update existing patient
+      await updatePatientInfo()
+    } else {
+      // Create new patient
       await createNewPatient()
-    } else if (selectedAction.value === 'existing') {
-      await useExistingPatient()
     }
+
+    showPatientEditDialog.value = false
+    editDialogAction.value = null
+    edit.value = false
+    hasChanges.value = false
+    await getPatientDetails(glNum.value)
   } catch (error) {
     console.error('Action failed:', error)
     $q.notify({
@@ -630,183 +636,14 @@ const proceedWithAction = async () => {
       position: 'top'
     })
   } finally {
-    actionLoading.value = false
+    editActionLoading.value = false
   }
 }
 
-const performUpdate = async () => {
-  saveLoading.value = true
-  try {
-    await updateDetails()
-
-    $q.notify({
-      type: 'positive',
-      message: 'Changes saved successfully',
-      position: 'top'
-    })
-
-    edit.value = false
-    await getPatientDetails(glNum.value)
-  } catch (error) {
-    console.error("Failed to save changes:", error)
-
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to save changes',
-      position: 'top'
-    })
-  } finally {
-    saveLoading.value = false
-  }
-}
-
-const cancelNameChange = () => {
-  lastNameValue.value = originalPatientData.value.lastname
-  firstNameValue.value = originalPatientData.value.firstname
-  middleNameValue.value = originalPatientData.value.middlename
-  suffixValue.value = originalPatientData.value.suffix
-  showExistingDialog.value = false
-  selectedExistingPatient.value = null
-  selectedAction.value = null
-}
-
-const replaceAllNames = async () => {
-  try {
-    await axios.post('http://localhost:8000/api/patient-name/update', {
-      patient_id: originalPatientData.value.patient_id,
-      lastname: lastNameValue.value,
-      firstname: firstNameValue.value,
-      middlename: middleNameValue.value,
-      suffix: suffixValue.value
-    })
-
-    // Update other GL-specific details
-    await updateDetails()
-
-    $q.notify({
-      type: 'positive',
-      message: 'Name replaced successfully across all records',
-      position: 'top'
-    })
-
-    showExistingDialog.value = false
-    edit.value = false
-    selectedExistingPatient.value = null
-    selectedAction.value = null
-    await getPatientDetails(glNum.value)
-  } catch (error) {
-    console.error("Failed to replace names:", error)
-    throw error
-  }
-}
-
-// Create a new patient record (new patient_id)
-const createNewPatient = async () => {
-  try {
-    // Update with force_new_patient flag
-    const formData = new FormData()
-    formData.append('glNum', glNum.value)
-    formData.append('force_new_patient', '1')
-    formData.append('category', categoryValue.value)
-    formData.append('lastname', lastNameValue.value)
-    formData.append('firstname', firstNameValue.value)
-    formData.append('middlename', middleNameValue.value || '')
-    formData.append('suffix', suffixValue.value || '')
-
-    // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
-    const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
-    formData.append('birthdate', mysqlBirthdate)
-
-    formData.append('sex', sexValue.value)
-    formData.append('preference', preferenceValue.value || '')
-    formData.append('is_checked', isChecked.value ? 1 : 0)
-    formData.append('province', provinceValue.value)
-    formData.append('city', cityValue.value)
-    formData.append('barangay', barangayValue.value)
-    formData.append('house_address', houseAddressValue.value)
-    formData.append('partner', partnerValue.value)
-    formData.append('hospital_bill', hospitalBillValue.value || 0)
-    formData.append('issued_amount', issuedAmountValue.value)
-    const user = JSON.parse(localStorage.getItem('user'))
-    formData.append('issued_by', user.USERNAME)
-    formData.append('client_lastname', clientLastNameValue.value || '')
-    formData.append('client_firstname', clientFirstNameValue.value || '')
-    formData.append('client_middlename', clientMiddleNameValue.value || '')
-    formData.append('client_suffix', clientSuffixValue.value || '')
-    formData.append('relationship', relationshipValue.value || '')
-
-    await axios.post('http://localhost:8000/api/patient-details/update', formData)
-
-    $q.notify({
-      type: 'positive',
-      message: 'New patient created successfully',
-      position: 'top'
-    })
-
-    showExistingDialog.value = false
-    edit.value = false
-    selectedAction.value = null
-    await getPatientDetails(glNum.value)
-  } catch (error) {
-    console.error("Failed to create new patient:", error)
-    throw error
-  }
-}
-
-// Link this GL to an existing patient_id
-const useExistingPatient = async () => {
-  if (!selectedExistingPatient.value) return
-
-  try {
-    // Update with the selected existing patient_id
-    const formData = new FormData()
-    formData.append('glNum', glNum.value)
-    formData.append('use_existing_patient_id', selectedExistingPatient.value.patient_id)
-    formData.append('category', categoryValue.value)
-
-    // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
-    const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
-    formData.append('birthdate', mysqlBirthdate)
-
-    formData.append('sex', sexValue.value)
-    formData.append('preference', preferenceValue.value || '')
-    formData.append('is_checked', isChecked.value ? 1 : 0)
-    formData.append('province', provinceValue.value)
-    formData.append('city', cityValue.value)
-    formData.append('barangay', barangayValue.value)
-    formData.append('house_address', houseAddressValue.value)
-    formData.append('partner', partnerValue.value)
-    formData.append('hospital_bill', hospitalBillValue.value || 0)
-    formData.append('issued_amount', issuedAmountValue.value)
-    const user = JSON.parse(localStorage.getItem('user'))
-    formData.append('issued_by', user.USERNAME)
-    formData.append('client_lastname', clientLastNameValue.value || '')
-    formData.append('client_firstname', clientFirstNameValue.value || '')
-    formData.append('client_middlename', clientMiddleNameValue.value || '')
-    formData.append('client_suffix', clientSuffixValue.value || '')
-    formData.append('relationship', relationshipValue.value || '')
-
-    await axios.post('http://localhost:8000/api/patient-details/update', formData)
-
-    $q.notify({
-      type: 'positive',
-      message: 'Record linked to existing patient successfully',
-      position: 'top'
-    })
-
-    showExistingDialog.value = false
-    edit.value = false
-    selectedAction.value = null
-    await getPatientDetails(glNum.value)
-  } catch (error) {
-    console.error("Failed to link to existing patient:", error)
-    throw error
-  }
-}
-
-const updateDetails = async () => {
+const updatePatientInfo = async () => {
   const formData = new FormData()
   formData.append('glNum', glNum.value)
+  formData.append('update_patient_info', '1')
   formData.append('category', categoryValue.value)
   formData.append('lastname', lastNameValue.value)
   formData.append('firstname', firstNameValue.value)
@@ -820,22 +657,15 @@ const updateDetails = async () => {
   formData.append('sex', sexValue.value)
   formData.append('preference', preferenceValue.value || '')
   formData.append('is_checked', isChecked.value ? 1 : 0)
-
   formData.append('province', provinceValue.value)
   formData.append('city', cityValue.value)
   formData.append('barangay', barangayValue.value)
   formData.append('house_address', houseAddressValue.value)
-
-  if (hospitalBillValue.value == null || hospitalBillValue.value == '') {
-    hospitalBillValue.value = 0;
-  }
   formData.append('partner', partnerValue.value)
-  formData.append('hospital_bill', Number(hospitalBillValue.value))
+  formData.append('hospital_bill', hospitalBillValue.value || 0)
   formData.append('issued_amount', issuedAmountValue.value)
   const user = JSON.parse(localStorage.getItem('user'))
-  const username = user.USERNAME
-  formData.append('issued_by', username)
-
+  formData.append('issued_by', user.USERNAME)
   formData.append('client_lastname', clientLastNameValue.value || '')
   formData.append('client_firstname', clientFirstNameValue.value || '')
   formData.append('client_middlename', clientMiddleNameValue.value || '')
@@ -843,12 +673,60 @@ const updateDetails = async () => {
   formData.append('relationship', relationshipValue.value || '')
 
   await axios.post('http://localhost:8000/api/patient-details/update', formData)
+
+  $q.notify({
+    type: 'positive',
+    message: 'Patient information updated successfully',
+    position: 'top'
+  })
+}
+
+const createNewPatient = async () => {
+  const formData = new FormData()
+  formData.append('glNum', glNum.value)
+  formData.append('force_new_patient', '1')
+  formData.append('category', categoryValue.value)
+  formData.append('lastname', lastNameValue.value)
+  formData.append('firstname', firstNameValue.value)
+  formData.append('middlename', middleNameValue.value || '')
+  formData.append('suffix', suffixValue.value || '')
+
+  // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
+  const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
+  formData.append('birthdate', mysqlBirthdate)
+
+  formData.append('sex', sexValue.value)
+  formData.append('preference', preferenceValue.value || '')
+  formData.append('is_checked', isChecked.value ? 1 : 0)
+  formData.append('province', provinceValue.value)
+  formData.append('city', cityValue.value)
+  formData.append('barangay', barangayValue.value)
+  formData.append('house_address', houseAddressValue.value)
+  formData.append('partner', partnerValue.value)
+  formData.append('hospital_bill', hospitalBillValue.value || 0)
+  formData.append('issued_amount', issuedAmountValue.value)
+  const user = JSON.parse(localStorage.getItem('user'))
+  formData.append('issued_by', user.USERNAME)
+  formData.append('client_lastname', clientLastNameValue.value || '')
+  formData.append('client_firstname', clientFirstNameValue.value || '')
+  formData.append('client_middlename', clientMiddleNameValue.value || '')
+  formData.append('client_suffix', clientSuffixValue.value || '')
+  formData.append('relationship', relationshipValue.value || '')
+
+  await axios.post('http://localhost:8000/api/patient-details/update', formData)
+
+  $q.notify({
+    type: 'positive',
+    message: 'New patient created successfully',
+    position: 'top'
+  })
 }
 
 onMounted(() => {
   if (!glNum.value) return
   getPatientDetails(glNum.value)
 })
+
 watch(
   () => route.params.glNum,
   (newGlNum) => {
@@ -857,6 +735,7 @@ watch(
     }
   }
 )
+
 const getPatientDetails = async (id) => {
   const res = await axios.get(
     `http://localhost:8000/api/patient-details/${id}`
@@ -881,12 +760,30 @@ const getPatientDetails = async (id) => {
   barangayValue.value = patientDetails.barangay
   houseAddressValue.value = patientDetails.house_address
 
+  // Store original data for comparison
   originalPatientData.value = {
     lastname: patientDetails.patient_lastname,
     firstname: patientDetails.patient_firstname,
     middlename: patientDetails.patient_middlename,
     suffix: patientDetails.patient_suffix,
-    patient_id: patientDetails.patient_id
+    patient_id: patientDetails.patient_id,
+    birthdate: convertFromMySQLDate(patientDetails.birthdate),
+    sex: patientDetails.sex,
+    preference: patientDetails.preference,
+    barangay: patientDetails.barangay,
+    house_address: patientDetails.house_address,
+    province: patientDetails.province,
+    city: patientDetails.city,
+    category: patientDetails.category,
+    partner: patientDetails.partner,
+    hospital_bill: patientDetails.hospital_bill,
+    issued_amount: patientDetails.issued_amount,
+    is_checked: patientDetails.client_lastname == null,
+    client_lastname: patientDetails.client_lastname,
+    client_firstname: patientDetails.client_firstname,
+    client_middlename: patientDetails.client_middlename,
+    client_suffix: patientDetails.client_suffix,
+    relationship: patientDetails.relationship
   }
 
   await nextTick()
@@ -912,6 +809,8 @@ const getPatientDetails = async (id) => {
     clientSuffixValue.value = null
     relationshipValue.value = null
   }
+
+  hasChanges.value = false
 }
 
 const generatePDF = async () => {
@@ -1277,12 +1176,37 @@ function getDaySuffix(day) {
 }
 
 /* =========================
-   NAME CHANGE DIALOG STYLES
+   PATIENT INFO BOX
 ========================= */
-.name-change-display {
-  border: 2px solid #e0e0e0;
+.patient-info-box {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
 }
 
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.info-item {
+  font-size: 13px;
+  color: #333;
+}
+
+.info-item strong {
+  color: #1f8f2e;
+}
+
+.info-item-full {
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   OPTIONS GRID
+========================= */
 .options-grid {
   display: grid;
   grid-template-columns: 1fr;
