@@ -1750,7 +1750,6 @@ label span {
   font-weight: 600;
   font-size: 14px;
   padding: 4px 12px;
-  border-radius: 20px;
   color: white;
 }
 
