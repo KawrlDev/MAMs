@@ -13,6 +13,7 @@
       />
       
       <div class="copyright">© 2026 MAMs</div>
+      <div class="version">V 1.0.0</div>
     </div>
   </div>
 </template>
@@ -80,8 +81,17 @@ const handleLogin = async (credentials) => {
 
 .copyright {
   position: absolute;
-  bottom: 25px;
-  right: 350px;
+  bottom: 45px;
+  right: 470px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+  user-select: none;
+}
+.version {
+  position: absolute;
+  bottom: 45px;
+  right: 400px;
   font-size: 13px;
   color: #666;
   font-weight: 500;
@@ -120,14 +130,5 @@ const handleLogin = async (credentials) => {
   display: block;
   width: 350px;
   height: auto;
-}
-.copyright {
-  position: absolute;
-  bottom: 45px;
-  right: 430px;
-  font-size: 13px;
-  color: #666;
-  font-weight: 500;
-  user-select: none;
 }
 </style>
