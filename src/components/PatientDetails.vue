@@ -458,7 +458,7 @@ import axios from 'axios'
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib'
 import { toWords } from 'number-to-words'
 import dayjs from 'dayjs'
 
@@ -1004,6 +1004,10 @@ const generatePDF = async () => {
 
   const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
   const page = pdfDoc.getPages()[0]
+  page.setSize(page.getWidth(), 1200)
+  page.translateContent(0, 605)
+
+
 
   const parsedDate = new Date(dateToday.value)
   const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
