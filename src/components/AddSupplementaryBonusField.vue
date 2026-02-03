@@ -32,11 +32,46 @@
         <div class="divider"></div>
 
         <div class="actions">
-          <RouterLink to="/budget-table">
-            <q-btn class="btn-cancel" icon="close">CANCEL</q-btn>
-          </RouterLink>
-          <q-btn type="submit" class="btn-save" icon="add">SAVE</q-btn>
+          <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
+          <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
         </div>
+
+        <!-- CANCEL CONFIRMATION DIALOG -->
+        <q-dialog v-model="showCancelDialog">
+          <q-card style="min-width: 350px">
+            <q-card-section>
+              <div class="text-h6">Close Form?</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+              Are you sure you want to close? All unsaved changes will be lost.
+            </q-card-section>
+
+            <q-card-actions align="right" class="q-px-md q-pb-md">
+              <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+              <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+        <!-- SAVE CONFIRMATION DIALOG -->
+        <q-dialog v-model="showSaveDialog">
+          <q-card style="min-width: 350px">
+            <q-card-section>
+              <div class="text-h6">Save Form?</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+              Are you sure you want to save?
+            </q-card-section>
+
+            <q-card-actions align="right" class="q-px-md q-pb-md">
+              <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+              <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmSave"
+                :loading="saveLoading" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </div>
     </q-form>
   </div>
@@ -44,13 +79,20 @@
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router';
-const router = useRouter()
 import { ref } from 'vue';
 import axios from 'axios';
+import { useQuasar } from 'quasar';
+
+const router = useRouter()
+const $q = useQuasar()
 const budgetForm = ref(null)
 
 const currentYear = new Date().getFullYear()
 const yearValue = ref(currentYear)
+
+const showCancelDialog = ref(false)
+const showSaveDialog = ref(false)
+const saveLoading = ref(false)
 
 const currentDate = new Date()
 const dateValue = ref(currentDate.toISOString().slice(0, 10))
@@ -58,6 +100,33 @@ const dateValue = ref(currentDate.toISOString().slice(0, 10))
 const medicineSupplementaryBudget = ref(null)
 const laboratorySupplementaryBudget = ref(null)
 const hospitalSupplementaryBudget = ref(null)
+
+const handleSaveClick = () => {
+  if (budgetForm.value.validate()) {
+    showSaveDialog.value = true
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Please fill in all required fields',
+      position: 'top'
+    })
+  }
+}
+
+const confirmSave = async () => {
+  showSaveDialog.value = false
+  saveLoading.value = true
+  try {
+    await addSupplementaryBonus()
+  } finally {
+    saveLoading.value = false
+  }
+}
+
+const handleCancel = () => {
+  showCancelDialog.value = false
+  router.push('/budget-table')
+}
 
 const addSupplementaryBonus = async () => {
   try {
@@ -67,10 +136,23 @@ const addSupplementaryBonus = async () => {
     formData.append('medicine_supplementary_bonus', medicineSupplementaryBudget.value)
     formData.append('laboratory_supplementary_bonus', laboratorySupplementaryBudget.value)
     formData.append('hospital_supplementary_bonus', hospitalSupplementaryBudget.value)
+    
     const res = await axios.post('http://localhost:8000/api/add-supplementary-bonus', formData)
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Supplementary bonus added successfully',
+      position: 'top'
+    })
+    
     router.push('/budget-table')
   } catch (err) {
-    console.log(err)
+    console.error('Error adding supplementary bonus:', err)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to add supplementary bonus',
+      position: 'top'
+    })
   }
 }
 </script>
@@ -131,5 +213,50 @@ label span {
   height: 2px;
   background: #dcdcdc;
   margin: 15px 0 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.actions .q-btn {
+  font-weight: 600;
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+}
+
+.btn-cancel {
+  background: #ff3b3b;
+}
+
+.btn-save {
+  background: #0aa64f;
+}
+
+/* Dialog Button Styling */
+.dialog-cancel-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-goback-btn {
+  background: #ff3b3b !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-cancel-btn .q-icon,
+.dialog-goback-btn .q-icon {
+  margin-right: 6px;
 }
 </style>
