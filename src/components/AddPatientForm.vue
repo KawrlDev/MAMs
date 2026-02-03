@@ -39,6 +39,9 @@
                     'patient-ineligible': !patient.eligible
                   }">
                   <q-item-section>
+                    <q-item-label class="patient-name-dropdown">
+                      {{ formatPatientName(patient) }}
+                    </q-item-label>
                     <q-item-label caption class="patient-details-dropdown">
                       <div class="detail-row-dropdown">
                         <span><strong>ID:</strong> {{ patient.patient_id }}</span>
@@ -1297,6 +1300,21 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
       position: 'top'
     })
   }
+}
+const formatPatientName = (patient) => {
+  const parts = [
+    patient.lastname,
+    patient.firstname,
+    patient.middlename,
+    patient.suffix
+  ].filter(Boolean)
+  
+  if (parts.length === 0) return 'N/A'
+  
+  // Format as: LASTNAME, FIRSTNAME MIDDLENAME SUFFIX
+  const lastname = parts[0]
+  const rest = parts.slice(1).join(' ')
+  return `${lastname}, ${rest}`
 }
 
 const generatePDF = async () => {

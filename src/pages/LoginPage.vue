@@ -121,4 +121,13 @@ const handleLogin = async (credentials) => {
   width: 350px;
   height: auto;
 }
+.copyright {
+  position: absolute;
+  bottom: 45px;
+  right: 430px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+  user-select: none;
+}
 </style>
