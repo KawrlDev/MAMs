@@ -1308,9 +1308,9 @@ const formatPatientName = (patient) => {
     patient.middlename,
     patient.suffix
   ].filter(Boolean)
-  
+
   if (parts.length === 0) return 'N/A'
-  
+
   // Format as: LASTNAME, FIRSTNAME MIDDLENAME SUFFIX
   const lastname = parts[0]
   const rest = parts.slice(1).join(' ')
@@ -1330,6 +1330,8 @@ const generatePDF = async () => {
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
   const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
   const page = pdfDoc.getPages()[0]
+  page.setSize(page.getWidth(), 1200)
+  page.translateContent(0, 605)
   const parsedDate = new Date(dateToday.value)
   const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
   const monthName = parsedDate.toLocaleString('default', { month: 'long' })
