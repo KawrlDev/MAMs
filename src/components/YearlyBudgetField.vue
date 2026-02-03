@@ -1,6 +1,6 @@
 <template>
   <div class="page-bg">
-    <q-form ref="budgetForm" @submit.prevent="createYearlyBudget" class="form-container">
+    <q-form ref="budgetForm" @submit.prevent="handleSaveClick" class="form-container">
       <h4>CREATE NEW YEARLY BUDGET</h4>
 
       <div class="content">
@@ -33,28 +33,98 @@
         <div class="divider"></div>
 
         <div class="actions">
-          <RouterLink to="/budget-table">
-            <q-btn class="btn-cancel" icon="close">CANCEL</q-btn>
-          </RouterLink>
-          <q-btn type="submit" class="btn-save" icon="add">SAVE</q-btn>
+          <q-btn class="btn-cancel" icon="close" label="CANCEL" @click="showCancelDialog = true" dense />
+          <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
         </div>
+
+        <!-- CANCEL CONFIRMATION DIALOG -->
+        <q-dialog v-model="showCancelDialog">
+          <q-card style="min-width: 350px">
+            <q-card-section>
+              <div class="text-h6">Close Form?</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+              Are you sure you want to close? All unsaved changes will be lost.
+            </q-card-section>
+
+            <q-card-actions align="right" class="q-px-md q-pb-md">
+              <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+              <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+        <!-- SAVE CONFIRMATION DIALOG -->
+        <q-dialog v-model="showSaveDialog">
+          <q-card style="min-width: 350px">
+            <q-card-section>
+              <div class="text-h6">Save Form?</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+              Are you sure you want to save?
+            </q-card-section>
+
+            <q-card-actions align="right" class="q-px-md q-pb-md">
+              <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+              <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmSave"
+                :loading="saveLoading" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </div>
     </q-form>
   </div>
 </template>
 
 <script setup>
-import { RouterLink, useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 import axios from 'axios'
+import { useQuasar } from 'quasar'
 
 const router = useRouter()
+const $q = useQuasar()
 const budgetForm = ref(null)
+
+const currentYear = new Date().getFullYear()
+const yearValue = ref(currentYear)
+
+const showCancelDialog = ref(false)
+const showSaveDialog = ref(false)
+const saveLoading = ref(false)
+
 const medicineBudget = ref(null)
 const laboratoryBudget = ref(null)
 const hospitalBudget = ref(null)
-const currentYear = new Date().getFullYear()
-const yearValue = ref(currentYear)
+
+const handleSaveClick = () => {
+  if (budgetForm.value.validate()) {
+    showSaveDialog.value = true
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Please fill in all required fields',
+      position: 'top'
+    })
+  }
+}
+
+const confirmSave = async () => {
+  showSaveDialog.value = false
+  saveLoading.value = true
+  try {
+    await createYearlyBudget()
+  } finally {
+    saveLoading.value = false
+  }
+}
+
+const handleCancel = () => {
+  showCancelDialog.value = false
+  router.push('/budget-table')
+}
 
 const createYearlyBudget = async () => {
   const formData = new FormData()
@@ -62,11 +132,24 @@ const createYearlyBudget = async () => {
   formData.append('medicine_budget', medicineBudget.value)
   formData.append('laboratory_budget', laboratoryBudget.value)
   formData.append('hospital_budget', hospitalBudget.value)
+  
   try {
     const res = await axios.post('http://localhost:8000/api/create-yearly-budget', formData)
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Yearly budget created successfully',
+      position: 'top'
+    })
+    
     router.push('/budget-table')
-  } catch {
-    console.log("error")
+  } catch (err) {
+    console.error('Error creating yearly budget:', err)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to create yearly budget',
+      position: 'top'
+    })
   }
 }
 </script>
@@ -132,5 +215,50 @@ label span {
   height: 2px;
   background: #dcdcdc;
   margin: 15px 0 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.actions .q-btn {
+  font-weight: 600;
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+}
+
+.btn-cancel {
+  background: #ff3b3b;
+}
+
+.btn-save {
+  background: #0aa64f;
+}
+
+/* Dialog Button Styling */
+.dialog-cancel-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-goback-btn {
+  background: #ff3b3b !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-cancel-btn .q-icon,
+.dialog-goback-btn .q-icon {
+  margin-right: 6px;
 }
 </style>
