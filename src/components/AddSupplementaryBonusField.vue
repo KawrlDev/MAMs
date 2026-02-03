@@ -10,21 +10,21 @@
         </div>
         <div class="budget-block">
           <h3>MEDICINE</h3>
-          <label>SUPPLEMENTARY BONUS:</label>
+          <label>SUPPLEMENTARY BONUS: <span>*</span></label>
           <q-input v-model="medicineSupplementaryBudget" dense outlined type="number" placeholder="AMOUNT"
             :rules="[val => !!val || 'Required']" class="amount-input" />
         </div>
 
         <div class="budget-block">
           <h3>LABORATORY</h3>
-          <label>SUPPLEMENTARY BONUS:</label>
+          <label>SUPPLEMENTARY BONUS: <span>*</span></label>
           <q-input v-model="laboratorySupplementaryBudget" dense outlined type="number" placeholder="AMOUNT"
             :rules="[val => !!val || 'Required']" class="amount-input" />
         </div>
 
         <div class="budget-block">
           <h3>HOSPITAL</h3>
-          <label>SUPPLEMENTARY BONUS:</label>
+          <label>SUPPLEMENTARY BONUS: <span>*</span></label>
           <q-input v-model="hospitalSupplementaryBudget" dense outlined type="number" placeholder="AMOUNT"
             :rules="[val => !!val || 'Required']" class="amount-input" />
         </div>
