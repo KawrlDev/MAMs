@@ -11,8 +11,12 @@
 
       <div class="field">
         <label>Password</label>
-        <q-input dense outlined type="password" v-model="password" placeholder="Password" :error="!!errors.password"
-          :error-message="errors.password" />
+        <q-input dense outlined v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Password">
+          <template #append v-if="password">
+            <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @mousedown.prevent
+              @click="showPassword = !showPassword" />
+          </template>
+        </q-input>
       </div>
 
       <div v-if="errors.general" class="text-negative q-mb-sm">
@@ -46,6 +50,7 @@ const emit = defineEmits(['submit']);
 
 const username = ref("");
 const password = ref("");
+const showPassword = ref(false)
 const remember = ref(false);
 
 const onSubmit = () => {
