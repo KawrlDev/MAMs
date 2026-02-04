@@ -16,8 +16,8 @@
         <!-- Total Amount Released (Right) -->
         <div class="total-right">
           <div class="total-item">
-            <div class="amount-title">TOTAL AMOUNT RELEASED</div>
-            <div class="amount-titles">{{ formatPeso(totalAmount) }}</div>
+            <div class="amount-title2">TOTAL AMOUNT RELEASED</div>
+            <div class="amount-titles2">{{ formatPeso(totalAmount) }}</div>
           </div>
         </div>
       </div>
@@ -99,12 +99,30 @@ onMounted(() => {
   font-weight: 700;
   font-size: 15px;
   margin-bottom: 5px;
+  margin-left: -12%;
+  color: green;
+}
+
+.amount-title2 {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 5px;
+  margin-left: 10%;
   color: green;
 }
 
 .amount-titles {
   font-weight: 700;
   font-size: 30px;
+  margin-left: -15%;
+  margin-top: 5%;
+  color: rgb(153, 0, 0);
+}
+
+.amount-titles2 {
+  font-weight: 700;
+  font-size: 30px;
+  margin-left: 12%;
   margin-top: 5%;
   color: rgb(153, 0, 0);
 }

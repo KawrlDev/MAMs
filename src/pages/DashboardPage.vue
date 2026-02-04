@@ -21,7 +21,6 @@ import CategoryFigures from 'src/components/CategoryFigures.vue'
 import TotalPatientsFigure from 'src/components/TotalPatientsFigure.vue'
 import AmountGiven from 'src/components/AmountGiven.vue'
 import MonthlyPatients from 'src/components/MonthlyPatients.vue'
-import BarangayDataTable from 'src/components/BarangayDataTable.vue'
 </script>
 
 <style scoped>
