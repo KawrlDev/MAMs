@@ -2,7 +2,7 @@
   <q-card class="dashboard-card">
     <q-card-section class="text-center">
       <div class="text-h5 text-green-8 q-mb-sm amount-title">
-        AMOUNT GIVEN
+        DISTRIBUTION SUMMARY
       </div>
 
       <div class="charts-container">
@@ -22,6 +22,56 @@
         </div>
       </div>
 
+      <!-- Barangay Records Table Section -->
+      <div class="text-h5 text-green-8 q-mb-sm barangay-title">PER BARANGAY</div>
+      <div class="table-container">
+        <q-table class="budget-table" :rows="rows" row-key="num" flat bordered dense :pagination="{ rowsPerPage: 0 }"
+          style="height: 230px" virtual-scroll :virtual-scroll-sticky-size-start="48">
+          <template v-slot:header>
+            <tr class="sticky-header">
+              <th rowspan="2">#</th>
+              <th rowspan="2">Barangay</th>
+
+              <th colspan="2">Medicine</th>
+              <th colspan="2">Laboratory</th>
+              <th colspan="2">Hospital</th>
+
+              <th rowspan="2">Total Patients</th>
+              <th rowspan="2">Total Amount</th>
+            </tr>
+            <tr class="sticky-header second-row">
+              <th>Patients</th>
+              <th>Amount</th>
+
+              <th>Patients</th>
+              <th>Amount</th>
+
+              <th>Patients</th>
+              <th>Amount</th>
+            </tr>
+          </template>
+
+          <template v-slot:body="props">
+            <tr>
+              <td>{{ props.row.num }}</td>
+              <td>{{ props.row.barangay }}</td>
+
+              <td align="right">{{ props.row.medicinePatients }}</td>
+              <td align="right">{{ formatPeso(props.row.medicineAmount) }}</td>
+
+              <td align="right">{{ props.row.laboratoryPatients }}</td>
+              <td align="right">{{ formatPeso(props.row.laboratoryAmount) }}</td>
+
+              <td align="right">{{ props.row.hospitalPatients }}</td>
+              <td align="right">{{ formatPeso(props.row.hospitalAmount) }}</td>
+
+              <td align="right">{{ props.row.totalPatients }}</td>
+              <td align="right">{{ formatPeso(props.row.totalAmount) }}</td>
+            </tr>
+          </template>
+        </q-table>
+      </div>
+
     </q-card-section>
   </q-card>
 </template>
@@ -38,6 +88,7 @@ Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 const perCategoryChart = ref(null)
 const perSexChart = ref(null)
 const perAgeBracketChart = ref(null)
+const rows = ref([])
 
 onMounted(() => {
   const getAmountGiven = async () => {
@@ -55,6 +106,7 @@ onMounted(() => {
       const amountGiven20to39 = Number(res.data['20to39'] ?? 0)
       const amountGiven40to64 = Number(res.data['40to64'] ?? 0)
       const amountGiven65AndAbove = Number(res.data['65AndAbove'] ?? 0)
+      
       const createDoughnut = (refEl, labels, data, colors) => {
         new Chart(refEl.value, {
           type: 'doughnut',
@@ -80,7 +132,7 @@ onMounted(() => {
                 position: 'top'
               },
               datalabels: {
-                color: '#000',  /* numbers in black */
+                color: '#000',
                 formatter: (v, c) =>
                   ((v / c.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100).toFixed(1) + '%',
                 font: {
@@ -94,44 +146,74 @@ onMounted(() => {
         })
       }
 
-createDoughnut(
-  perCategoryChart,
-  ['Medicine', 'Laboratory', 'Hospital'],
-  [amountGivenPerMedicine, amountGivenPerLaboratory, amountGivenPerHospital],
-  ['#b5d6d6', '#b5d6b5', '#d6b5b5']
-)
+      createDoughnut(
+        perCategoryChart,
+        ['Medicine', 'Laboratory', 'Hospital'],
+        [amountGivenPerMedicine, amountGivenPerLaboratory, amountGivenPerHospital],
+        ['#b5d6d6', '#b5d6b5', '#d6b5b5']
+      )
 
-// per sex chart
-createDoughnut(
-  perSexChart,
-  ['Male', 'Female'],
-  [amountGivenPerMale, amountGivenPerFemale],
-  ['#B5EAD7', '#FFDAC1']
-)
+      createDoughnut(
+        perSexChart,
+        ['Male', 'Female'],
+        [amountGivenPerMale, amountGivenPerFemale],
+        ['#B5EAD7', '#FFDAC1']
+      )
 
-// per age bracket chart
-createDoughnut(
-  perAgeBracketChart,
-  ['0-1', '2-5', '6-12', '13-19', '20-39', '40-64', '65+'],
-  [amountGiven0to1, amountGiven2to5, amountGiven6to12, amountGiven13to19, amountGiven20to39, amountGiven40to64, amountGiven65AndAbove],
-  ['#A8E6CF', '#FFD3B6', '#FFAAA5', '#FFDAC1', '#E0BBE4', '#B5EAD7', '#C7CEEA']
-)
+      createDoughnut(
+        perAgeBracketChart,
+        ['0-1', '2-5', '6-12', '13-19', '20-39', '40-64', '65+'],
+        [amountGiven0to1, amountGiven2to5, amountGiven6to12, amountGiven13to19, amountGiven20to39, amountGiven40to64, amountGiven65AndAbove],
+        ['#A8E6CF', '#FFD3B6', '#FFAAA5', '#FFDAC1', '#E0BBE4', '#B5EAD7', '#C7CEEA']
+      )
     } catch (err) {
       console.log(err)
     }
   }
+
+  const getBarangayData = async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/api/barangay-records')
+      rows.value = res.data.map((item, index) => ({
+        num: index + 1,
+        barangay: item.barangay,
+        medicinePatients: item.medicinePatients,
+        medicineAmount: item.medicineAmount,
+        laboratoryPatients: item.laboratoryPatients,
+        laboratoryAmount: item.laboratoryAmount,
+        hospitalPatients: item.hospitalPatients,
+        hospitalAmount: item.hospitalAmount,
+        totalPatients: item.totalPatients,
+        totalAmount: item.totalAmount
+      }))
+    } catch (err) {
+      console.error('Failed to fetch barangay data:', err)
+    }
+  }
+
   const pesoFormatter = new Intl.NumberFormat('en-PH', {
     style: 'currency',
     currency: 'PHP'
   })
+  
   getAmountGiven()
+  getBarangayData()
 })
+
+const formatPeso = (amount) => {
+  if (amount == null) return '₱0.00';
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 2
+  }).format(amount);
+};
 </script>
 
 <style scoped>
 .dashboard-card {
   flex: 0 0 800px;
-  height: 445px;
+  height: auto;
   padding: 15px;
   text-align: center;
   background: white;
@@ -140,19 +222,12 @@ createDoughnut(
   font-family: Arial, sans-serif;
   margin-right: 40%;
   border: 2px solid grey;
-
-  /* ✅ Reduced left gap */
   margin-left: 5px;
-  /* smaller left-side gap */
-  /* right side flexible */
-
-  margin-top: 85px;
+  margin-top: 86px;
   gap: 50%;
-
   position: relative;
   z-index: 1;
-  margin-bottom: -5%;
-  /* overlap next row */
+  margin-bottom: -7%;
 }
 
 .charts-container {
@@ -169,7 +244,6 @@ createDoughnut(
   text-align: center;
   margin-top: -35%;
   margin-bottom: 5%;
-
 }
 
 .chart-items {
@@ -217,8 +291,65 @@ createDoughnut(
   color: black;
 }
 
+.barangay-title {
+  font-weight: 700;
+  margin-top: -80px;
+  margin-bottom: 20px;
+  color: black;
+}
+
 canvas {
   max-width: 1000%;
   height: 90px;
+  margin-top: 10px;
+}
+
+.table-container {
+  max-height: 320px;
+  overflow-y: auto;
+  margin-top: 5px;
+
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 5;
+}
+
+.sticky-header.second-row {
+  top: 28px;
+}
+
+.sticky-header th {
+  border-bottom: 1px solid #ccc;
+}
+
+:deep(thead tr) {
+  display: table-row;
+}
+
+:deep(.sticky-header) {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+:deep(.sticky-header.second-row) {
+  top: 28px;
+}
+
+:deep(.sticky-header th) {
+  background: #1f8f2e;
+  color: white;
+  font-weight: 700;
+  border-bottom: 1px solid #1b5e20;
+  text-align: center;
+}
+
+.budget-table {
+  overflow-y: auto;
 }
 </style>

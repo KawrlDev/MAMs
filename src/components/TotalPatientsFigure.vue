@@ -71,7 +71,7 @@ onMounted(() => {
   font-family: sans-serif;
   margin-left: 10px;
   margin-bottom: 10px;
-  margin-top: -3%;
+  margin-top: -26%;
 }
 
 .totals-container {

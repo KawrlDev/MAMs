@@ -13,7 +13,6 @@
   <!-- THIRD ROW: Monthly Patients chart + Barangay table -->
   <div class="dashboard-row">
     <MonthlyPatients />
-    <BarangayDataTable />
   </div>
 </template>
 

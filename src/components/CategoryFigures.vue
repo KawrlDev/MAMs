@@ -116,9 +116,10 @@ onMounted(() => {
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   text-align: center;
-  height: 300px;
+  height: 301px;
   background: #ffffff;
   border: 2px solid grey;
+  margin-top: -9px;
 }
 
 /* HEADER */

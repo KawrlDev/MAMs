@@ -79,8 +79,8 @@ onMounted(async () => {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   font-family: Arial, sans-serif;
-  height: 375px;
-  margin-top: 2%;
+  height: 352px;
+  margin-top: -15.8%;
   border: 2px solid grey;
   margin-left: 10px;
 }
@@ -92,7 +92,7 @@ onMounted(async () => {
 /* Wrapper for the canvas to control sizing properly */
 .chart-container {
   position: relative;
-  height: 300px;
+  height: 250px;
   width: 100%;
 }
 
