@@ -136,8 +136,8 @@ onMounted(() => {
                 formatter: (v, c) =>
                   ((v / c.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100).toFixed(1) + '%',
                 font: {
-                  weight: 'bold',
-                  size: 14
+                  weight: '',
+                  size: 12
                 }
               }
             }

@@ -72,13 +72,14 @@ onMounted(async () => {
 
 <style scoped>
 .dashboard-card {
-  flex: 0 0 40%;
+  flex: 0 0 39.6%;
   padding: 4px;
   text-align: center;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   font-family: Arial, sans-serif;
+
   height: 352px;
   margin-top: -15.8%;
   border: 2px solid grey;
