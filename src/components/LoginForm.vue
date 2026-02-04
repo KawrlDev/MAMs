@@ -5,29 +5,16 @@
     <q-form @submit.prevent="onSubmit">
       <div class="field">
         <label>Username</label>
-        <q-input 
-          dense 
-          outlined 
-          v-model="username" 
-          placeholder="Username"
-          :error="!!errors.username"
-          :error-message="errors.username"
-        />
+        <q-input dense outlined v-model="username" placeholder="Username" :error="!!errors.username"
+          :error-message="errors.username" />
       </div>
 
       <div class="field">
         <label>Password</label>
-        <q-input 
-          dense 
-          outlined 
-          type="password" 
-          v-model="password" 
-          placeholder="Password"
-          :error="!!errors.password"
-          :error-message="errors.password"
-        />
+        <q-input dense outlined type="password" v-model="password" placeholder="Password" :error="!!errors.password"
+          :error-message="errors.password" />
       </div>
-      
+
       <div v-if="errors.general" class="text-negative q-mb-sm">
         {{ errors.general }}
       </div>
@@ -35,12 +22,7 @@
       <q-checkbox v-model="remember" class="checkbox" label="Remember Me" />
 
       <div class="actions">
-        <q-btn 
-          class="btn-save" 
-          label="LOGIN" 
-          type="submit"
-          :loading="loading"
-        />
+        <q-btn class="btn-save" label="LOGIN" type="submit" :loading="loading" />
       </div>
     </q-form>
   </div>

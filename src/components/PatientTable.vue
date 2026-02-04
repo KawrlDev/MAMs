@@ -6,7 +6,7 @@
 
         <!-- SEARCH -->
         <div class="col-5">
-          <q-input v-model="search" placeholder="Search" outlined dense>
+          <q-input v-model="search" placeholder="Search" outlined dense clearable>
             <template #prepend>
               <q-icon name="search" />
             </template>

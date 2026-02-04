@@ -63,10 +63,7 @@ onMounted(() => {
   padding: 10px;
   background: #ffffff;
   border-radius: 12px;
-
-  /* ✅ GREY BORDER ADDED */
   border: 2px solid grey;
-
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   font-family: sans-serif;
   margin-left: 10px;

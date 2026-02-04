@@ -14,18 +14,18 @@
       <h6 class="section-title">Patient Form</h6>
 
       <div class="grid-4">
-        <div class="field lastname-field">
+        <div class="field">
           <label>Last Name <span>*</span></label>
           <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
             :rules="[val => !!val || 'This field is required']" @update:model-value="onLastNameChange"
-            @focus="lastNameFocused = true" @blur="onLastNameBlur">
+            @focus="lastNameFocused = true" @blur="onLastNameBlur" clearable>
             <template v-slot:append v-if="searchingPatients">
               <q-spinner color="primary" size="20px" />
             </template>
           </q-input>
 
           <!-- Patient Search Dropdown -->
-          <div v-if="showPatientDropdown && filteredSearchResults.length > 0" class="patient-dropdown">
+          <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
             <div class="dropdown-header">
               <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
               <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -88,19 +88,154 @@
         <div class="field">
           <label>First Name <span>*</span></label>
           <q-input v-model="firstNameValue" dense outlined placeholder="First Name"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
+            :rules="[val => !!val || 'This field is required']" 
+            @update:model-value="onFirstNameChange"
+            @focus="firstNameFocused = true"
+            @blur="onFirstNameBlur"
+            clearable>
+            <template v-slot:append v-if="searchingPatients">
+              <q-spinner color="primary" size="20px" />
+            </template>
+          </q-input>
+
+          <!-- Patient Search Dropdown for First Name -->
+          <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+            <div class="dropdown-header">
+              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
+              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
+            </div>
+            <q-scroll-area style="height: 300px;">
+              <q-list separator>
+                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
+                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
+                    'dropdown-patient-item': true,
+                    'patient-eligible': patient.eligible,
+                    'patient-ineligible': !patient.eligible
+                  }">
+                  <q-item-section>
+                    <q-item-label class="patient-name-dropdown">
+                      {{ formatPatientName(patient) }}
+                    </q-item-label>
+                    <q-item-label caption class="patient-details-dropdown">
+                      <div class="detail-row-dropdown">
+                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
+                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                        }}</span>
+                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                          'N/A'
+                        }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                      </div>
+                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
+                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
+                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
+                      </div>
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side top>
+                    <div class="eligibility-badge-container-dropdown">
+                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
+                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
+                        ELIGIBLE
+                      </q-badge>
+                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
+                        <q-icon name="block" size="xs" class="q-mr-xs" />
+                        NOT ELIGIBLE
+                      </q-badge>
+                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
+                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
+                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                      </div>
+                    </div>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-scroll-area>
+          </div>
         </div>
 
         <div class="field">
           <label>Middle Name</label>
           <q-input v-model="middleNameValue" dense outlined placeholder="Middle Name"
-            @update:model-value="checkForPatientEdits" />
+            @update:model-value="onMiddleNameChange"
+            @focus="middleNameFocused = true"
+            @blur="onMiddleNameBlur"
+            clearable>
+            <template v-slot:append v-if="searchingPatients">
+              <q-spinner color="primary" size="20px" />
+            </template>
+          </q-input>
+
+          <!-- Patient Search Dropdown for Middle Name -->
+          <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+            <div class="dropdown-header">
+              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
+              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
+            </div>
+            <q-scroll-area style="height: 300px;">
+              <q-list separator>
+                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
+                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
+                    'dropdown-patient-item': true,
+                    'patient-eligible': patient.eligible,
+                    'patient-ineligible': !patient.eligible
+                  }">
+                  <q-item-section>
+                    <q-item-label class="patient-name-dropdown">
+                      {{ formatPatientName(patient) }}
+                    </q-item-label>
+                    <q-item-label caption class="patient-details-dropdown">
+                      <div class="detail-row-dropdown">
+                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
+                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                        }}</span>
+                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                          'N/A'
+                        }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                      </div>
+                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
+                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
+                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
+                      </div>
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side top>
+                    <div class="eligibility-badge-container-dropdown">
+                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
+                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
+                        ELIGIBLE
+                      </q-badge>
+                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
+                        <q-icon name="block" size="xs" class="q-mr-xs" />
+                        NOT ELIGIBLE
+                      </q-badge>
+                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
+                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
+                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                      </div>
+                    </div>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-scroll-area>
+          </div>
         </div>
 
         <div class="field">
           <label>Suffix</label>
           <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
-            @update:model-value="checkForPatientEdits" />
+            @update:model-value="checkForPatientEdits" clearable />
         </div>
       </div>
 
@@ -163,7 +298,7 @@
         <div class="field">
           <label>House Address <span>*</span></label>
           <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
-            @update:model-value="checkForPatientEdits" />
+            @update:model-value="checkForPatientEdits" clearable />
         </div>
       </div>
       <q-separator color="grey-5" size="2px" class="q-my-lg" />
@@ -180,13 +315,13 @@
         <div class="field" v-if="categoryValue == 'HOSPITAL'">
           <label>Hospital Bill <span>*</span></label>
           <q-input type="number" dense v-model="hospitalBillValue" outlined
-            :rules="[val => !!val || 'This field is required']" />
+            :rules="[val => !!val || 'This field is required']" clearable />
         </div>
 
         <div class="field">
           <label>Issued Amount <span>*</span></label>
           <q-input type="number" dense v-model="issuedAmountValue" outlined
-            :rules="[val => !!val || 'This field is required']" />
+            :rules="[val => !!val || 'This field is required']" clearable />
         </div>
       </div>
 
@@ -198,30 +333,30 @@
           <div class="field">
             <label>Last Name <span>*</span></label>
             <q-input v-model="clientLastNameValue" dense outlined placeholder="Last Name"
-              :rules="[val => !!val || 'This field is required']" />
+              :rules="[val => !!val || 'This field is required']" clearable />
           </div>
 
           <div class="field">
             <label>First Name <span>*</span></label>
             <q-input v-model="clientFirstNameValue" dense outlined placeholder="First Name"
-              :rules="[val => !!val || 'This field is required']" />
+              :rules="[val => !!val || 'This field is required']" clearable />
           </div>
 
           <div class="field">
             <label>Middle Name</label>
-            <q-input v-model="clientMiddleNameValue" dense outlined placeholder="Middle Name" />
+            <q-input v-model="clientMiddleNameValue" dense outlined placeholder="Middle Name" clearable />
           </div>
 
           <div class="field">
             <label>Suffix</label>
-            <q-input v-model="clientSuffixValue" dense outlined placeholder="Suffix" />
+            <q-input v-model="clientSuffixValue" dense outlined placeholder="Suffix" clearable />
           </div>
         </div>
 
         <div class="field full">
           <label>Relationship to patient <span>*</span></label>
           <q-input v-model="relationshipValue" dense outlined placeholder="Relationship to patient"
-            :rules="[val => !!val || 'This field is required']" />
+            :rules="[val => !!val || 'This field is required']" clearable />
         </div>
       </div>
 
@@ -703,7 +838,10 @@ const showPatientDropdown = ref(false)
 const searchingPatients = ref(false)
 const patientSearchResults = ref([])
 const lastNameFocused = ref(false)
+const firstNameFocused = ref(false)
+const middleNameFocused = ref(false)
 const searchDebounceTimer = ref(null)
+const activeSearchField = ref(null)
 
 const selectedBrowserPatient = ref(null)
 const originalBrowserPatient = ref(null)
@@ -724,14 +862,32 @@ const partnerOptions = computed(() => {
 })
 
 const filteredSearchResults = computed(() => {
-  if (!lastNameValue.value || lastNameValue.value.trim().length < 2) {
+  const searchField = activeSearchField.value
+  let searchValue = null
+
+  if (searchField === 'lastname') searchValue = lastNameValue.value
+  else if (searchField === 'firstname') searchValue = firstNameValue.value
+  else if (searchField === 'middlename') searchValue = middleNameValue.value
+
+  if (!searchValue || searchValue.trim().length < 2) {
     return []
   }
 
-  const query = lastNameValue.value.toLowerCase().trim()
+  const query = searchValue.toLowerCase().trim()
 
   return patientSearchResults.value
-    .filter(patient => patient.lastname.toLowerCase().startsWith(query))
+    .filter(patient => {
+      const lastname = (patient.lastname || '').toLowerCase()
+      const firstname = (patient.firstname || '').toLowerCase()
+      const middlename = (patient.middlename || '').toLowerCase()
+
+      // Match based on which field is active
+      if (searchField === 'lastname') return lastname.startsWith(query)
+      if (searchField === 'firstname') return firstname.startsWith(query)
+      if (searchField === 'middlename') return middlename.startsWith(query)
+      
+      return false
+    })
     .sort((a, b) => {
       // Sort eligible patients first
       if (a.eligible && !b.eligible) return -1
@@ -850,8 +1006,8 @@ const convertFromMySQLDate = (dateString) => {
   return `${day}/${month}/${year}`
 }
 
-// Auto-search when last name changes
-const onLastNameChange = (value) => {
+// Unified search handler
+const handleNameSearch = (value) => {
   // Clear previous timer
   if (searchDebounceTimer.value) {
     clearTimeout(searchDebounceTimer.value)
@@ -867,7 +1023,27 @@ const onLastNameChange = (value) => {
   // Debounce the search
   searchDebounceTimer.value = setTimeout(async () => {
     await searchPatients(value)
-  }, 300) // Wait 300ms after user stops typing
+  }, 300)
+}
+
+// Auto-search when last name changes
+const onLastNameChange = (value) => {
+  activeSearchField.value = 'lastname'
+  handleNameSearch(value)
+}
+
+// Auto-search when first name changes
+const onFirstNameChange = (value) => {
+  activeSearchField.value = 'firstname'
+  handleNameSearch(value)
+  checkForPatientEdits()
+}
+
+// Auto-search when middle name changes
+const onMiddleNameChange = (value) => {
+  activeSearchField.value = 'middlename'
+  handleNameSearch(value)
+  checkForPatientEdits()
 }
 
 const onLastNameBlur = () => {
@@ -875,6 +1051,24 @@ const onLastNameBlur = () => {
   setTimeout(() => {
     lastNameFocused.value = false
     // Only hide if user didn't click on a patient
+    if (!usedBrowserPatient.value) {
+      showPatientDropdown.value = false
+    }
+  }, 200)
+}
+
+const onFirstNameBlur = () => {
+  setTimeout(() => {
+    firstNameFocused.value = false
+    if (!usedBrowserPatient.value) {
+      showPatientDropdown.value = false
+    }
+  }, 200)
+}
+
+const onMiddleNameBlur = () => {
+  setTimeout(() => {
+    middleNameFocused.value = false
     if (!usedBrowserPatient.value) {
       showPatientDropdown.value = false
     }
@@ -1555,17 +1749,18 @@ label span {
   margin-bottom: 14px;
 }
 
+.field {
+  position: relative;
+  margin-bottom: 12px;
+}
+
 .field.full {
   grid-column: 1 / -1;
 }
 
 /* =========================
-   LASTNAME FIELD & DROPDOWN
+   PATIENT DROPDOWN (ALL NAME FIELDS)
 ========================= */
-
-.lastname-field {
-  position: relative;
-}
 
 .patient-dropdown {
   position: absolute;
