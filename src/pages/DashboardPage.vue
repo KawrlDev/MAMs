@@ -4,13 +4,6 @@
     <CategoryFigures />
     <AmountGiven />
   </div>
-
-  <!-- SECOND ROW: Total Patients figure -->
- 
-
-  <!-- THIRD ROW: Monthly Patients chart + Barangay table -->
-
-  
 </template>
 
 <script setup>

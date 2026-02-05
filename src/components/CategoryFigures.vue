@@ -151,7 +151,6 @@ onMounted(async () => {
     const dataMedicine = months.map(m => monthlyRes.data.monthlyCounts.Medicine[m] ?? 0)
     const dataLaboratory = months.map(m => monthlyRes.data.monthlyCounts.Laboratory[m] ?? 0)
     const dataHospital = months.map(m => monthlyRes.data.monthlyCounts.Hospital[m] ?? 0)
-    const dataTotal = months.map(m => monthlyRes.data.totalCounts[m] ?? 0)
 
     // Create Chart
     new Chart(monthlyCateredPatients.value, {
@@ -162,7 +161,6 @@ onMounted(async () => {
           { label: 'Medicine', data: dataMedicine, borderColor: '#0318fc', pointBackgroundColor: '#0318fc', borderWidth: 2 },
           { label: 'Laboratory', data: dataLaboratory, borderColor: '#fbff00', pointBackgroundColor: '#fbff00', borderWidth: 2 },
           { label: 'Hospital', data: dataHospital, borderColor: '#ff0000', pointBackgroundColor: '#ff0000', borderWidth: 2 },
-          { label: 'Total', data: dataTotal, borderColor: '#00ff11', pointBackgroundColor: '#00ff11', borderWidth: 2 }
         ]
       },
       options: {
