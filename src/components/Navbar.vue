@@ -6,10 +6,12 @@
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
 
         <q-toolbar-title class="row items-center q-gutter-sm">
-          <q-img src="~assets/logo.png" width="34px" height="34px" fit="contain" />
-          <span class="text-weight-bold text-h6">MAMs</span>
-        </q-toolbar-title>
+          <q-btn flat dense round @click="$router.push('/')">
+            <q-img src="~assets/logo.png" width="34px" height="34px" fit="contain" />
+            <span class="text-weight-bold text-h6">MAMs</span>
+          </q-btn>
 
+        </q-toolbar-title>
         <!-- USER ICON WITH DROPDOWN MENU -->
         <q-btn flat round icon="account_circle">
           <q-menu>

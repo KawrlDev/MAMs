@@ -5,27 +5,10 @@
       <q-card-section class="row q-col-gutter-md items-center">
 
         <!-- SEARCH -->
-        <div class="col-5">
+        <div class="col-10">
           <q-input v-model="search" placeholder="Search" outlined dense clearable>
             <template #prepend>
               <q-icon name="search" />
-            </template>
-          </q-input>
-        </div>
-
-        <!-- FILTER BY PERIOD (INLINE LABEL + INPUT) -->
-        <div class="col-5 row items-center q-gutter-sm">
-          <span class="text-body2 text-weight-medium">
-            Filter by Period:
-          </span>
-
-          <q-input class="col" :model-value="formattedDate" outlined dense placeholder="dd/mm/yyyy - dd/mm/yyyy">
-            <template #append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover>
-                  <q-date v-model="dateRange" range emit-immediately mask="DD/MM/YYYY" />
-                </q-popup-proxy>
-              </q-icon>
             </template>
           </q-input>
         </div>
@@ -82,65 +65,7 @@ onMounted(() => {
 })
 
 const search = ref('')
-const dateRange = ref(null)
 
-const formattedDate = computed(() => {
-  if (!dateRange.value) {
-    return ''
-  }
-
-  if (typeof dateRange.value === 'string') {
-    return dateRange.value
-  }
-
-  const { from, to } = dateRange.value
-  if (from && !to) {
-    return from
-  }
-  if (from && to) {
-    return `${from} - ${to}`
-  }
-  return ''
-})
-watch(dateRange, async (newVal) => {
-  if (!newVal) return
-
-  try {
-    let res
-
-    if (typeof newVal === 'string') {
-      // Single date
-      res = await axios.get(
-        'http://localhost:8000/api/patient-records',
-        { params: { date: newVal } }
-      )
-
-    } else {
-      const { from, to } = newVal
-
-      if (from && to) {
-        // Date range
-        res = await axios.get(
-          'http://localhost:8000/api/patient-records',
-          { params: { from, to } }
-        )
-      } else if (from && !to) {
-        // Single date via range picker
-        res = await axios.get(
-          'http://localhost:8000/api/patient-records',
-          { params: { date: from } }
-        )
-      }
-    }
-
-    if (res?.data) {
-      rows.value = mapPatientsToRows(res.data)
-    }
-
-  } catch (err) {
-    console.error('Date filter failed:', err)
-  }
-})
 const mapPatientsToRows = (patients) => {
   return patients.map(patient => {
     const name = [

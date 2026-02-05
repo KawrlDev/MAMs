@@ -23,17 +23,8 @@
       <div class="amount-title barangay-title">PER BARANGAY</div>
 
       <div class="table-container">
-        <q-table
-          class="budget-table"
-          :rows="rows"
-          row-key="num"
-          flat
-          bordered
-          dense
-          :pagination="{ rowsPerPage: 0 }"
-          virtual-scroll
-          :virtual-scroll-sticky-size-start="48"
-        >
+        <q-table class="budget-table" :rows="rows" row-key="num" flat bordered dense :pagination="{ rowsPerPage: 5 }"
+          virtual-scroll :virtual-scroll-sticky-size-start="48">
           <template v-slot:header>
             <tr class="sticky-header">
               <th rowspan="2">#</th>
@@ -145,8 +136,8 @@ onMounted(async () => {
       perCategoryChart,
       ['Medicine', 'Laboratory', 'Hospital'],
       [
-        parseFloat(chartData.medicine) || 0, 
-        parseFloat(chartData.laboratory) || 0, 
+        parseFloat(chartData.medicine) || 0,
+        parseFloat(chartData.laboratory) || 0,
         parseFloat(chartData.hospital) || 0
       ],
       ['#b5d6d6', '#b5d6b5', '#d6b5b5']
@@ -156,7 +147,7 @@ onMounted(async () => {
       perSexChart,
       ['Male', 'Female'],
       [
-        parseFloat(chartData.perMale) || 0, 
+        parseFloat(chartData.perMale) || 0,
         parseFloat(chartData.perFemale) || 0
       ],
       ['#B5EAD7', '#FFDAC1']
@@ -164,7 +155,7 @@ onMounted(async () => {
 
     createDoughnut(
       perAgeBracketChart,
-      ['0-1','2-5','6-12','13-19','20-39','40-64','65+'],
+      ['0-1', '2-5', '6-12', '13-19', '20-39', '40-64', '65+'],
       [
         parseFloat(chartData['0to1']) || 0,
         parseFloat(chartData['2to5']) || 0,
@@ -174,7 +165,7 @@ onMounted(async () => {
         parseFloat(chartData['40to64']) || 0,
         parseFloat(chartData['65AndAbove']) || 0
       ],
-      ['#A8E6CF','#FFD3B6','#FFAAA5','#FFDAC1','#E0BBE4','#B5EAD7','#C7CEEA']
+      ['#A8E6CF', '#FFD3B6', '#FFAAA5', '#FFDAC1', '#E0BBE4', '#B5EAD7', '#C7CEEA']
     )
   } catch (err) {
     console.error('Error loading data:', err)
@@ -280,23 +271,24 @@ canvas {
 
 @media (min-width: 1601px) {
   .dashboard-card {
-  flex: 0 0 800px;
-  height: auto;
-  padding: 15px;
-  text-align: center;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
-  font-family: Arial, sans-serif;
-  margin-right: 1%;
-  border: 2px solid grey;
-  margin-left: 10px;
-  margin-top: 86px;
-  gap: 50%;
-  position: relative;
-  z-index: 1; 
- }
+    flex: 0 0 800px;
+    height: auto;
+    padding: 15px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
+    font-family: Arial, sans-serif;
+    margin-right: 1%;
+    border: 2px solid grey;
+    margin-left: 10px;
+    margin-top: 86px;
+    gap: 50%;
+    position: relative;
+    z-index: 1;
+  }
 }
+
 @media (min-width: 901px) and (max-width: 1200px) {
   .charts-container {
     grid-template-columns: repeat(2, 1fr);
