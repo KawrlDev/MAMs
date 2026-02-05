@@ -3,7 +3,7 @@
     <div class="section-header">
       <h4>ANNUAL BUDGET</h4>
 
-      <q-btn icon="add" label="CREATE NEW YEARLY BUDGET" class="add-btn" @click="checkBeforeCreate" />
+      <q-btn icon="add" label="ADD BUDGET" class="add-btn" @click="checkBeforeCreate" />
     </div>
 
     <q-table flat bordered class="budget-table" :rows="rows" :columns="columns" row-key="year"
