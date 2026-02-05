@@ -1310,16 +1310,6 @@ const proceedWithAction = async () => {
     if (selectedAction.value === 'existing') {
       await checkEligibilityAndProceed(selectedExistingPatient.value.patient_id)
     } else if (selectedAction.value === 'new') {
-      const eligibilityCheck = await checkEligibility()
-
-      if (!eligibilityCheck.eligible) {
-        showExistingDialog.value = false
-        eligibilityWarningData.value = eligibilityCheck
-        showEligibilityWarning.value = true
-        actionLoading.value = false
-        return
-      }
-
       await createNewPatient()
     }
   } catch (error) {
