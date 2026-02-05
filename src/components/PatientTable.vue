@@ -6,7 +6,7 @@
 
         <!-- SEARCH -->
         <div class="col-10">
-          <q-input v-model="search" placeholder="Search" outlined dense clearable>
+          <q-input v-model="search" placeholder="Search by name, category, GL No., barangay, or date (YYYY-MM-DD)" outlined dense clearable>
             <template #prepend>
               <q-icon name="search" />
             </template>
@@ -36,13 +36,14 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import ActionBtn from './ActionBtn.vue'
 
 const rows = ref([])
 
 const columns = [
   { name: 'name', label: "Patient's Name", field: 'name', align: 'center', sortable: true },
+  { name: 'barangay', label: 'Barangay', field: 'barangay', align: 'center', sortable: true },
   { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
   { name: 'glNum', label: 'GL No.', field: 'glNum', align: 'center', sortable: true },
   { name: 'date', label: 'Date Issued', field: 'date', align: 'center', sortable: true },
@@ -78,12 +79,14 @@ const mapPatientsToRows = (patients) => {
     return {
       ...patient,
       name,
+      barangay: patient.barangay,
       category: patient.category,
       glNum: patient.gl_no,
       date: patient.date_issued
     }
   })
 }
+
 watch(search, async (val) => {
   const res = await axios.get(
     'http://localhost:8000/api/patients/search',

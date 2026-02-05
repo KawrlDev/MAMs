@@ -18,14 +18,15 @@
           <label>Last Name <span>*</span></label>
           <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
             :rules="[val => !!val || 'This field is required']" @update:model-value="onLastNameChange"
-            @focus="lastNameFocused = true" @blur="onLastNameBlur" clearable>
+            @focus="lastNameFocused = true" @blur="onLastNameBlur">
             <template v-slot:append v-if="searchingPatients">
               <q-spinner color="primary" size="20px" />
             </template>
           </q-input>
 
           <!-- Patient Search Dropdown -->
-          <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+          <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0"
+            class="patient-dropdown">
             <div class="dropdown-header">
               <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
               <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -88,18 +89,16 @@
         <div class="field">
           <label>First Name <span>*</span></label>
           <q-input v-model="firstNameValue" dense outlined placeholder="First Name"
-            :rules="[val => !!val || 'This field is required']" 
-            @update:model-value="onFirstNameChange"
-            @focus="firstNameFocused = true"
-            @blur="onFirstNameBlur"
-            clearable>
+            :rules="[val => !!val || 'This field is required']" @update:model-value="onFirstNameChange"
+            @focus="firstNameFocused = true" @blur="onFirstNameBlur">
             <template v-slot:append v-if="searchingPatients">
               <q-spinner color="primary" size="20px" />
             </template>
           </q-input>
 
           <!-- Patient Search Dropdown for First Name -->
-          <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+          <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0"
+            class="patient-dropdown">
             <div class="dropdown-header">
               <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
               <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -162,17 +161,15 @@
         <div class="field">
           <label>Middle Name</label>
           <q-input v-model="middleNameValue" dense outlined placeholder="Middle Name"
-            @update:model-value="onMiddleNameChange"
-            @focus="middleNameFocused = true"
-            @blur="onMiddleNameBlur"
-            clearable>
+            @update:model-value="onMiddleNameChange" @focus="middleNameFocused = true" @blur="onMiddleNameBlur">
             <template v-slot:append v-if="searchingPatients">
               <q-spinner color="primary" size="20px" />
             </template>
           </q-input>
 
           <!-- Patient Search Dropdown for Middle Name -->
-          <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+          <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0"
+            class="patient-dropdown">
             <div class="dropdown-header">
               <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
               <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -235,7 +232,7 @@
         <div class="field">
           <label>Suffix</label>
           <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
-            @update:model-value="checkForPatientEdits" clearable />
+            @update:model-value="checkForPatientEdits" />
         </div>
       </div>
 
@@ -296,7 +293,7 @@
         <div class="field">
           <label>House Address <span>*</span></label>
           <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
-            @update:model-value="checkForPatientEdits" clearable />
+            @update:model-value="checkForPatientEdits" />
         </div>
       </div>
       <q-separator color="grey-5" size="2px" class="q-my-lg" />
@@ -313,17 +310,17 @@
         <div class="field" v-if="categoryValue == 'HOSPITAL'">
           <label>Hospital Bill <span>*</span></label>
           <q-input type="number" dense v-model="hospitalBillValue" outlined
-            :rules="[val => !!val || 'This field is required']" clearable />
+            :rules="[val => !!val || 'This field is required']" />
         </div>
 
         <div class="field">
           <label>Issued Amount <span>*</span></label>
           <q-input type="number" dense v-model="issuedAmountValue" outlined
-            :rules="[val => !!val || 'This field is required']" clearable />
+            :rules="[val => !!val || 'This field is required']" />
         </div>
       </div>
 
-      
+
       <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
 
       <div v-if="!isChecked">
@@ -334,30 +331,30 @@
           <div class="field">
             <label>Last Name <span>*</span></label>
             <q-input v-model="clientLastNameValue" dense outlined placeholder="Last Name"
-              :rules="[val => !!val || 'This field is required']" clearable />
+              :rules="[val => !!val || 'This field is required']" />
           </div>
 
           <div class="field">
             <label>First Name <span>*</span></label>
             <q-input v-model="clientFirstNameValue" dense outlined placeholder="First Name"
-              :rules="[val => !!val || 'This field is required']" clearable />
+              :rules="[val => !!val || 'This field is required']" />
           </div>
 
           <div class="field">
             <label>Middle Name</label>
-            <q-input v-model="clientMiddleNameValue" dense outlined placeholder="Middle Name" clearable />
+            <q-input v-model="clientMiddleNameValue" dense outlined placeholder="Middle Name" />
           </div>
 
           <div class="field">
             <label>Suffix</label>
-            <q-input v-model="clientSuffixValue" dense outlined placeholder="Suffix" clearable />
+            <q-input v-model="clientSuffixValue" dense outlined placeholder="Suffix" />
           </div>
         </div>
 
         <div class="field full">
           <label>Relationship to patient <span>*</span></label>
           <q-input v-model="relationshipValue" dense outlined placeholder="Relationship to patient"
-            :rules="[val => !!val || 'This field is required']" clearable />
+            :rules="[val => !!val || 'This field is required']" />
         </div>
       </div>
 
@@ -886,7 +883,7 @@ const filteredSearchResults = computed(() => {
       if (searchField === 'lastname') return lastname.startsWith(query)
       if (searchField === 'firstname') return firstname.startsWith(query)
       if (searchField === 'middlename') return middlename.startsWith(query)
-      
+
       return false
     })
     .sort((a, b) => {
