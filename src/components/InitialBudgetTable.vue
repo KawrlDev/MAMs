@@ -1,7 +1,7 @@
 <template>
   <div class="budget-card">
     <div class="section-header">
-      <h4>INITIAL BUDGET</h4>
+      <h4>ANNUAL BUDGET</h4>
 
       <q-btn icon="add" label="CREATE NEW YEARLY BUDGET" class="add-btn" @click="checkBeforeCreate" />
     </div>
@@ -18,7 +18,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          You have already created a budget for the {{ currentYear }}.
+          You have already created a budget for this year.
         </q-card-section>
 
         <q-card-actions align="right" class="q-px-md q-pb-md">

@@ -1,7 +1,7 @@
 <template>
   <div class="page-bg">
     <q-form ref="budgetForm" @submit.prevent="handleSaveClick" class="form-container">
-      <h4>CREATE NEW YEARLY BUDGET</h4>
+      <h4>CREATE NEW ANNUAL BUDGET</h4>
 
       <div class="content">
         <h2 class="section-header">WHOLE YEAR BUDGET</h2>

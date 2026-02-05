@@ -239,8 +239,6 @@
         </div>
       </div>
 
-      <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
-
       <div class="grid-4">
         <div class="field">
           <label>Birthdate <span>*</span></label>
@@ -324,6 +322,9 @@
             :rules="[val => !!val || 'This field is required']" clearable />
         </div>
       </div>
+
+      
+      <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
 
       <div v-if="!isChecked">
         <q-separator color="grey-5" size="2px" class="q-my-lg" />

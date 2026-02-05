@@ -1,7 +1,7 @@
 <template>
   <div class="page-bg">
     <q-form ref="budgetForm" @submit.prevent="addSupplementaryBonus" class="form-container">
-      <h4>ADD SUPPLEMENTARY BONUS</h4>
+      <h4>ADD SUPPLEMENTAL BUDGET</h4>
 
       <div class="content">
         <div class="budget-block">

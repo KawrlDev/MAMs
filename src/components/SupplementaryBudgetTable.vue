@@ -1,7 +1,7 @@
 <template>
   <div class="budget-card">
     <div class="section-header">
-      <h4>SUPPLEMENTARY BONUS</h4>
+      <h4>SUPPLEMENTAL BUDGET</h4>
 
       <RouterLink to="/add-supplementary-bonus">
         <q-btn icon="add" label="ADD BONUS" class="add-btn" />
@@ -23,9 +23,9 @@ const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'center', sortable: true },
   { name: 'year', label: 'Year', field: 'year', align: 'center', sortable: true },
   { name: 'addedOn', label: 'Added on', field: 'date_added', align: 'center', sortable: true },
-  { name: 'medicine', label: 'Supplementary Medicine Bonus', field: 'medicine_supplementary_bonus', align: 'center', sortable: true },
-  { name: 'lab', label: 'Supplementary Laboratory Bonus', field: 'laboratory_supplementary_bonus', align: 'center', sortable: true },
-  { name: 'hospital', label: 'Supplementary Hospital Bonus', field: 'hospital_supplementary_bonus', align: 'center', sortable: true }
+  { name: 'medicine', label: 'Supplemental Medicine Bonus', field: 'medicine_supplementary_bonus', align: 'center', sortable: true },
+  { name: 'lab', label: 'Supplemental Laboratory Bonus', field: 'laboratory_supplementary_bonus', align: 'center', sortable: true },
+  { name: 'hospital', label: 'Supplemental Hospital Bonus', field: 'hospital_supplementary_bonus', align: 'center', sortable: true }
 ]
 
 onMounted(() => {
