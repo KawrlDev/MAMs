@@ -1,3 +1,4 @@
+<!-- pages\DashboardPage.vue -->
 <template>
   <!-- FIRST ROW: Cards -->
   <div class="dashboard-row">
@@ -26,11 +27,29 @@ import MonthlyPatients from 'src/components/MonthlyPatients.vue'
 <style scoped>
 .dashboard-row {
   display: flex;
-  flex-wrap: nowrap;    /* keep items in one row */
-  gap: 10px;   /* horizontal scroll if needed */
+  flex-wrap: nowrap;
+  gap: 10px;
   padding: 10px 0;
+  margin-top: -30px;
+  position: relative;
+}
 
-  margin-top: -30px;    /* ✅ allow overlap with previous row */
-  position: relative;   /* required for proper stacking */
+/* Scale everything based on 1535px baseline */
+@media (min-width: 1000px) {
+  .dashboard-row {
+    zoom: calc(100vw / 1535);
+  }
+}
+@media (min-width: 1500px) and (max-width: 1600px) {
+  .dashboard-row {
+    zoom: 1;
+  }
+}
+
+/* For larger screens, keep it at 100% or scale up slightly */
+@media (min-width: 1601px) {
+  .dashboard-row {
+    zoom: calc(100vw / 1535);
+  }
 }
 </style>

@@ -133,4 +133,49 @@ onMounted(() => {
   top: 10%;
   transform: translateX(-50%);
 }
+@media (min-width: 1540px) and (max-width: 1565px) {
+  .dashboard-card {
+  flex: 0 0 580px;
+  height: 128px;
+  width: 500px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+
+  /* ✅ GREY BORDER ADDED */
+  border: 2px solid grey;
+
+  box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
+  font-family: sans-serif;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  margin-top: -25.7%;
+}
+
+}
+@media (min-width: 1576px){
+  .dashboard-card {
+  flex: 0 0 599px;
+  height: 128px;
+  width: 500px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+
+  /* ✅ GREY BORDER ADDED */
+  border: 2px solid grey;
+
+  box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
+  font-family: sans-serif;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  margin-top: -24.7%;
+}
+}
+@media (min-width: 1585px){
+  .dashboard-card {
+  flex: 0 0 602px;
+}
+}
+
 </style>

@@ -193,4 +193,12 @@ onMounted(() => {
 .negative .remaining-value {
   color: #d32f2f; /* red if negative */
 }
+@media (min-width: 1576px) and (max-width: 1600px) {
+.dashboard-row {
+  display: flex;
+  gap: 39px;
+  padding: 10px;
+  overflow-x: auto;
+}
+}
 </style>
