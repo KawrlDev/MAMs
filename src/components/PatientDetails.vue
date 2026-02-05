@@ -53,11 +53,6 @@
             @update:model-value="checkForChanges" />
         </div>
 
-        <div class="col-12">
-          <q-checkbox v-model="isChecked" label="Patient is same as client?" class="form-checkbox" :disable="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
-
         <div class="col-3">
           <label class="form-label">Birthdate <span class="required">*</span></label>
           <q-input v-model="birthdateValue" dense outlined class="flat-input"
@@ -1052,23 +1047,6 @@ function getDaySuffix(day) {
 .flat-input :deep(.q-field--disabled .q-field__label) {
   color: #757575 !important;
 }
-
-/* =========================
-   CHECKBOX
-========================= */
-.form-checkbox :deep(.q-checkbox__bg) {
-  border: 2px solid #000;
-  border-radius: 2px;
-}
-
-.form-checkbox :deep(.q-checkbox__label) {
-  font-weight: 600;
-}
-
-.form-checkbox :deep(.q-checkbox--disabled .q-checkbox__label) {
-  color: #757575;
-}
-
 /* BUTTON COLORS */
 .delete-btn {
   background: #ff3b3b;
