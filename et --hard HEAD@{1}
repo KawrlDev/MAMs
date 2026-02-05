@@ -1,0 +1,24 @@
+[33mb50c2c7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: pull origin main: Fast-forward
+[33mfd80720[m HEAD@{1}: commit: button to reveal password
+[33m708e9a0[m HEAD@{2}: pull origin main: Merge made by the 'ort' strategy.
+[33m75d8590[m HEAD@{3}: commit: searching for existing patients naa napud sa first naem and middle initial, naay x button ang text input fields
+[33m2de8bc5[m HEAD@{4}: commit: gi fix ang dashboard titles
+[33m12da01d[m HEAD@{5}: pull origin main: Merge made by the 'ort' strategy.
+[33m17a6ec3[m HEAD@{6}: pull origin main: Merge made by the 'ort' strategy.
+[33mb7b5479[m HEAD@{7}: pull origin main: Merge made by the 'ort' strategy.
+[33m020aaf8[m HEAD@{8}: commit: reversion
+[33mbe3ec88[m HEAD@{9}: commit: wa ra guD
+[33m9417d04[m HEAD@{10}: commit: bago ang login page
+[33m183c9b4[m HEAD@{11}: commit: fixed ang copyright and naa nay name when mo display sa patients found
+[33m275f476[m HEAD@{12}: commit: packages
+[33m963e0aa[m HEAD@{13}: commit: added separator sa partner and issued for clarity and lahi ang dialog when mag edit ka og patient info, transaction details og client's name
+[33m6d8613d[m HEAD@{14}: commit: if mag edit ka sa any details sa patient, mo prompt lang siya kung new patient bana or iedit tanan details
+[33m93e4a4a[m HEAD@{15}: commit: gipa gamay nako ang text when printing
+[33md784d80[m HEAD@{16}: commit: naa ang pdf library
+[33mf43427b[m HEAD@{17}: commit: gi fix nako ang bug when mo generate kag pdf sa patientdetails kay mo return og nanth og undefined date og gi ayo lang nako tong code ni llena
+[33m64b9458[m HEAD@{18}: pull origin main: Fast-forward
+[33m9ad9f5f[m HEAD@{19}: commit: gi ayo nako ang age
+[33m0b9966d[m HEAD@{20}: commit: Gi implement nako ang new changes
+[33mf41e201[m HEAD@{21}: Branch: renamed refs/heads/master to refs/heads/main
+[33mf41e201[m HEAD@{23}: commit: Initial commit
+[33m637acb8[m HEAD@{24}: commit (initial): Initialize the project 🚀

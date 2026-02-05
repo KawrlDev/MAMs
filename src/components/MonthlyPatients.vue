@@ -1,7 +1,8 @@
 <template>
   <q-card class="dashboard-card">
     <q-card-section class="text-center">
-      <div class="text-h5 text-green-8 q-mb-sm amount-title">MONTHLY CATERED PATIENTS</div>
+      <div class="amount-title">MONTHLY CATERED PATIENTS</div>
+
       <div class="chart-container">
         <canvas ref="monthlyCateredPatients"></canvas>
       </div>
@@ -11,10 +12,25 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineController, LineElement, PointElement } from 'chart.js/auto'
+import {
+  Chart,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+} from 'chart.js/auto'
 import axios from 'axios'
 
-Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineController, LineElement, PointElement)
+Chart.register(
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+)
 
 const monthlyCateredPatients = ref(null)
 
@@ -22,8 +38,8 @@ onMounted(async () => {
   try {
     const res = await axios.get('http://localhost:8000/api/monthly-patients')
 
-    // Extract data per category for months 1–12
     const months = Array.from({ length: 12 }, (_, i) => i + 1)
+
     const dataMedicine = months.map(m => res.data.monthlyCounts.Medicine[m] ?? 0)
     const dataLaboratory = months.map(m => res.data.monthlyCounts.Laboratory[m] ?? 0)
     const dataHospital = months.map(m => res.data.monthlyCounts.Hospital[m] ?? 0)
@@ -32,35 +48,25 @@ onMounted(async () => {
     new Chart(monthlyCateredPatients.value, {
       type: 'line',
       data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
         datasets: [
-          { label: 'Medicine', data: dataMedicine, borderColor: '#0318fc', pointBackgroundColor: '#0318fc', borderWidth: 1.5, fill: false },
-          { label: 'Laboratory', data: dataLaboratory, borderColor: '#fbff00', pointBackgroundColor: '#fbff00', borderWidth: 1.5, fill: false },
-          { label: 'Hospital', data: dataHospital, borderColor: '#ff0000', pointBackgroundColor: '#ff0000', borderWidth: 1.5, fill: false },
-          { label: 'Total', data: dataTotal, borderColor: '#00ff11', pointBackgroundColor: '#00ff11', borderWidth: 1.5, fill: false },
+          { label: 'Medicine', data: dataMedicine, borderColor: '#0318fc', pointBackgroundColor: '#0318fc', borderWidth: 2 },
+          { label: 'Laboratory', data: dataLaboratory, borderColor: '#fbff00', pointBackgroundColor: '#fbff00', borderWidth: 2 },
+          { label: 'Hospital', data: dataHospital, borderColor: '#ff0000', pointBackgroundColor: '#ff0000', borderWidth: 2 },
+          { label: 'Total', data: dataTotal, borderColor: '#00ff11', pointBackgroundColor: '#00ff11', borderWidth: 2 }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: 'top' },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.raw}`
-            }
-          },
-          datalabels: {
-            display: false
-          }
+          legend: { position: 'top' }
         },
-        scales: { 
-          y: { 
+        scales: {
+          y: {
             beginAtZero: true,
-            ticks: {
-              stepSize: 1
-            }
-          } 
+            ticks: { stepSize: 1 }
+          }
         }
       }
     })
@@ -71,52 +77,55 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* CARD */
 .dashboard-card {
-  flex: 0 0 39.6%;
-  padding: 4px;
-  text-align: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 12px auto;
+  padding: 8px;
   background: #ffffff;
   border-radius: 12px;
+  border: 2px solid grey;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   font-family: Arial, sans-serif;
-
-  height: 352px;
-  margin-top: -15.8%;
-  border: 2px solid grey;
-  margin-left: 10px;
 }
 
+/* TITLE */
 .amount-title {
+  font-size: 20px;
   font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 10px;
 }
 
-/* Wrapper for the canvas to control sizing properly */
+/* CHART WRAPPER */
 .chart-container {
   position: relative;
-  height: 250px;
   width: 100%;
+  height: 280px;
 }
 
-/* Remove !important and fixed dimensions - let Chart.js handle it */
+/* CANVAS */
 canvas {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-@media (min-width: 1576px) and (max-width: 1600px) {
-  .dashboard-card {
-  flex: 0 0 39.6%;
-  padding: 4px;
-  text-align: center;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
-  font-family: Arial, sans-serif;
+/* 📱 MOBILE */
+@media (max-width: 600px) {
+  .amount-title {
+    font-size: 16px;
+  }
 
-  height: 352px;
-  margin-top: -14.8%;
-  border: 2px solid grey;
-  margin-left: 10px;
+  .chart-container {
+    height: 220px;
+  }
 }
+
+/* 💻 LARGE SCREENS */
+@media (min-width: 1400px) {
+  .chart-container {
+    height: 340px;
+  }
 }
 </style>
