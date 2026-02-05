@@ -6,12 +6,20 @@
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
 
         <q-toolbar-title class="row items-center q-gutter-sm">
-          <q-btn flat dense round @click="$router.push('/')">
-            <q-img src="~assets/logo.png" width="34px" height="34px" fit="contain" />
+          <div
+            class="row items-center q-gutter-sm cursor-pointer"
+            @click="$router.push('/')"
+          >
+            <q-img
+              src="~assets/logo.png"
+              width="34px"
+              height="34px"
+              fit="contain"
+            />
             <span class="text-weight-bold text-h6">MAMs</span>
-          </q-btn>
-
+          </div>
         </q-toolbar-title>
+
         <!-- USER ICON WITH DROPDOWN MENU -->
         <q-btn flat round icon="account_circle">
           <q-menu>
@@ -43,14 +51,94 @@
     <q-drawer v-model="drawer" overlay modal side="left" :width='200' class="drawer-bg">
       <!-- IMPORTANT: inner content background -->
       <div class="drawer-content q-pa-sm column q-gutter-sm items-center">
-        <q-btn to="/" exact left rounded unelevated no-caps icon="dashboard" label="Dashboard" class="nav-btn"
-          :class="{ 'active-btn': route.path === '/' }" />
+        <!-- Dashboard -->
+        <q-btn
+          to="/"
+          exact
+          left
+          rounded
+          unelevated
+          no-caps
+          icon="dashboard"
+          label="Dashboard"
+          class="nav-btn"
+          :class="{ 'active-btn': route.path === '/' }"
+        />
 
-        <q-btn to="/patient-records" exact left rounded unelevated no-caps icon="description" label="Patients"
-          class="nav-btn" :class="{ 'active-btn': route.path === '/patient-records' }" />
+        <!-- Patients -->
+        <q-btn
+          to="/patient-records"
+          exact
+          left
+          rounded
+          unelevated
+          no-caps
+          icon="description"
+          label="Patients"
+          class="nav-btn"
+          :class="{ 'active-btn': route.path === '/patient-records' }"
+        />
 
-        <q-btn v-if="role === 'HEAD' || role === 'ADMIN'" to="/budget-table" exact left rounded unelevated no-caps
-          icon="add_circle" label="Budget" class="nav-btn" :class="{ 'active-btn': route.path === '/budget-table' }" />
+        <!-- Reports (NEW – after Patients) -->
+        <q-btn
+          to="/reports"
+          exact
+          left
+          rounded
+          unelevated
+          no-caps
+          icon="assessment"
+          label="Reports"
+          class="nav-btn"
+          :class="{ 'active-btn': route.path === '/reports' }"
+        />
+
+        <!-- Budget (HEAD & ADMIN only) -->
+        <q-btn
+          v-if="role === 'HEAD' || role === 'ADMIN'"
+          to="/budget-table"
+          exact
+          left
+          rounded
+          unelevated
+          no-caps
+          icon="add_circle"
+          label="Budget"
+          class="nav-btn"
+          :class="{ 'active-btn': route.path === '/budget-table' }"
+        />
+
+        <!-- Spacer pushes Settings to bottom -->
+        <div class="q-mt-auto" />
+
+        <!-- Settings (ADMIN only – at bottom) -->
+        <q-btn
+          v-if="role === 'ADMIN'"
+          to="/settings"
+          exact
+          left
+          rounded
+          unelevated
+          no-caps
+          icon="settings"
+          label="Settings"
+          class="nav-btn"
+          :class="{ 'active-btn': route.path === '/settings' }"
+        />
+
+        <!-- Trademark -->
+        <div
+          class="q-mt-sm row items-center justify-center text-white text-caption q-gutter-xs"
+          style="opacity: 0.85"
+        >
+          <span>Developed by</span>
+          <q-img
+            src="~assets/trademark.png"
+            width="25px"
+            height="25px"
+            fit="contain"
+          />
+        </div>
       </div>
     </q-drawer>
   </div>
