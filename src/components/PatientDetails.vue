@@ -10,7 +10,6 @@
           <template v-if="!edit">
             <q-btn label="DELETE" icon="delete" class="action-btn delete-btn" @click="showDeleteDialog = true" dense />
             <q-btn label="EDIT" icon="edit" class="action-btn edit-btn" dense @click="edit = true" />
-            <q-btn icon="picture_as_pdf" class="action-btn pdf-btn" dense round @click="generatePDF" />
           </template>
 
           <!-- Edit Mode Buttons -->
@@ -232,6 +231,37 @@
       </q-card>
     </q-dialog>
 
+    <!-- FINAL SAVE CONFIRMATION -->
+<q-dialog v-model="showFinalSaveDialog">
+  <q-card style="min-width: 350px">
+    <q-card-section>
+      <div class="text-h6">Save Changes?</div>
+    </q-card-section>
+
+    <q-card-section class="q-pt-none">
+      Are you sure you want to save these changes?
+    </q-card-section>
+
+    <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-btn
+        label="NO"
+        icon="close"
+        unelevated
+        class="dialog-goback-btn"
+        v-close-popup
+      />
+      <q-btn
+        label="YES"
+        icon="check"
+        unelevated
+        class="dialog-cancel-btn"
+        @click="confirmSave"
+        :loading="editActionLoading"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
     <!-- PATIENT EDIT CONFIRMATION DIALOG (when patient info is edited) -->
     <q-dialog v-model="showPatientEditDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
@@ -317,8 +347,16 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn" :disable="!editDialogAction"
-            @click="proceedWithEdit" :loading="editActionLoading" />
+          <q-btn
+  label="PROCEED"
+  icon="check"
+  unelevated
+  class="dialog-cancel-btn"
+  @click="showFinalSaveDialog = true"
+  :loading="editActionLoading"
+/>
+
+
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -429,7 +467,6 @@ import axios from 'axios'
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib'
 import { toWords } from 'number-to-words'
 import dayjs from 'dayjs'
 
@@ -489,13 +526,13 @@ const clientSuffixValue = ref(null)
 const relationshipValue = ref(null)
 const dateToday = ref(null)
 
+const showFinalSaveDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showCancelDialog = ref(false)
 const showPatientEditDialog = ref(false)
 const showTransactionEditDialog = ref(false)
 const deleteLoading = ref(false)
 const editActionLoading = ref(false)
-const editDialogAction = ref(null)
 const hasPatientChanges = ref(false)
 const hasTransactionChanges = ref(false)
 
@@ -667,19 +704,9 @@ const handleSaveClick = () => {
   const patientChanged = checkPatientChanges()
   const transactionChanged = checkTransactionChanges()
 
-  if (patientChanged && transactionChanged) {
-    // Both changed - show patient dialog first
-    $q.notify({
-      type: 'warning',
-      message: 'Both patient and transaction details changed. Please handle patient changes first.',
-      position: 'top'
-    })
-    editDialogAction.value = null
-    showPatientEditDialog.value = true
-  } else if (patientChanged) {
-    // Only patient info changed
-    editDialogAction.value = null
-    showPatientEditDialog.value = true
+  if (patientChanged) {
+  showPatientEditDialog.value = true
+  
   } else if (transactionChanged) {
     // Only transaction/client details changed
     showTransactionEditDialog.value = true
@@ -700,44 +727,6 @@ const cancelPatientEdit = () => {
 
 const cancelTransactionEdit = () => {
   showTransactionEditDialog.value = false
-}
-
-const proceedWithEdit = async () => {
-  if (!editDialogAction.value) return
-
-  editActionLoading.value = true
-
-  try {
-    if (editDialogAction.value === 'update') {
-      // Update existing patient
-      await updatePatientInfo()
-    } else {
-      // Create new patient
-      await createNewPatient()
-    }
-
-    showPatientEditDialog.value = false
-    editDialogAction.value = null
-
-    // If there are also transaction changes, show that dialog next
-    if (checkTransactionChanges()) {
-      showTransactionEditDialog.value = true
-    } else {
-      edit.value = false
-      hasPatientChanges.value = false
-      hasTransactionChanges.value = false
-      await getPatientDetails(glNum.value)
-    }
-  } catch (error) {
-    console.error('Action failed:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Operation failed',
-      position: 'top'
-    })
-  } finally {
-    editActionLoading.value = false
-  }
 }
 
 const proceedWithTransactionUpdate = async () => {
@@ -883,6 +872,42 @@ watch(
   }
 )
 
+const confirmSave = async () => {
+  editActionLoading.value = true
+
+  try {
+    await updatePatientInfo()
+
+    showFinalSaveDialog.value = false
+    showPatientEditDialog.value = false
+
+    // If transaction changes exist, handle next
+    if (checkTransactionChanges()) {
+      showTransactionEditDialog.value = true
+    } else {
+      edit.value = false
+      hasPatientChanges.value = false
+      hasTransactionChanges.value = false
+      await getPatientDetails(glNum.value)
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: 'Changes saved successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Save failed:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to save changes',
+      position: 'top'
+    })
+  } finally {
+    editActionLoading.value = false
+  }
+}
+
 const getPatientDetails = async (id) => {
   const res = await axios.get(
     `http://localhost:8000/api/patient-details/${id}`
@@ -959,152 +984,6 @@ const getPatientDetails = async (id) => {
 
   hasPatientChanges.value = false
   hasTransactionChanges.value = false
-}
-
-const generatePDF = async () => {
-  const pdfMap = {
-    MEDICINE: '/med.pdf',
-    LABORATORY: '/lab.pdf',
-    HOSPITAL: '/hosp.pdf',
-  }
-
-  const pdfPath = pdfMap[categoryValue.value]
-  const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
-  const pdfDoc = await PDFDocument.load(existingPdfBytes)
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-
-  const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
-  const page = pdfDoc.getPages()[0]
-  page.setSize(page.getWidth(), 1200)
-  page.translateContent(0, 605)
-
-
-
-  const parsedDate = new Date(dateToday.value)
-  const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
-  const monthName = parsedDate.toLocaleString('default', { month: 'long' })
-
-  const fullNameValue =
-    lastNameValue.value + ", " + firstNameValue.value +
-    (middleNameValue.value ? " " + middleNameValue.value : "") +
-    (suffixValue.value ? " " + suffixValue.value : "");
-
-  const clientValue = ref(null);
-  const fullAddressValue = houseAddressValue.value + ", " + barangayValue.value + ", " + cityValue.value + ", " + provinceValue.value
-
-  if (isChecked.value == true) {
-    clientValue.value = fullNameValue;
-  } else {
-    clientValue.value = clientLastNameValue.value + ", " + clientFirstNameValue.value +
-      (clientMiddleNameValue.value ? " " + clientMiddleNameValue.value : "") +
-      (clientSuffixValue.value ? " " + clientSuffixValue.value : "") + " / " + (relationshipValue.value ? " " + relationshipValue.value : "");
-  }
-
-  // Calculate age from birthdate
-  const age = calculateAgeFromDate(birthdateValue.value)
-
-  page.drawText(glNum.value + ' / ' + partnerValue.value, {
-    x: 600,
-    y: 489,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(fullNameValue.toUpperCase(), {
-    x: 140,
-    y: 375,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-
-  // Only draw age if it's valid
-  if (age !== null) {
-    page.drawText(String(age), {
-      x: 400,
-      y: 375,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
-    })
-  }
-  page.drawText(sexValue.value.toUpperCase(), {
-    x: 455,
-    y: 375,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(fullAddressValue.toUpperCase(), {
-    x: 95,
-    y: 350,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(clientValue.value.toUpperCase(), {
-    x: 70,
-    y: 300,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-
-  if (categoryValue.value == 'MEDICINE') {
-    page.drawText(amountWords, {
-      x: 245,
-      y: 273,
-      size: 10,
-      color: rgb(0, 0, 0),
-      font: boldFont,
-    })
-  } else {
-    page.drawText(amountWords, {
-      x: 260,
-      y: 273,
-      size: 10,
-      color: rgb(0, 0, 0),
-      font: boldFont,
-    })
-  }
-
-  page.drawText(
-    Number(issuedAmountValue.value).toFixed(2),
-    {
-      x: 90,
-      y: 248,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
-    },
-  )
-  page.drawText(dayNum, {
-    x: 137,
-    y: 197,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(monthName.toUpperCase(), {
-    x: 225,
-    y: 197,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(issuedByValue.value.toUpperCase(), {
-    x: 340,
-    y: 65,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-
-  const pdfBytes = await pdfDoc.save()
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-  const url = URL.createObjectURL(blob)
-
-  window.open(url)
 }
 
 function getDaySuffix(day) {
@@ -1290,11 +1169,7 @@ function getDaySuffix(day) {
   border-radius: 5%;
 }
 
-.pdf-btn {
-  background: #e53935;
-  color: white;
-  border-radius: 5%;
-}
+
 
 .cancel-btn,
 .save-btn {
