@@ -23,18 +23,10 @@
 
       <div class="patient-ids">
         <h6>Patient ID: {{ patientIDValue }}</h6>
-        <h6>GL Number: {{ glNum }}</h6>
       </div>
 
       <!-- ================= PATIENT DETAILS ================= -->
       <div class="row q-col-gutter-md">
-
-        <div class="col-12">
-          <label class="form-label">Category <span class="required">*</span></label>
-          <q-select v-model="categoryValue" :options="categoryOptions" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :disable="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
 
         <div class="col-6">
           <label class="form-label">Last Name <span class="required">*</span></label>
@@ -302,6 +294,9 @@
                 <span v-if="suffixValue"> {{ suffixValue }}</span>
               </div>
               <div class="info-item">
+                <strong>Patient ID:</strong> {{ originalPatientData.patient_id }}
+              </div>
+              <div class="info-item">
                 <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
               </div>
               <div class="info-item">
@@ -313,30 +308,6 @@
               <div class="info-item info-item-full">
                 <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
                   provinceValue }}
-              </div>
-            </div>
-          </div>
-
-          <div class="options-grid q-mt-md">
-            <!-- Option 1: Update Existing Patient -->
-            <div class="option-card" @click="editDialogAction = 'update'"
-              :class="{ 'option-selected': editDialogAction === 'update' }">
-              <q-icon name="update" size="md" color="blue" />
-              <div class="option-title">Update Patient Information</div>
-              <div class="option-description">
-                Update Patient ID {{ originalPatientData.patient_id }} with the new information.
-                This will affect ALL future records for this patient.
-              </div>
-            </div>
-
-            <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="editDialogAction = 'new'"
-              :class="{ 'option-selected': editDialogAction === 'new' }">
-              <q-icon name="person_add" size="md" color="green" />
-              <div class="option-title">Create New Patient</div>
-              <div class="option-description">
-                Create a completely new patient with the modified information.
-                The original patient record will remain unchanged.
               </div>
             </div>
           </div>

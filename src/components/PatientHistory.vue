@@ -8,7 +8,7 @@
             Patient's History
           </div>
           <q-space />
-          <q-btn to="/patient-records" label="Back" icon="arrow_back" class="cancel-btn" flat />
+          
         </div>
       </template>
 
