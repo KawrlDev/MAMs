@@ -390,8 +390,7 @@ canvas {
   margin-top: 86px;
   gap: 50%;
   position: relative;
-  z-index: 1;
-  margin-bottom: -%;
-}
+  z-index: 1; 
+ }
 }
 </style>
