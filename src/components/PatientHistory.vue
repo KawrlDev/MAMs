@@ -29,19 +29,19 @@
 
       <!-- ACTION COLUMN -->
       <template #body-cell-action="props">
-  <q-td class="action-cell">
-    <q-btn
-      icon="visibility"
-      color="primary"
-      flat
-      round
-      dense
-      @click="viewDetails(props.row.glNum)"
-    >
-      <q-tooltip>View Details</q-tooltip>
-    </q-btn>
-  </q-td>
-</template>
+        <q-td class="action-cell">
+          <q-btn
+            icon="visibility"
+            color="primary"
+            flat
+            round
+            dense
+            @click="viewDetails(props.row.glNum)"
+          >
+            <q-tooltip>View Details</q-tooltip>
+          </q-btn>
+        </q-td>
+      </template>
 
     </q-table>
 
@@ -55,45 +55,128 @@
           </div>
         </q-card-section>
 
-        <q-card-section v-if="selectedRecord" class="q-pa-md">
-          <!-- Transaction Details -->
+        <q-card-section>
           <div class="info-section q-mb-md">
-            <div class="section-title">Transaction Details:</div>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="info-label">Partner:</span>
-                <span class="info-value">{{ selectedRecord.partner }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Issued By:</span>
-                <span class="info-value">{{ selectedRecord.issuedBy }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Issued Amount:</span>
-                <span class="info-value">₱{{ Number(selectedRecord.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              </div>
-              <div class="info-item" v-if="selectedRecord.category === 'HOSPITAL' && selectedRecord.hospitalBill">
-                <span class="info-label">Hospital Bill:</span>
-                <span class="info-value">₱{{ Number(selectedRecord.hospitalBill).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              </div>
-            </div>
-          </div>
+            <div class="section-title">Transcation Details</div>
+            
+            <!-- VIEW MODE -->
+            <div v-if="!editMode">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">GL Number:</span>
+                  <span class="info-value">{{ selectedRecord?.glNum }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Category:</span>
+                  <span class="info-value">{{ selectedRecord?.category }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Partner:</span>
+                  <span class="info-value">{{ selectedRecord?.partner }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Issued By:</span>
+                  <span class="info-value">{{ selectedRecord?.issuedBy }}</span>
+                </div>
+                
+                <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
+                <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'" class="info-item">
+                  <span class="info-label">Issued Amount:</span>
+                  <span class="info-value">₱{{ selectedRecord?.issuedAmount }}</span>
+                </div>
+                
+                <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
+                <template v-if="selectedRecord?.category === 'HOSPITAL'">
+                  <div class="info-item">
+                    <span class="info-label">Hospital Bill:</span>
+                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + selectedRecord.hospitalBill : 'N/A' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Issued Amount:</span>
+                    <span class="info-value">₱{{ selectedRecord?.issuedAmount }}</span>
+                  </div>
+                </template>
 
-          <!-- Client Details -->
-          <div class="info-section">
-            <div class="section-title">Client Information:</div>
-            <div class="info-grid">
-              <div v-if="selectedRecord.clientName" class="info-item">
-                <span class="info-label">Name:</span>
-                <span class="info-value">{{ selectedRecord.clientName }}</span>
+                <!-- Patient is same as client checkbox (view mode - disabled) -->
+                <div class="info-item info-item-full">
+                  <q-checkbox :model-value="!selectedRecord?.clientName" label="Patient is same as client?" class="form-checkbox" disable />
+                </div>
               </div>
-              <div v-if="selectedRecord.clientName" class="info-item">
-                <span class="info-label">Relationship:</span>
-                <span class="info-value">{{ selectedRecord.relationship }}</span>
+
+              <!-- Client Information Section - Only show if client exists -->
+              <template v-if="selectedRecord?.clientName">
+                <div class="section-title q-mt-md q-mb-sm">Client Information</div>
+                <div class="info-grid">
+                  <div class="info-item info-item-full">
+                    <span class="info-label">Client Name:</span>
+                    <span class="info-value">{{ selectedRecord?.clientName }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Relationship:</span>
+                    <span class="info-value">{{ selectedRecord?.relationship }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- EDIT MODE -->
+            <div v-else>
+              <div class="edit-grid">
+                <div class="edit-item">
+                  <label class="edit-label">GL Number:</label>
+                  <q-input v-model="editData.glNum" dense outlined readonly class="edit-input" />
+                </div>
+                <div class="edit-item">
+                  <label class="edit-label">Category:</label>
+                  <q-select v-model="editData.category" :options="categoryOptions" dense outlined class="edit-input" @update:model-value="onCategoryChange" />
+                </div>
+                <div class="edit-item">
+                  <label class="edit-label">Partner:</label>
+                  <q-select v-model="editData.partner" :options="partnerOptions" dense outlined class="edit-input" />
+                </div>
+                <div class="edit-item">
+                  <label class="edit-label">Issued By:</label>
+                  <q-input v-model="editData.issuedBy" dense outlined readonly class="edit-input" />
+                </div>
+                
+                <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
+                <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
+                  <label class="edit-label">Issued Amount:</label>
+                  <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱" />
+                </div>
+                
+                <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
+                <template v-if="editData.category === 'HOSPITAL'">
+                  <div class="edit-item">
+                    <label class="edit-label">Hospital Bill:</label>
+                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input" prefix="₱" />
+                  </div>
+                  <div class="edit-item">
+                    <label class="edit-label">Issued Amount:</label>
+                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱" />
+                  </div>
+                </template>
+
+                <!-- Patient is same as client checkbox -->
+                <div class="edit-item edit-item-full">
+                  <q-checkbox v-model="editData.isChecked" label="Patient is same as client?" class="form-checkbox" @update:model-value="onCheckboxChange" />
+                </div>
               </div>
-              <div v-else class="info-item-full">
-                <span class="text-grey-7 text-italic">Patient is same as client</span>
-              </div>
+
+              <!-- Client Information Section - Only show if patient is NOT same as client -->
+              <template v-if="!editData.isChecked">
+                <div class="section-title q-mt-md q-mb-sm">Client Information</div>
+                <div class="edit-grid">
+                  <div class="edit-item edit-item-full">
+                    <label class="edit-label">Client Name:</label>
+                    <q-input v-model="editData.clientName" dense outlined class="edit-input" />
+                  </div>
+                  <div class="edit-item">
+                    <label class="edit-label">Relationship:</label>
+                    <q-input v-model="editData.relationship" dense outlined class="edit-input" />
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
         </q-card-section>
@@ -101,8 +184,129 @@
         <q-separator />
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CLOSE" icon="close" unelevated class="dialog-close-btn" @click="showDetailsDialog = false" />
-          <q-btn label="PRINT PDF" icon="picture_as_pdf" unelevated class="dialog-print-btn" @click="generatePDF" :loading="pdfLoading" />
+          <!-- VIEW MODE BUTTONS -->
+          <template v-if="!editMode">
+            <q-btn
+  label="CLOSE"
+  icon="close"
+  unelevated
+  class="dialog-close-btn"
+  @click="showCloseConfirmDialog = true"
+/>
+
+
+            <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
+            <q-btn
+  label="PRINT PDF"
+  icon="print"
+  unelevated
+  class="dialog-print-btn"
+  @click="showPrintConfirmDialog = true"
+  :loading="pdfLoading"
+/>
+          </template>
+
+          <!-- EDIT MODE BUTTONS -->
+          <template v-else>
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-close-btn" @click="cancelEdit" />
+            <q-btn label="SAVE" icon="save" unelevated class="dialog-save-btn" @click="showSaveConfirmDialog = true" />
+          </template>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="showCloseConfirmDialog">
+  <q-card style="min-width: 350px">
+    <q-card-section>
+      <div class="text-h6">Close Form?</div>
+    </q-card-section>
+
+    <q-card-section class="q-pt-none">
+      Are you sure you want to close?
+    </q-card-section>
+
+    <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-btn
+        unelevated
+        icon="close"
+        label="NO"
+        class="dialog-goback-btn"
+        v-close-popup
+      />
+      <q-btn
+        unelevated
+        icon="check"
+        label="YES"
+        class="dialog-confirm-btn"
+        @click="confirmClose"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
+
+<q-dialog v-model="showPrintConfirmDialog">
+  <q-card style="min-width: 350px">
+    <q-card-section>
+      <div class="text-h6">Print PDF?</div>
+    </q-card-section>
+
+    <q-card-section class="q-pt-none">
+      Do you want to generate and print this PDF?
+    </q-card-section>
+
+    <q-card-actions align="right">
+      <q-btn
+        unelevated
+        icon="close"
+        label="NO"
+        class="dialog-goback-btn"
+        v-close-popup
+      />
+      <q-btn
+        unelevated
+        icon="print"
+        label="YES"
+        class="dialog-confirm-btn"
+        @click="confirmPrint"
+        :loading="pdfLoading"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
+    <!-- SAVE CONFIRMATION DIALOG -->
+    <q-dialog v-model="showSaveConfirmDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Save Changes?</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          Are you sure you want to save these changes to GL Number {{ editData.glNum }}?
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmSave" :loading="saveLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- CANCEL EDIT CONFIRMATION DIALOG -->
+    <q-dialog v-model="showCancelConfirmDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Cancel Editing?</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          Are you sure you want to cancel? All unsaved changes will be lost.
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmCancel" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -129,6 +333,33 @@ const rows = ref([])
 const showDetailsDialog = ref(false)
 const selectedRecord = ref(null)
 const pdfLoading = ref(false)
+const editMode = ref(false)
+const saveLoading = ref(false)
+const showSaveConfirmDialog = ref(false)
+const showCancelConfirmDialog = ref(false)
+const showCloseConfirmDialog = ref(false)
+const showPrintConfirmDialog = ref(false)
+
+const editData = ref({
+  glNum: null,
+  category: null,
+  partner: null,
+  issuedBy: null,
+  issuedAmount: null,
+  hospitalBill: null,
+  clientName: null,
+  relationship: null,
+  isChecked: false
+})
+
+const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
+
+const partnerOptions = computed(() => {
+  if (editData.value.category === 'MEDICINE') return ['PHARMACITI', 'QURESS']
+  if (editData.value.category === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
+  if (editData.value.category === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
+  return []
+})
 
 const columns = [
   { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'right' },
@@ -173,6 +404,9 @@ const viewDetails = async (glNumber) => {
       rawData: data
     }
 
+    // Reset edit mode
+    editMode.value = false
+
     showDetailsDialog.value = true
   } catch (err) {
     console.error('Error fetching details:', err)
@@ -181,6 +415,132 @@ const viewDetails = async (glNumber) => {
       message: 'Failed to load record details',
       position: 'top'
     })
+  }
+}
+
+const enterEditMode = () => {
+  // Copy current data to edit data
+  editData.value = {
+    glNum: selectedRecord.value.glNum,
+    category: selectedRecord.value.category,
+    partner: selectedRecord.value.partner,
+    issuedBy: selectedRecord.value.issuedBy,
+    issuedAmount: selectedRecord.value.issuedAmount,
+    hospitalBill: selectedRecord.value.hospitalBill,
+    clientName: selectedRecord.value.clientName,
+    relationship: selectedRecord.value.relationship,
+    // If clientName is null/empty, patient is same as client
+    isChecked: !selectedRecord.value.clientName
+  }
+  editMode.value = true
+}
+
+const confirmPrint = async () => {
+  showPrintConfirmDialog.value = false
+  await generatePDF()
+}
+
+const cancelEdit = () => {
+  showCancelConfirmDialog.value = true
+}
+
+const confirmCancel = () => {
+  showCancelConfirmDialog.value = false
+  editMode.value = false
+  editData.value = {
+    glNum: null,
+    category: null,
+    partner: null,
+    issuedBy: null,
+    issuedAmount: null,
+    hospitalBill: null,
+    clientName: null,
+    relationship: null,
+    isChecked: false
+  }
+}
+
+const closeDialog = () => {
+  showDetailsDialog.value = false
+  editMode.value = false
+  selectedRecord.value = null
+}
+
+const onCategoryChange = () => {
+  // Reset partner when category changes
+  editData.value.partner = null
+}
+
+const onCheckboxChange = () => {
+  // If checked (patient is same as client), clear client name and relationship
+  if (editData.value.isChecked) {
+    editData.value.clientName = null
+    editData.value.relationship = null
+  }
+}
+const confirmClose = () => {
+  showCloseConfirmDialog.value = false
+  showDetailsDialog.value = false
+  editMode.value = false
+  selectedRecord.value = null
+}
+const confirmSave = async () => {
+  saveLoading.value = true
+  try {
+    // Prepare form data for update
+    const formData = new FormData()
+    formData.append('glNum', editData.value.glNum)
+    formData.append('category', editData.value.category)
+    formData.append('partner', editData.value.partner)
+    formData.append('issued_amount', editData.value.issuedAmount)
+    formData.append('hospital_bill', editData.value.hospitalBill || 0)
+    formData.append('client_name', editData.value.clientName || '')
+    formData.append('relationship', editData.value.relationship || '')
+    formData.append('update_transaction_only', '1')
+
+    await axios.post('http://localhost:8000/api/patient-details/update', formData)
+
+    $q.notify({
+      type: 'positive',
+      message: 'Record updated successfully',
+      position: 'top'
+    })
+
+
+    showSaveConfirmDialog.value = false
+
+    // Refresh the data
+    await viewDetails(editData.value.glNum)
+    
+    // Refresh the table
+    const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
+    const today = dayjs().startOf('day')
+    rows.value = res.data.history.map(item => {
+      const eligibilityDate = dayjs(item.date_issued).add(3, 'month')
+      const diff = eligibilityDate.diff(today, 'day')
+      const isEligible = diff <= 0
+
+      return {
+        glNum: item.gl_no,
+        category: item.category,
+        issuedAt: item.date_issued,
+        eligibilityDate: eligibilityDate.format('YYYY-MM-DD'),
+        eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
+        daysRemaining: diff > 0 ? diff : 0,
+        issuedBy: item.issued_by
+      }
+    })
+
+    editMode.value = false
+  } catch (error) {
+    console.error('Save error:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to update record',
+      position: 'top'
+    })
+  } finally {
+    saveLoading.value = false
   }
 }
 
@@ -482,12 +842,119 @@ onMounted(() => {
   padding: 8px 20px;
   border-radius: 4px;
 }
-.budget-table :deep(.action-cell) {
-  height: 100%;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.dialog-edit-btn {
+  background: #ff9800 !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
 }
 
+.dialog-save-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-goback-btn {
+  background: #ff3b3b !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-confirm-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+/* Edit Mode Styles */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.edit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-item-full {
+  grid-column: 1 / -1;
+}
+
+.edit-label {
+  font-weight: 600;
+  color: #1f8f2e;
+  font-size: 13px;
+}
+
+.edit-input :deep(.q-field__control) {
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  box-shadow: none !important;
+}
+
+.edit-input :deep(.q-field__control:before),
+.edit-input :deep(.q-field__control:after) {
+  display: none !important;
+}
+
+.edit-input :deep(.q-field__native),
+.edit-input :deep(.q-field__input),
+.edit-input :deep(input) {
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 6px 10px;
+  font-weight: 500;
+}
+
+.edit-input :deep(.q-field--focused .q-field__control) {
+  border-color: #9e9e9e !important;
+  box-shadow: none !important;
+}
+
+.edit-input :deep(input[readonly]),
+.edit-input :deep(input:read-only) {
+  color: #757575 !important;
+}
+
+.edit-input :deep(.q-field--readonly .q-field__control) {
+  background-color: #ededed;
+  border-color: #cfcfcf;
+}
+
+.edit-input :deep(.q-field--readonly .q-field__native),
+.edit-input :deep(.q-field--readonly .q-field__input) {
+  color: #757575 !important;
+}
+
+/* Checkbox Styles */
+.form-checkbox :deep(.q-checkbox__bg) {
+  border: 2px solid #000;
+  border-radius: 2px;
+}
+
+.form-checkbox :deep(.q-checkbox__label) {
+  font-weight: 600;
+}
+
+.form-checkbox :deep(.q-checkbox--disabled .q-checkbox__label) {
+  color: #757575;
+}
+
+.form-checkbox :deep(.q-checkbox--disabled .q-checkbox__bg) {
+  border-color: #757575;
+}
 </style>
