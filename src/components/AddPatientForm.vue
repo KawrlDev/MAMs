@@ -365,199 +365,187 @@
       </div>
     </q-form>
 
-    <!-- All the dialog components remain the same... -->
-    <!-- PATIENT EDIT CONFIRMATION DIALOG (when browser patient is edited) -->
-    <q-dialog v-model="showPatientEditDialog" persistent>
-      <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-orange-6 text-white">
-          <div class="text-h6">
-            <q-icon name="edit" size="sm" class="q-mr-sm" />
-            Patient Information Changed
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <div class="text-subtitle1 q-mb-md">
-            You have modified the patient information that was loaded from the dropdown.
-          </div>
-
-          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="info" color="orange" />
-            </template>
-            Please choose whether to update the existing patient's information or create a new patient.
-          </q-banner>
-
-          <!-- Show original patient info -->
-          <div v-if="selectedBrowserPatient" class="patient-info-box q-mb-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm">Original Patient Information:</div>
-            <div class="info-grid">
-              <div class="info-item">
-                <strong>Name:</strong>
-                {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
-                <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
-                <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
-              </div>
-              <div class="info-item">
-                <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
-              </div>
-              <div class="info-item">
-                <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
-                  formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
-              </div>
-              <div class="info-item">
-                <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
-              </div>
-              <div class="info-item">
-                <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
-              </div>
-              <div class="info-item info-item-full">
-                <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
-              </div>
-              <div class="info-item info-item-full">
-                <strong>Latest GL:</strong> {{ selectedBrowserPatient.gl_no || 'N/A' }}
-                <span v-if="selectedBrowserPatient.last_issued_at">
-                  - Issued: {{ formatDate(selectedBrowserPatient.last_issued_at) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Show current form values -->
-          <div class="patient-info-box">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm">Current Form Values:</div>
-            <div class="info-grid">
-              <div class="info-item">
-                <strong>Name:</strong>
-                {{ lastNameValue }}, {{ firstNameValue }}
-                <span v-if="middleNameValue"> {{ middleNameValue }}</span>
-                <span v-if="suffixValue"> {{ suffixValue }}</span>
-              </div>
-              <div class="info-item">
-                <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
-              </div>
-              <div class="info-item">
-                <strong>Sex:</strong> {{ sexValue || 'N/A' }}
-              </div>
-              <div class="info-item">
-                <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
-              </div>
-              <div class="info-item info-item-full">
-                <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
-                  provinceValue }}
-              </div>
-            </div>
-          </div>
-
-          <div class="options-grid q-mt-md">
-            <!-- Option 1: Update Existing Patient -->
-            <div class="option-card" @click="editDialogAction = 'update'"
-              :class="{ 'option-selected': editDialogAction === 'update' }">
-              <q-icon name="update" size="md" color="blue" />
-              <div class="option-title">Update Patient Information</div>
-              <div class="option-description">
-                Update Patient ID {{ selectedBrowserPatient?.patient_id }} with the new information.
-                This will affect ALL future records for this patient.
-              </div>
-            </div>
-
-            <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="editDialogAction = 'new'"
-              :class="{ 'option-selected': editDialogAction === 'new' }">
-              <q-icon name="person_add" size="md" color="green" />
-              <div class="option-title">Create New Patient</div>
-              <div class="option-description">
-                Create a completely new patient with the modified information.
-                The original patient record will remain unchanged.
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn" :disable="!editDialogAction"
-            @click="proceedWithEdit" :loading="editActionLoading" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- PATIENT ID CONFIRMATION DIALOG (when using dropdown-selected patient without edits) -->
-    <q-dialog v-model="showPatientIdConfirmDialog" persistent>
-      <q-card style="min-width: 600px; max-width: 700px;">
+    <!-- FINAL CONFIRMATION DIALOG - Shows comparison between original and current -->
+    <q-dialog v-model="showFinalConfirmDialog" persistent>
+      <q-card style="min-width: 700px; max-width: 800px;">
         <q-card-section class="bg-blue-6 text-white">
           <div class="text-h6">
             <q-icon name="info" size="sm" class="q-mr-sm" />
-            Use Existing Patient?
+            Confirm Patient Information
           </div>
         </q-card-section>
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You selected an existing patient from the dropdown.
+            Please review the patient information before proceeding.
           </div>
 
-          <!-- Show patient info -->
-          <div v-if="selectedBrowserPatient" class="patient-info-box q-mb-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm">Patient Information:</div>
+          <!-- Show comparison between original and current if there are changes -->
+          <div v-if="selectedBrowserPatient && browserPatientEdited">
+            <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+              <template v-slot:avatar>
+                <q-icon name="warning" color="orange" />
+              </template>
+              You have modified the patient information. Please confirm the changes.
+            </q-banner>
+
+            <div class="comparison-container">
+              <!-- Original Patient Info -->
+              <div class="patient-info-box">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
+                  <q-icon name="history" size="sm" class="q-mr-xs" />
+                  Original Patient Information:
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <strong>Name:</strong>
+                    {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
+                    <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
+                    <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
+                  </div>
+                  <div class="info-item">
+                    <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
+                      formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
+                  </div>
+                  <div class="info-item info-item-full">
+                    <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="comparison-arrow">
+                <q-icon name="arrow_downward" size="lg" color="orange" />
+              </div>
+
+              <!-- Current Form Values -->
+              <div class="patient-info-box highlight-changes">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm text-orange-8">
+                  <q-icon name="edit" size="sm" class="q-mr-xs" />
+                  New Patient Information:
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <strong>Name:</strong>
+                    {{ lastNameValue }}, {{ firstNameValue }}
+                    <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                    <span v-if="suffixValue"> {{ suffixValue }}</span>
+                  </div>
+                  <div class="info-item">
+                    <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }} (unchanged)
+                  </div>
+                  <div class="info-item">
+                    <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Sex:</strong> {{ sexValue || 'N/A' }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
+                  </div>
+                  <div class="info-item info-item-full">
+                    <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                      provinceValue }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <q-banner class="bg-blue-1 text-blue-9 q-mt-md">
+              <template v-slot:avatar>
+                <q-icon name="info" color="blue" />
+              </template>
+              Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future records.
+            </q-banner>
+          </div>
+
+          <!-- Show just current info if no changes -->
+          <div v-else-if="selectedBrowserPatient && !browserPatientEdited">
+            <div class="patient-info-box">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm">Patient Information:</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Name:</strong>
+                  {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
+                  <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
+                  <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
+                </div>
+                <div class="info-item">
+                  <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
+                    formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
+                </div>
+                <div class="info-item info-item-full">
+                  <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction Details -->
+          <div class="patient-info-box q-mt-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
+              <q-icon name="receipt" size="sm" class="q-mr-xs" />
+              Transaction Details:
+            </div>
             <div class="info-grid">
               <div class="info-item">
-                <strong>Name:</strong>
-                {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
-                <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
-                <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
+                <strong>Category:</strong> {{ categoryValue }}
               </div>
               <div class="info-item">
-                <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
+                <strong>Partner:</strong> {{ partnerValue }}
+              </div>
+              <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
               </div>
               <div class="info-item">
-                <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
-                  formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
-              </div>
-              <div class="info-item">
-                <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
-              </div>
-              <div class="info-item">
-                <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
-              </div>
-              <div class="info-item info-item-full">
-                <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
-              </div>
-              <div class="info-item info-item-full">
-                <strong>Latest GL:</strong> {{ selectedBrowserPatient.gl_no || 'N/A' }}
-                <span v-if="selectedBrowserPatient.last_issued_at">
-                  - Issued: {{ formatDate(selectedBrowserPatient.last_issued_at) }}
-                </span>
+                <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
               </div>
             </div>
           </div>
 
-          <div class="text-body2 text-grey-8 q-mb-md">
-            Would you like to link this new record to the existing patient, or create a new patient entry?
-          </div>
-
-          <div class="options-grid">
-            <!-- Option 1: Use Existing Patient -->
-            <div class="option-card" @click="confirmDialogAction = 'existing'"
-              :class="{ 'option-selected': confirmDialogAction === 'existing' }">
-              <q-icon name="link" size="md" color="blue" />
-              <div class="option-title">Use Existing Patient</div>
-              <div class="option-description">
-                Link this record to Patient ID {{ selectedBrowserPatient?.patient_id }}. This will add a new GL record
-                under the same patient.
+          <!-- Client Details (if different from patient) -->
+          <div v-if="!isChecked" class="patient-info-box q-mt-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+              <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+              Client Information:
+            </div>
+            <div class="info-grid">
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong>
+                {{ clientLastNameValue }}, {{ clientFirstNameValue }}
+                <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
+                <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Relationship to Patient:</strong> {{ relationshipValue }}
               </div>
             </div>
-
-            <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="confirmDialogAction = 'new'"
-              :class="{ 'option-selected': confirmDialogAction === 'new' }">
-              <q-icon name="person_add" size="md" color="green" />
-              <div class="option-title">Create New Patient</div>
-              <div class="option-description">
-                Create a completely new patient with a new Patient ID. Use this if this is actually a different person
-                with the same name.
+          </div>
+          <div v-else class="patient-info-box q-mt-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+              <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+              Client Information:
+            </div>
+            <div class="info-grid">
+              <div class="info-item info-item-full">
+                <strong>Client:</strong> Same as patient
               </div>
             </div>
           </div>
@@ -565,10 +553,10 @@
 
         <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientIdConfirm" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn" :disable="!confirmDialogAction"
-            @click="proceedWithPatientIdConfirm" :loading="confirmActionLoading" />
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelFinalConfirm" />
+          <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated class="dialog-cancel-btn"
+            @click="proceedWithFinalConfirm" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -617,40 +605,121 @@
       </q-card>
     </q-dialog>
 
-    <!-- SAVE AND PRINT CONFIRMATION DIALOG -->
-    <q-dialog v-model="showPrintDialog">
-      <q-card style="min-width: 350px">
+    <!-- ARE YOU SURE DIALOG - Final confirmation before submit -->
+    <q-dialog v-model="showAreYouSureDialog" persistent>
+      <q-card style="min-width: 700px; max-width: 800px;">
+        <q-card-section class="bg-blue-6 text-white">
+          <div class="text-h6">
+            <q-icon name="info" size="sm" class="q-mr-sm" />
+            {{ pendingAction === 'print' ? 'Save and Print Form?' : 'Save Form?' }}
+          </div>
+        </q-card-section>
+
         <q-card-section>
-          <div class="text-h6">Save and Print Form?</div>
+          <!-- Show details if user did NOT select from dropdown (manual entry) -->
+          <div v-if="!usedBrowserPatient">
+            <div class="text-subtitle1 q-mb-md">
+              Please review the information before proceeding.
+            </div>
+
+            <!-- Patient Information -->
+            <div class="patient-info-box">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
+                <q-icon name="person" size="sm" class="q-mr-xs" />
+                Patient Information:
+              </div>
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Name:</strong>
+                  {{ lastNameValue }}, {{ firstNameValue }}
+                  <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                  <span v-if="suffixValue"> {{ suffixValue }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Age:</strong> {{ ageValue || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Sex:</strong> {{ sexValue || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
+                </div>
+                <div class="info-item info-item-full">
+                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{ provinceValue }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Transaction Details -->
+            <div class="patient-info-box q-mt-md">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
+                <q-icon name="receipt" size="sm" class="q-mr-xs" />
+                Transaction Details:
+              </div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Category:</strong> {{ categoryValue }}
+                </div>
+                <div class="info-item">
+                  <strong>Partner:</strong> {{ partnerValue }}
+                </div>
+                <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
+                  <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
+                </div>
+                <div class="info-item">
+                  <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Client Details -->
+            <div v-if="!isChecked" class="patient-info-box q-mt-md">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+                Client Information:
+              </div>
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Client Name:</strong>
+                  {{ clientLastNameValue }}, {{ clientFirstNameValue }}
+                  <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
+                  <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
+                </div>
+                <div class="info-item info-item-full">
+                  <strong>Relationship to Patient:</strong> {{ relationshipValue }}
+                </div>
+              </div>
+            </div>
+            <div v-else class="patient-info-box q-mt-md">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+                Client Information:
+              </div>
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Client:</strong> Same as patient
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simple text if user selected from dropdown -->
+          <div v-else>
+            <div class="text-body1">
+              Are you sure you want to {{ pendingAction === 'print' ? 'save and print' : 'save' }} this record?
+            </div>
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          Are you sure you want to save and print?
-        </q-card-section>
+        <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmSaveAndPrint"
-            :loading="printLoading" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- SAVE CONFIRMATION DIALOG -->
-    <q-dialog v-model="showSaveDialog">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Save Form?</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          Are you sure you want to save?
-        </q-card-section>
-
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmSave"
-            :loading="saveLoading" />
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
+          <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" @click="showAreYouSureDialog = false" />
+          <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmAreYouSure"
+            :loading="areYouSureLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -673,7 +742,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- EXISTING PATIENTS DIALOG (automatic detection) -->
+    <!-- EXISTING PATIENTS DIALOG (for new patients found during save) -->
     <q-dialog v-model="showExistingDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
         <q-card-section class="bg-blue-6 text-white">
@@ -750,7 +819,7 @@
 
         <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelExistingDialog" />
           <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
             :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
@@ -843,12 +912,7 @@ const activeSearchField = ref(null)
 
 const selectedBrowserPatient = ref(null)
 const originalBrowserPatient = ref(null)
-const showPatientIdConfirmDialog = ref(false)
-const showPatientEditDialog = ref(false)
-const confirmDialogAction = ref(null)
-const editDialogAction = ref(null)
-const confirmActionLoading = ref(false)
-const editActionLoading = ref(false)
+const showFinalConfirmDialog = ref(false)
 const usedBrowserPatient = ref(false)
 const browserPatientEdited = ref(false)
 
@@ -900,13 +964,11 @@ const filteredSearchResults = computed(() => {
 })
 
 const showCancelDialog = ref(false)
-const showSaveDialog = ref(false)
-const showPrintDialog = ref(false)
 const showExistingDialog = ref(false)
 const showEligibilityWarning = ref(false)
-const saveLoading = ref(false)
-const printLoading = ref(false)
+const showAreYouSureDialog = ref(false)
 const actionLoading = ref(false)
+const areYouSureLoading = ref(false)
 
 const pendingAction = ref(null)
 
@@ -914,8 +976,6 @@ const existingPatients = ref([])
 const selectedExistingPatient = ref(null)
 const selectedAction = ref(null)
 const eligibilityWarningData = ref(null)
-
-// AUTOMATIC AGE CALCULATION - Watch birthdate changes
 
 // Helper functions for date formatting
 const formatDate = (dateString) => {
@@ -1160,69 +1220,43 @@ const checkForPatientEdits = () => {
   browserPatientEdited.value = edited
 }
 
-const cancelPatientIdConfirm = () => {
-  showPatientIdConfirmDialog.value = false
-  confirmDialogAction.value = null
-  usedBrowserPatient.value = false
-  selectedBrowserPatient.value = null
-  originalBrowserPatient.value = null
-  browserPatientEdited.value = false
+const cancelFinalConfirm = () => {
+  showFinalConfirmDialog.value = false
+  pendingAction.value = null
 }
 
-const cancelPatientEdit = () => {
-  showPatientEditDialog.value = false
-  editDialogAction.value = null
+const proceedWithFinalConfirm = () => {
+  showFinalConfirmDialog.value = false
+  showAreYouSureDialog.value = true
 }
 
-const proceedWithEdit = async () => {
-  if (!editDialogAction.value) return
-
-  editActionLoading.value = true
+const confirmAreYouSure = async () => {
+  areYouSureLoading.value = true
 
   try {
-    if (editDialogAction.value === 'update') {
-      await submitForm(pendingAction.value === 'print', selectedBrowserPatient.value.patient_id, true)
+    const shouldPrint = pendingAction.value === 'print'
+    
+    if (selectedBrowserPatient.value) {
+      // User selected from dropdown
+      await submitForm(shouldPrint, selectedBrowserPatient.value.patient_id, browserPatientEdited.value)
+    } else if (selectedExistingPatient.value) {
+      // User selected from existing patients list
+      await submitForm(shouldPrint, selectedExistingPatient.value.patient_id)
     } else {
-      await submitForm(pendingAction.value === 'print', null)
+      // New patient
+      await submitForm(shouldPrint, null)
     }
 
-    showPatientEditDialog.value = false
-    editDialogAction.value = null
+    showAreYouSureDialog.value = false
   } catch (error) {
-    console.error('Action failed:', error)
+    console.error('Submit failed:', error)
     $q.notify({
       type: 'negative',
-      message: 'Operation failed',
+      message: 'Failed to save patient record',
       position: 'top'
     })
   } finally {
-    editActionLoading.value = false
-  }
-}
-
-const proceedWithPatientIdConfirm = async () => {
-  if (!confirmDialogAction.value) return
-
-  confirmActionLoading.value = true
-
-  try {
-    if (confirmDialogAction.value === 'existing') {
-      await submitForm(pendingAction.value === 'print', selectedBrowserPatient.value.patient_id)
-    } else {
-      await submitForm(pendingAction.value === 'print', null)
-    }
-
-    showPatientIdConfirmDialog.value = false
-    confirmDialogAction.value = null
-  } catch (error) {
-    console.error('Action failed:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Operation failed',
-      position: 'top'
-    })
-  } finally {
-    confirmActionLoading.value = false
+    areYouSureLoading.value = false
   }
 }
 
@@ -1250,53 +1284,15 @@ const checkExistingPatients = async (isPrint = false) => {
 
   pendingAction.value = isPrint ? 'print' : 'save'
 
-  // If user selected from dropdown and edited the info
-  if (usedBrowserPatient.value && selectedBrowserPatient.value && browserPatientEdited.value) {
-    editDialogAction.value = null
-    showPatientEditDialog.value = true
+  // If user selected from dropdown, show final confirmation
+  if (usedBrowserPatient.value && selectedBrowserPatient.value) {
+    showFinalConfirmDialog.value = true
     return
   }
 
-  // If user selected from dropdown without edits
-  if (usedBrowserPatient.value && selectedBrowserPatient.value && !browserPatientEdited.value) {
-    confirmDialogAction.value = null
-    showPatientIdConfirmDialog.value = true
-    return
-  }
-
-  try {
-    const res = await axios.post('http://localhost:8000/api/patients/existing', {
-      lastname: lastNameValue.value,
-      firstname: firstNameValue.value,
-      middlename: middleNameValue.value,
-      suffix: suffixValue.value
-    })
-
-    existingPatients.value = res.data;
-
-    if (existingPatients.value.length > 0) {
-      showExistingDialog.value = true;
-      selectedAction.value = null;
-      selectedExistingPatient.value = null;
-    } else {
-      const eligibilityCheck = await checkEligibility()
-
-      if (!eligibilityCheck.eligible) {
-        eligibilityWarningData.value = eligibilityCheck
-        showEligibilityWarning.value = true
-        return
-      }
-
-      await submitForm(isPrint, null)
-    }
-  } catch (err) {
-    console.error('Failed checking existing patients', err)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to check for existing patients',
-      position: 'top'
-    })
-  }
+  // If user did NOT select from dropdown, treat as new patient
+  // Show "are you sure" dialog directly
+  showAreYouSureDialog.value = true
 }
 
 const proceedWithAction = async () => {
@@ -1346,15 +1342,14 @@ const checkEligibilityAndProceed = async (patientId) => {
   }
 }
 
-const useExistingPatient = async () => {
-  const patientId = selectedExistingPatient.value.patient_id
+const useExistingPatient = () => {
   showExistingDialog.value = false
-  await submitForm(pendingAction.value === 'print', patientId)
+  showAreYouSureDialog.value = true
 }
 
-const createNewPatient = async () => {
+const createNewPatient = () => {
   showExistingDialog.value = false
-  await submitForm(pendingAction.value === 'print', null)
+  showAreYouSureDialog.value = true
 }
 
 const cancelExistingDialog = () => {
@@ -1371,7 +1366,7 @@ const handleCancel = () => {
 
 const handleSaveClick = () => {
   if (patientForm.value.validate()) {
-    showSaveDialog.value = true
+    checkExistingPatients(false)
   } else {
     $q.notify({
       type: 'negative',
@@ -1383,33 +1378,13 @@ const handleSaveClick = () => {
 
 const handleSaveAndPrintClick = () => {
   if (patientForm.value.validate()) {
-    showPrintDialog.value = true
+    checkExistingPatients(true)
   } else {
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',
       position: 'top'
     })
-  }
-}
-
-const confirmSave = async () => {
-  showSaveDialog.value = false
-  saveLoading.value = true
-  try {
-    await checkExistingPatients(false)
-  } finally {
-    saveLoading.value = false
-  }
-}
-
-const confirmSaveAndPrint = async () => {
-  showPrintDialog.value = false
-  printLoading.value = true
-  try {
-    await checkExistingPatients(true)
-  } finally {
-    printLoading.value = false
   }
 }
 
@@ -1483,6 +1458,7 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
     })
   }
 }
+
 const formatPatientName = (patient) => {
   const parts = [
     patient.lastname,
@@ -1853,6 +1829,24 @@ label span {
   padding: 16px;
 }
 
+.patient-info-box.highlight-changes {
+  background: #fff3e0;
+  border: 2px solid #ff9800;
+}
+
+.comparison-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comparison-arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+}
+
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1975,6 +1969,14 @@ label span {
 .dialog-cancel-btn .q-icon,
 .dialog-goback-btn .q-icon {
   margin-right: 6px;
+}
+
+.dialog-actions-sticky {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  z-index: 10;
 }
 
 /* =========================
