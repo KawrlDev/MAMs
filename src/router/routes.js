@@ -60,6 +60,17 @@ const routes = [
       { path: '', component: () => import('src/pages/AddSupplementaryBonusPage.vue') }
     ]
   },
+
+  // ✅ NEW ROUTE FOR TRANSFER BUDGET PAGE
+  {
+    path: '/transfer-supplemental-budget',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('src/components/TransferBudget.vue') }
+    ]
+  },
+
   {
     path: '/test',
     component: () => import('layouts/MainLayout.vue'),

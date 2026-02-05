@@ -9,8 +9,10 @@
           <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" />
         </RouterLink>
 
-        <!-- EDIT BUTTON -->
-        <q-btn icon="edit" label="TRANSFER BUDGET" class="edit-btn" @click="handleEdit" />
+        <!-- TRANSFER BUDGET BUTTON (ROUTED) -->
+        <RouterLink to="/transfer-supplemental-budget">
+          <q-btn icon="edit" label="TRANSFER BUDGET" class="edit-btn" />
+        </RouterLink>
       </div>
     </div>
 
@@ -52,12 +54,6 @@ onMounted(() => {
   }
   getSupplementaryBudget()
 })
-
-// EDIT BUTTON HANDLER
-const handleEdit = () => {
-  // This is where you can trigger a popup or navigate to an edit page
-  console.log('Edit button clicked')
-}
 </script>
 
 <style scoped>
