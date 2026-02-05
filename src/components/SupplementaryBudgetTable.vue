@@ -3,19 +3,32 @@
     <div class="section-header">
       <h4>SUPPLEMENTAL BUDGET</h4>
 
-      <RouterLink to="/add-supplementary-bonus">
-        <q-btn icon="add" label="ADD BONUS" class="add-btn" />
-      </RouterLink>
+      <div class="header-buttons">
+        <!-- ADD BUDGET BUTTON -->
+        <RouterLink to="/add-supplementary-bonus">
+          <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" />
+        </RouterLink>
+
+        <!-- EDIT BUTTON -->
+        <q-btn icon="edit" label="TRANSFER BUDGET" class="edit-btn" @click="handleEdit" />
+      </div>
     </div>
 
-    <q-table flat bordered :rows="rows" :columns="columns" row-key="id" class="budget-table"
-      :rows-per-page-options="[5, 10, 15, 20, 0]" />
+    <q-table
+      flat
+      bordered
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      class="budget-table"
+      :rows-per-page-options="[5, 10, 15, 20, 0]"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios';
+import axios from 'axios'
 
 const rows = ref([])
 
@@ -39,6 +52,12 @@ onMounted(() => {
   }
   getSupplementaryBudget()
 })
+
+// EDIT BUTTON HANDLER
+const handleEdit = () => {
+  // This is where you can trigger a popup or navigate to an edit page
+  console.log('Edit button clicked')
+}
 </script>
 
 <style scoped>
@@ -61,7 +80,18 @@ onMounted(() => {
   color: #1f8f2e;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .add-btn {
+  background: #0aa64f;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.edit-btn {
   background: #0aa64f;
   color: #ffffff;
   font-weight: 600;
