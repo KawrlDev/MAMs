@@ -67,18 +67,28 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '', component: () => import('src/components/TransferBudget.vue') }
+      { path: '', component: () => import('src/pages/TransferBudgetPage.vue') }
     ]
   },
 
   {
-    path: '/test',
+    path: '/settings',
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '', component: () => import('src/pages/TestPage.vue') }
+      { path: '', component: () => import('src/pages/SettingsPage.vue') }
     ]
   },
+
+    {
+    path: '/reports',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('src/pages/ReportsPage.vue') }
+    ]
+  },
+  
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorPage.vue')
