@@ -183,8 +183,8 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.33);
   font-family: Arial, sans-serif;
   box-sizing: border-box;
-  margin-top: 105px;
-  margin-bottom: -20px;
+  margin-top: 10px;
+  margin-bottom: -19px;
 }
 
 .amount-title {
