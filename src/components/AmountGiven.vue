@@ -278,7 +278,6 @@ canvas {
   }
 }
 
-<<<<<<< HEAD
 @media (min-width: 1601px) {
   .dashboard-card {
   flex: 0 0 800px;
@@ -297,7 +296,7 @@ canvas {
   position: relative;
   z-index: 1; 
  }
-=======
+}
 @media (min-width: 901px) and (max-width: 1200px) {
   .charts-container {
     grid-template-columns: repeat(2, 1fr);
@@ -308,6 +307,5 @@ canvas {
   canvas {
     height: 240px !important;
   }
->>>>>>> b09527d8df363a69e2523d39b47efe2050bc2c25
 }
 </style>
