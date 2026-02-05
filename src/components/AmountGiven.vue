@@ -278,6 +278,26 @@ canvas {
   }
 }
 
+<<<<<<< HEAD
+@media (min-width: 1601px) {
+  .dashboard-card {
+  flex: 0 0 800px;
+  height: auto;
+  padding: 15px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
+  font-family: Arial, sans-serif;
+  margin-right: 1%;
+  border: 2px solid grey;
+  margin-left: 10px;
+  margin-top: 86px;
+  gap: 50%;
+  position: relative;
+  z-index: 1; 
+ }
+=======
 @media (min-width: 901px) and (max-width: 1200px) {
   .charts-container {
     grid-template-columns: repeat(2, 1fr);
@@ -288,5 +308,6 @@ canvas {
   canvas {
     height: 240px !important;
   }
+>>>>>>> b09527d8df363a69e2523d39b47efe2050bc2c25
 }
 </style>
