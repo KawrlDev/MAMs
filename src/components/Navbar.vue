@@ -27,8 +27,12 @@
               <!-- User Info Section -->
               <q-item>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">{{ user?.USERNAME || 'User' }}</q-item-label>
-                  <q-item-label caption>{{ user?.ROLE || 'Role' }}</q-item-label>
+                  <q-item-label class="text-weight-bold">
+                    {{ user?.USERNAME || 'User' }}
+                  </q-item-label>
+                  <q-item-label caption>
+                    {{ user?.ROLE || 'Role' }}
+                  </q-item-label>
                 </q-item-section>
               </q-item>
 
@@ -48,9 +52,16 @@
     </q-header>
 
     <!-- OVERLAY DRAWER -->
-    <q-drawer v-model="drawer" overlay modal side="left" :width='200' class="drawer-bg">
-      <!-- IMPORTANT: inner content background -->
+    <q-drawer
+      v-model="drawer"
+      overlay
+      modal
+      side="left"
+      :width="200"
+      class="drawer-bg"
+    >
       <div class="drawer-content q-pa-sm column q-gutter-sm items-center">
+
         <!-- Dashboard -->
         <q-btn
           to="/"
@@ -79,7 +90,7 @@
           :class="{ 'active-btn': route.path === '/patient-records' }"
         />
 
-        <!-- Reports (NEW – after Patients) -->
+        <!-- Reports -->
         <q-btn
           to="/reports"
           exact
@@ -108,10 +119,9 @@
           :class="{ 'active-btn': route.path === '/budget-table' }"
         />
 
-        <!-- Spacer pushes Settings to bottom -->
         <div class="q-mt-auto" />
 
-        <!-- Settings (ADMIN only – at bottom) -->
+        <!-- Settings (ADMIN only) -->
         <q-btn
           v-if="role === 'ADMIN'"
           to="/settings"
@@ -145,26 +155,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
-const data = JSON.parse(localStorage.getItem('user'))
-const role = data.ROLE
+const data = JSON.parse(localStorage.getItem('user') || '{}')
+const role = data?.ROLE || ''
 
 const drawer = ref(false);
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
 
-// Get user from localStorage
 const user = computed(() => {
   const userData = localStorage.getItem('user');
   return userData ? JSON.parse(userData) : null;
 });
 
 const logout = () => {
-  // Clear local storage
   localStorage.removeItem('user');
 
   $q.notify({
@@ -173,13 +181,11 @@ const logout = () => {
     position: 'top'
   });
 
-  // Force reload to login (this clears all state)
   router.push('/login');
 };
 </script>
 
 <style scoped>
-/* DRAWER BACKGROUND (outer) */
 .drawer-bg {
   background-color: #19ad19;
 }
@@ -190,7 +196,6 @@ const logout = () => {
   padding: 20px;
 }
 
-/* SMALLER BUTTONS */
 .nav-btn,
 .test-btn {
   margin-top: 10px;
@@ -209,7 +214,6 @@ const logout = () => {
   color: #59b259;
 }
 
-/* ICON SIZE */
 .nav-btn .q-icon {
   font-size: 22px;
 }

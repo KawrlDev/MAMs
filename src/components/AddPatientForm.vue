@@ -1641,7 +1641,7 @@ function getDaySuffix(day) {
 ========================= */
 
 div.category {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 label {
@@ -1663,7 +1663,7 @@ label span {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 10px;
+  margin-bottom: -20px;
 }
 
 .grid-3 {

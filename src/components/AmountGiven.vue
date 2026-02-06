@@ -1,30 +1,39 @@
 <template>
   <q-card class="dashboard-card">
-    <q-card-section class="text-center">
-      <div class="amount-title">DISTRIBUTION SUMMARY</div>
-
+    <div class="amount-title">DISTRIBUTION SUMMARY</div>
+    
+    <q-card-section class="text-center card-content">
       <div class="charts-container">
-        <div class="chart-item">
+        <div class="chart-wrapper chart-medium">
           <p>PER CATEGORY</p>
           <canvas ref="perCategoryChart" />
         </div>
 
-        <div class="chart-item">
+        <div class="chart-wrapper chart-small">
           <p>PER SEX</p>
           <canvas ref="perSexChart" />
         </div>
 
-        <div class="chart-item">
+        <div class="chart-wrapper chart-large">
           <p>PER AGE BRACKET</p>
           <canvas ref="perAgeBracketChart" />
         </div>
       </div>
 
-      <div class="amount-title barangay-title">PER BARANGAY</div>
+      <div class="barangay-title">PER BARANGAY</div>
 
       <div class="table-container">
-        <q-table class="budget-table" :rows="rows" row-key="num" flat bordered dense :pagination="{ rowsPerPage: 5 }"
-          virtual-scroll :virtual-scroll-sticky-size-start="48">
+        <q-table 
+          class="budget-table" 
+          :rows="rows" 
+          row-key="num" 
+          flat 
+          bordered 
+          dense 
+          :pagination="pagination"
+          @update:pagination="updatePagination"
+          :rows-per-page-options="[5, 10, 15, 20]"
+        >
           <template v-slot:header>
             <tr class="sticky-header">
               <th rowspan="2">#</th>
@@ -66,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import axios from 'axios'
@@ -77,12 +86,17 @@ const perCategoryChart = ref(null)
 const perSexChart = ref(null)
 const perAgeBracketChart = ref(null)
 const rows = ref([])
+const pagination = ref({ rowsPerPage: 5, page: 1 })
 
 // Format PHP currency
 const formatPeso = (amount) =>
   amount == null
     ? '₱0.00'
     : new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(amount)
+
+const updatePagination = (newPagination) => {
+  pagination.value = newPagination
+}
 
 onMounted(async () => {
   try {
@@ -140,7 +154,7 @@ onMounted(async () => {
         parseFloat(chartData.laboratory) || 0,
         parseFloat(chartData.hospital) || 0
       ],
-      ['#b5d6d6', '#b5d6b5', '#d6b5b5']
+      ['#4CAF50', '#2196F3', '#FF9800']
     )
 
     createDoughnut(
@@ -150,7 +164,7 @@ onMounted(async () => {
         parseFloat(chartData.perMale) || 0,
         parseFloat(chartData.perFemale) || 0
       ],
-      ['#B5EAD7', '#FFDAC1']
+      ['#42A5F5', '#EC407A']
     )
 
     createDoughnut(
@@ -165,7 +179,7 @@ onMounted(async () => {
         parseFloat(chartData['40to64']) || 0,
         parseFloat(chartData['65AndAbove']) || 0
       ],
-      ['#A8E6CF', '#FFD3B6', '#FFAAA5', '#FFDAC1', '#E0BBE4', '#B5EAD7', '#C7CEEA']
+      ['#FF6B6B', '#FFA07A', '#FFD93D', '#6BCF7F', '#4ECDC4', '#45B7D1', '#9B59B6']
     )
   } catch (err) {
     console.error('Error loading data:', err)
@@ -176,62 +190,112 @@ onMounted(async () => {
 <style scoped>
 .dashboard-card {
   width: 100%;
-  padding: 16px;
+  padding: 0;
   background: #fff;
   border-radius: 12px;
   border: 2px solid grey;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.33);
   font-family: Arial, sans-serif;
   box-sizing: border-box;
-  margin-top: 10px;
-  margin-bottom: -19px;
+  margin: 10px 0;
+  overflow: hidden;
+  margin-bottom: -2%;
 }
 
 .amount-title {
-  font-weight: 700;
-  font-size: 20px;
-  color: #2e7d32;
-  margin-bottom: 60px;
+  font-weight: 900;
+  font-size: 22px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  padding: 12px 20px;
+  margin: 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.card-content {
+  padding: 15px;
 }
 
 .barangay-title {
-  font-weight: 700;
-  font-size: 18px;
+  font-weight: 900;
+  font-size: 22px;
   color: #2e7d32;
-  margin-top: 60px;
-  margin-bottom: 40px;
-}
-
-/* Charts */
-.charts-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.chart-item {
+  margin-top: 50px;
+  margin-bottom: 30px;
   text-align: center;
 }
 
-.chart-item p {
-  font-size: 15px;
-  font-weight: 700;
-  color: green;
-  margin-bottom: 8px;
+/* Charts Container */
+.charts-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 40px;
+  padding: 0 10px;
+  margin-top: 30px;
+  flex-wrap: wrap;
 }
 
-/* Make canvas responsive */
-canvas {
+.chart-wrapper {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.chart-wrapper p {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 15px;
+  letter-spacing: 0.3px;
+  min-height: 25px;
+}
+
+/* Chart Sizes - Consistent across all charts */
+.chart-small {
+    flex: 1 1 200px;
+    height: 190px !important;
+  max-width: 190px;
+  min-width: 200px;
+}
+.chart-medium {
+    flex: 1 1 200px;
+    height: 220px !important;
+  max-width: 310px;
+  min-width: 200px;
+}
+.chart-large {
+  flex: 1 1 200px;
+  height: 270px !important;
+  max-width: 310px;
+  min-width: 250px;
+}
+
+.chart-small canvas,
+.chart-medium canvas,
+.chart-large canvas {
   width: 100% !important;
   height: 200px !important;
+  max-width: 280px;
 }
 
 /* Table */
 .table-container {
   width: 100%;
-  max-height: 350px;
-  overflow-y: auto;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.q-table__container {
+  overflow-x: hidden !important;
 }
 
 .sticky-header {
@@ -242,7 +306,7 @@ canvas {
 }
 
 .sticky-header.second-row {
-  top: 28px;
+  top: 40px;
 }
 
 .sticky-header th {
@@ -251,53 +315,460 @@ canvas {
   font-weight: 700;
   border-bottom: 1px solid #1b5e20;
   text-align: center;
-  padding: 8px;
+  padding: 10px 8px;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .budget-table {
-  overflow-y: auto;
+  width: 100%;
+  table-layout: fixed;
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
-  .charts-container {
-    grid-template-columns: 1fr;
+.budget-table td {
+  padding: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Extra Small Mobile (320px to 480px) */
+@media (max-width: 480px) {
+  .dashboard-card {
+    margin: 5px 0;
   }
 
-  canvas {
+  .amount-title {
+    font-size: 16px;
+    padding: 8px 10px;
+  }
+
+  .card-content {
+    padding: 8px;
+  }
+
+  .charts-container {
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    padding: 0 5px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .chart-wrapper p {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 180px !important;
+    max-width: 100%;
+  }
+
+  .barangay-title {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+
+  .sticky-header th {
+    padding: 6px 3px;
+    font-size: 9px;
+  }
+
+  .sticky-header.second-row {
+    top: 35px;
+  }
+
+  .budget-table td {
+    padding: 6px 3px;
+    font-size: 9px;
+  }
+}
+
+/* Small Mobile (481px to 599px) */
+@media (min-width: 481px) and (max-width: 599px) {
+  .amount-title {
+    font-size: 17px;
+    padding: 9px 12px;
+  }
+
+  .card-content {
+    padding: 10px;
+  }
+
+  .charts-container {
+    gap: 18px;
+    margin-top: 20px;
+    margin-bottom: 25px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .chart-wrapper p {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 200px !important;
+  }
+
+  .barangay-title {
+    font-size: 17px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  .sticky-header th {
+    padding: 7px 4px;
+    font-size: 10px;
+  }
+
+  .sticky-header.second-row {
+    top: 37px;
+  }
+
+  .budget-table td {
+    padding: 7px 4px;
+    font-size: 10px;
+  }
+}
+
+/* Tablet Portrait (600px to 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
+  .amount-title {
+    font-size: 18px;
+    padding: 10px 15px;
+  }
+
+  .card-content {
+    padding: 12px;
+  }
+
+  .charts-container {
+    gap: 18px;
+    margin-top: 25px;
+    margin-bottom: 30px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 45%;
+    max-width: 280px;
+  }
+
+  .chart-wrapper p {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
     height: 220px !important;
   }
-}
 
-@media (min-width: 1601px) {
-  .dashboard-card {
-    flex: 0 0 800px;
-    height: auto;
-    padding: 15px;
-    text-align: center;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
-    font-family: Arial, sans-serif;
-    margin-right: 1%;
-    border: 2px solid grey;
-    margin-left: 10px;
-    margin-top: 86px;
-    gap: 50%;
-    position: relative;
-    z-index: 1;
+  .barangay-title {
+    font-size: 18px;
+    margin-top: 30px;
+    margin-bottom: 18px;
+  }
+
+  .sticky-header th {
+    padding: 8px 5px;
+    font-size: 11px;
+  }
+
+  .sticky-header.second-row {
+    top: 38px;
+  }
+
+  .budget-table td {
+    padding: 5px 5px;
+    font-size: 11px;
   }
 }
 
-@media (min-width: 901px) and (max-width: 1200px) {
+/* Tablet Landscape (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .amount-title {
+    font-size: 19px;
+    padding: 11px 16px;
+  }
+
+  .card-content {
+    padding: 13px;
+  }
+
   .charts-container {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 28px;
+    margin-bottom: 35px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 280px;
+  }
+
+  .chart-wrapper p {
+    font-size: 17px;
+    margin-bottom: 13px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 230px !important;
+  }
+
+  .barangay-title {
+    font-size: 19px;
+    margin-top: 35px;
+    margin-bottom: 18px;
+  }
+
+  .sticky-header th {
+    padding: 9px 6px;
+    font-size: 11px;
+  }
+
+  .sticky-header.second-row {
+    top: 39px;
+  }
+
+  .budget-table td {
+    padding: 8px 6px;
+    font-size: 11px;
   }
 }
 
-@media (min-width: 1400px) {
-  canvas {
+/* Small Desktop (1024px to 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .amount-title {
+    font-size: 20px;
+    padding: 11px 18px;
+  }
+
+  .card-content {
+    padding: 14px;
+  }
+
+  .charts-container {
+    gap: 10px;
+    margin-top: 28px;
+    margin-bottom: 38px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 280px;
+  }
+
+  .chart-wrapper p {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
     height: 240px !important;
+  }
+
+  .barangay-title {
+    font-size: 20px;
+    margin-top: 38px;
+    margin-bottom: 19px;
+  }
+
+  .sticky-header th {
+    padding: 9px 7px;
+    font-size: 12px;
+  }
+
+  .sticky-header.second-row {
+    top: 39px;
+  }
+
+  .budget-table td {
+    padding: 8px 7px;
+    font-size: 12px;
+  }
+}
+
+/* Medium Desktop (1280px to 1599px) */
+@media (min-width: 1280px) and (max-width: 1599px) {
+  .amount-title {
+    font-size: 21px;
+    padding: 12px 19px;
+  }
+
+  .card-content {
+    padding: 15px;
+  }
+
+  .charts-container {
+    gap: 20px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 290px;
+  }
+
+  .chart-wrapper p {
+    font-size: 19px;
+    margin-bottom: 14px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 250px !important;
+  }
+
+  .barangay-title {
+    font-size: 21px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  .sticky-header th {
+    padding: 10px 7px;
+    font-size: 12px;
+  }
+
+  .sticky-header.second-row {
+    top: 40px;
+  }
+
+  .budget-table td {
+    padding: 8px 7px;
+    font-size: 12px;
+  }
+}
+
+/* Large Desktop (1600px to 1919px) */
+@media (min-width: 1600px) and (max-width: 1919px) {
+  .amount-title {
+    font-size: 22px;
+    padding: 12px 20px;
+  }
+
+  .card-content {
+    padding: 15px;
+  }
+
+  .charts-container {
+    gap: 20px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 300px;
+  }
+
+  .chart-wrapper p {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 250px !important;
+  }
+
+  .barangay-title {
+    font-size: 22px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  .sticky-header th {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .sticky-header.second-row {
+    top: 40px;
+  }
+
+  .budget-table td {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+/* Extra Large Desktop (1920px and up) */
+@media (min-width: 1920px) {
+  .amount-title {
+    font-size: 24px;
+    padding: 15px 20px;
+  }
+
+  .card-content {
+    padding: 20px;
+  }
+
+  .charts-container {
+    gap: 25px;
+    margin-top: 35px;
+    margin-bottom: 45px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 320px;
+  }
+
+  .chart-wrapper p {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 280px !important;
+  }
+
+  .barangay-title {
+    font-size: 24px;
+    margin-top: 45px;
+    margin-bottom: 22px;
+  }
+
+  .sticky-header th {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .sticky-header.second-row {
+    top: 44px;
+  }
+
+  .budget-table td {
+    padding: 10px;
+    font-size: 14px;
   }
 }
 </style>

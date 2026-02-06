@@ -98,7 +98,7 @@ const routes = [
       { path: '', component: () => import('src/pages/ReportsPage.vue') }
     ]
   },
-  
+
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorPage.vue')
