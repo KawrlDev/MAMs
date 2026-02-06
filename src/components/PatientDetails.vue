@@ -595,8 +595,38 @@ const handleCancel = async () => {
   await getPatientDetails(glNum.value)
 }
 
-const handleSaveClick = () => {
-  if (!patientForm.value.validate()) {
+const validateRequiredFields = () => {
+  const errors = []
+
+  // Basic patient info
+  if (!lastNameValue.value?.trim()) errors.push('Last Name is required')
+  if (!firstNameValue.value?.trim()) errors.push('First Name is required')
+  if (!birthdateValue.value) errors.push('Birthdate is required')
+  if (!sexValue.value) errors.push('Sex is required')
+  if (!barangayValue.value) errors.push('Barangay is required')
+  if (!houseAddressValue.value?.trim()) errors.push('House Address is required')
+
+  return errors
+}
+
+const handleSaveClick = async () => {
+  const errors = validateRequiredFields()
+  
+  if (errors.length > 0) {
+    $q.notify({
+      type: 'negative',
+      message: errors.join('<br>'),
+      html: true,
+      position: 'top',
+      timeout: 4000
+    })
+    return
+  }
+
+  // Then use Quasar's form validation
+  const isValid = await patientForm.value.validate()
+  
+  if (!isValid) {
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',
@@ -611,9 +641,7 @@ const handleSaveClick = () => {
 
   if (patientChanged) {
     showPatientEditDialog.value = true
-
   } else if (transactionChanged) {
-    // Only transaction/client details changed
     showTransactionEditDialog.value = true
   } else {
     $q.notify({
@@ -627,7 +655,6 @@ const handleSaveClick = () => {
 
 const cancelPatientEdit = () => {
   showPatientEditDialog.value = false
-  editDialogAction.value = null
 }
 
 const cancelTransactionEdit = () => {
@@ -694,47 +721,6 @@ const updatePatientInfo = async () => {
   $q.notify({
     type: 'positive',
     message: 'Patient information updated successfully',
-    position: 'top'
-  })
-}
-
-const createNewPatient = async () => {
-  const formData = new FormData()
-  formData.append('glNum', glNum.value)
-  formData.append('force_new_patient', '1')
-  formData.append('category', categoryValue.value)
-  formData.append('lastname', lastNameValue.value)
-  formData.append('firstname', firstNameValue.value)
-  formData.append('middlename', middleNameValue.value || '')
-  formData.append('suffix', suffixValue.value || '')
-
-  // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
-  const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
-  formData.append('birthdate', mysqlBirthdate)
-
-  formData.append('sex', sexValue.value)
-  formData.append('preference', preferenceValue.value || '')
-  formData.append('is_checked', isChecked.value ? 1 : 0)
-  formData.append('province', provinceValue.value)
-  formData.append('city', cityValue.value)
-  formData.append('barangay', barangayValue.value)
-  formData.append('house_address', houseAddressValue.value)
-  formData.append('partner', partnerValue.value)
-  formData.append('hospital_bill', hospitalBillValue.value || 0)
-  formData.append('issued_amount', issuedAmountValue.value)
-  const user = JSON.parse(localStorage.getItem('user'))
-  formData.append('issued_by', user.USERNAME)
-  formData.append('client_lastname', clientLastNameValue.value || '')
-  formData.append('client_firstname', clientFirstNameValue.value || '')
-  formData.append('client_middlename', clientMiddleNameValue.value || '')
-  formData.append('client_suffix', clientSuffixValue.value || '')
-  formData.append('relationship', relationshipValue.value || '')
-
-  await axios.post('http://localhost:8000/api/patient-details/update', formData)
-
-  $q.notify({
-    type: 'positive',
-    message: 'New patient created successfully',
     position: 'top'
   })
 }

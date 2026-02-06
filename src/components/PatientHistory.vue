@@ -126,12 +126,28 @@
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Category: <span class="required">*</span></label>
-                  <q-select v-model="editData.category" :options="categoryOptions" dense outlined class="edit-input"
-                    @update:model-value="onCategoryChange" />
+                  <q-select 
+                    v-model="editData.category" 
+                    :options="categoryOptions" 
+                    dense 
+                    outlined 
+                    class="edit-input"
+                    :error="validationErrors.category"
+                    error-message="Category is required"
+                    @update:model-value="onCategoryChange" 
+                  />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Partner: <span class="required">*</span></label>
-                  <q-select v-model="editData.partner" :options="partnerOptions" dense outlined class="edit-input" />
+                  <q-select 
+                    v-model="editData.partner" 
+                    :options="partnerOptions" 
+                    dense 
+                    outlined 
+                    class="edit-input"
+                    :error="validationErrors.partner"
+                    error-message="Partner is required"
+                  />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Issued By:</label>
@@ -141,20 +157,45 @@
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                  <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱" />
+                  <q-input 
+                    v-model="editData.issuedAmount" 
+                    type="number" 
+                    dense 
+                    outlined 
+                    class="edit-input" 
+                    prefix="₱"
+                    :error="validationErrors.issuedAmount"
+                    error-message="Issued Amount is required and must be greater than 0"
+                  />
                 </div>
 
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
-                    <label class="edit-label">Hospital Bill:</label>
-                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input"
-                      prefix="₱" />
+                    <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
+                    <q-input 
+                      v-model="editData.hospitalBill" 
+                      type="number" 
+                      dense 
+                      outlined 
+                      class="edit-input"
+                      prefix="₱"
+                      :error="validationErrors.hospitalBill"
+                      error-message="Hospital Bill is required and must be greater than 0"
+                    />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input"
-                      prefix="₱" />
+                    <q-input 
+                      v-model="editData.issuedAmount" 
+                      type="number" 
+                      dense 
+                      outlined 
+                      class="edit-input"
+                      prefix="₱"
+                      :error="validationErrors.issuedAmount"
+                      error-message="Issued Amount is required and must be greater than 0"
+                    />
                   </div>
                 </template>
 
@@ -171,11 +212,25 @@
                 <div class="edit-grid">
                   <div class="edit-item">
                     <label class="edit-label">Last Name: <span class="required">*</span></label>
-                    <q-input v-model="editData.clientLastName" dense outlined class="edit-input" />
+                    <q-input 
+                      v-model="editData.clientLastName" 
+                      dense 
+                      outlined 
+                      class="edit-input"
+                      :error="validationErrors.clientLastName"
+                      error-message="Last Name is required"
+                    />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">First Name: <span class="required">*</span></label>
-                    <q-input v-model="editData.clientFirstName" dense outlined class="edit-input" />
+                    <q-input 
+                      v-model="editData.clientFirstName" 
+                      dense 
+                      outlined 
+                      class="edit-input"
+                      :error="validationErrors.clientFirstName"
+                      error-message="First Name is required"
+                    />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Middle Name:</label>
@@ -187,7 +242,14 @@
                   </div>
                   <div class="edit-item edit-item-full">
                     <label class="edit-label">Relationship: <span class="required">*</span></label>
-                    <q-input v-model="editData.relationship" dense outlined class="edit-input" />
+                    <q-input 
+                      v-model="editData.relationship" 
+                      dense 
+                      outlined 
+                      class="edit-input"
+                      :error="validationErrors.relationship"
+                      error-message="Relationship is required"
+                    />
                   </div>
                 </div>
               </template>
@@ -211,7 +273,7 @@
           <!-- EDIT MODE BUTTONS -->
           <template v-else>
             <q-btn label="CANCEL" icon="close" unelevated class="dialog-close-btn" @click="cancelEdit" />
-            <q-btn label="SAVE" icon="save" unelevated class="dialog-save-btn" @click="showSaveConfirmDialog = true" />
+            <q-btn label="SAVE" icon="save" unelevated class="dialog-save-btn" @click="handleSaveClick" />
           </template>
         </q-card-actions>
       </q-card>
@@ -333,6 +395,16 @@ const editData = ref({
   isChecked: false
 })
 
+const validationErrors = ref({
+  category: false,
+  partner: false,
+  issuedAmount: false,
+  hospitalBill: false,
+  clientLastName: false,
+  clientFirstName: false,
+  relationship: false
+})
+
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
 
 const partnerOptions = computed(() => {
@@ -357,6 +429,67 @@ const calculateAge = (birthdate) => {
   if (!birth.isValid()) return null
   if (birth.isAfter(dayjs())) return null
   return dayjs().diff(birth, 'year')
+}
+
+const resetValidationErrors = () => {
+  validationErrors.value = {
+    category: false,
+    partner: false,
+    issuedAmount: false,
+    hospitalBill: false,
+    clientLastName: false,
+    clientFirstName: false,
+    relationship: false
+  }
+}
+
+const validateForm = () => {
+  resetValidationErrors()
+  let isValid = true
+
+  // Validate Category
+  if (!editData.value.category) {
+    validationErrors.value.category = true
+    isValid = false
+  }
+
+  // Validate Partner
+  if (!editData.value.partner) {
+    validationErrors.value.partner = true
+    isValid = false
+  }
+
+  // Validate Issued Amount
+  if (!editData.value.issuedAmount || editData.value.issuedAmount <= 0) {
+    validationErrors.value.issuedAmount = true
+    isValid = false
+  }
+
+  // Validate Hospital Bill for HOSPITAL category
+  if (editData.value.category === 'HOSPITAL') {
+    if (!editData.value.hospitalBill || editData.value.hospitalBill <= 0) {
+      validationErrors.value.hospitalBill = true
+      isValid = false
+    }
+  }
+
+  // Validate Client Information if patient is NOT same as client
+  if (!editData.value.isChecked) {
+    if (!editData.value.clientLastName || editData.value.clientLastName.trim() === '') {
+      validationErrors.value.clientLastName = true
+      isValid = false
+    }
+    if (!editData.value.clientFirstName || editData.value.clientFirstName.trim() === '') {
+      validationErrors.value.clientFirstName = true
+      isValid = false
+    }
+    if (!editData.value.relationship || editData.value.relationship.trim() === '') {
+      validationErrors.value.relationship = true
+      isValid = false
+    }
+  }
+
+  return isValid
 }
 
 const viewDetails = async (glNumber) => {
@@ -418,6 +551,8 @@ const enterEditMode = () => {
     // If client data doesn't exist, patient is same as client
     isChecked: !data.client_lastname
   }
+  
+  resetValidationErrors()
   editMode.value = true
 }
 
@@ -433,6 +568,7 @@ const cancelEdit = () => {
 const confirmCancel = () => {
   showCancelConfirmDialog.value = false
   editMode.value = false
+  resetValidationErrors()
   editData.value = {
     glNum: null,
     category: null,
@@ -458,6 +594,12 @@ const closeDialog = () => {
 const onCategoryChange = () => {
   // Reset partner when category changes
   editData.value.partner = null
+  // Clear partner validation error
+  validationErrors.value.partner = false
+  // Clear hospital bill validation when switching away from HOSPITAL
+  if (editData.value.category !== 'HOSPITAL') {
+    validationErrors.value.hospitalBill = false
+  }
 }
 
 const onCheckboxChange = () => {
@@ -468,6 +610,11 @@ const onCheckboxChange = () => {
     editData.value.clientMiddleName = null
     editData.value.clientSuffix = null
     editData.value.relationship = null
+    
+    // Clear client validation errors
+    validationErrors.value.clientLastName = false
+    validationErrors.value.clientFirstName = false
+    validationErrors.value.relationship = false
   }
 }
 
@@ -476,6 +623,17 @@ const confirmClose = () => {
   showDetailsDialog.value = false
   editMode.value = false
   selectedRecord.value = null
+  resetValidationErrors()
+}
+
+const handleSaveClick = () => {
+  // Validate form before showing confirmation dialog
+  if (!validateForm()) {
+    return
+  }
+  
+  // If validation passes, show confirmation dialog
+  showSaveConfirmDialog.value = true
 }
 
 const confirmSave = async () => {
@@ -531,6 +689,7 @@ const confirmSave = async () => {
     })
 
     editMode.value = false
+    resetValidationErrors()
   } catch (error) {
     console.error('Save error:', error)
     $q.notify({
@@ -941,6 +1100,17 @@ onMounted(() => {
 .edit-input :deep(.q-field--readonly .q-field__native),
 .edit-input :deep(.q-field--readonly .q-field__input) {
   color: #757575 !important;
+}
+
+/* Error state styles */
+.edit-input :deep(.q-field--error .q-field__control) {
+  border-color: #c10015 !important;
+}
+
+.edit-input :deep(.q-field__messages) {
+  color: #c10015;
+  font-size: 12px;
+  padding-top: 4px;
 }
 
 /* Checkbox Styles */
