@@ -470,7 +470,17 @@
           <!-- Show just current info if no changes -->
           <div v-else-if="selectedBrowserPatient && !browserPatientEdited">
             <div class="patient-info-box">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm">Patient Information:</div>
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+  <q-icon
+    name="person"
+    size="sm"
+    color="purple-8"
+    class="q-mr-xs"
+  />
+  Patient Information:
+</div>
+
+
               <div class="info-grid">
                 <div class="info-item">
                   <strong>Name:</strong>
@@ -498,9 +508,42 @@
             </div>
           </div>
 
+          <!-- Show manual entry info (when no patient was selected from dropdown) -->
+          <div v-else>
+            <div class="patient-info-box">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                <q-icon name="person" size="sm" color="purple-8" class="q-mr-xs" />
+                Patient Information:
+              </div>
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Name:</strong>
+                  {{ lastNameValue }}, {{ firstNameValue }}
+                  <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                  <span v-if="suffixValue"> {{ suffixValue }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Age:</strong> {{ ageValue || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Sex:</strong> {{ sexValue || 'N/A' }}
+                </div>
+                <div class="info-item">
+                  <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
+                </div>
+                <div class="info-item info-item-full">
+                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{ provinceValue }}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Transaction Details -->
           <div class="patient-info-box q-mt-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
               <q-icon name="receipt" size="sm" class="q-mr-xs" />
               Transaction Details:
             </div>
@@ -553,9 +596,9 @@
 
         <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelFinalConfirm" />
-          <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated class="dialog-cancel-btn"
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn unelevated icon="close" label="CANCEL" class="dialog-goback-btn" @click="cancelFinalConfirm" />
+          <q-btn unelevated icon="check" :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" class="dialog-confirm-btn"
             @click="proceedWithFinalConfirm" />
         </q-card-actions>
       </q-card>
@@ -607,118 +650,18 @@
 
     <!-- ARE YOU SURE DIALOG - Final confirmation before submit -->
     <q-dialog v-model="showAreYouSureDialog" persistent>
-      <q-card style="min-width: 700px; max-width: 800px;">
-        <q-card-section class="bg-blue-6 text-white">
-          <div class="text-h6">
-            <q-icon name="info" size="sm" class="q-mr-sm" />
-            {{ pendingAction === 'print' ? 'Save and Print Form?' : 'Save Form?' }}
-          </div>
-        </q-card-section>
-
+      <q-card style="min-width: 350px">
         <q-card-section>
-          <!-- Show details if user did NOT select from dropdown (manual entry) -->
-          <div v-if="!usedBrowserPatient">
-            <div class="text-subtitle1 q-mb-md">
-              Please review the information before proceeding.
-            </div>
-
-            <!-- Patient Information -->
-            <div class="patient-info-box">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
-                <q-icon name="person" size="sm" class="q-mr-xs" />
-                Patient Information:
-              </div>
-              <div class="info-grid">
-                <div class="info-item info-item-full">
-                  <strong>Name:</strong>
-                  {{ lastNameValue }}, {{ firstNameValue }}
-                  <span v-if="middleNameValue"> {{ middleNameValue }}</span>
-                  <span v-if="suffixValue"> {{ suffixValue }}</span>
-                </div>
-                <div class="info-item">
-                  <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Age:</strong> {{ ageValue || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Sex:</strong> {{ sexValue || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
-                </div>
-                <div class="info-item info-item-full">
-                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{ provinceValue }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Transaction Details -->
-            <div class="patient-info-box q-mt-md">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
-                <q-icon name="receipt" size="sm" class="q-mr-xs" />
-                Transaction Details:
-              </div>
-              <div class="info-grid">
-                <div class="info-item">
-                  <strong>Category:</strong> {{ categoryValue }}
-                </div>
-                <div class="info-item">
-                  <strong>Partner:</strong> {{ partnerValue }}
-                </div>
-                <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
-                  <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
-                </div>
-                <div class="info-item">
-                  <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Client Details -->
-            <div v-if="!isChecked" class="patient-info-box q-mt-md">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-                <q-icon name="person_outline" size="sm" class="q-mr-xs" />
-                Client Information:
-              </div>
-              <div class="info-grid">
-                <div class="info-item info-item-full">
-                  <strong>Client Name:</strong>
-                  {{ clientLastNameValue }}, {{ clientFirstNameValue }}
-                  <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
-                  <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
-                </div>
-                <div class="info-item info-item-full">
-                  <strong>Relationship to Patient:</strong> {{ relationshipValue }}
-                </div>
-              </div>
-            </div>
-            <div v-else class="patient-info-box q-mt-md">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-                <q-icon name="person_outline" size="sm" class="q-mr-xs" />
-                Client Information:
-              </div>
-              <div class="info-grid">
-                <div class="info-item info-item-full">
-                  <strong>Client:</strong> Same as patient
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Simple text if user selected from dropdown -->
-          <div v-else>
-            <div class="text-body1">
-              Are you sure you want to {{ pendingAction === 'print' ? 'save and print' : 'save' }} this record?
-            </div>
-          </div>
+          <div class="text-h6">{{ pendingAction === 'print' ? 'Save and Print Form?' : 'Save Form?' }}</div>
         </q-card-section>
 
-        <q-separator />
+        <q-card-section class="q-pt-none">
+          Are you sure you want to {{ pendingAction === 'print' ? 'save and print' : 'save' }} this record?
+        </q-card-section>
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" @click="showAreYouSureDialog = false" />
-          <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmAreYouSure"
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" @click="showAreYouSureDialog = false" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmAreYouSure"
             :loading="areYouSureLoading" />
         </q-card-actions>
       </q-card>
@@ -737,7 +680,7 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="handleCancel" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -819,9 +762,9 @@
 
         <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelExistingDialog" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn unelevated icon="close" label="CANCEL" class="dialog-goback-btn" @click="cancelExistingDialog" />
+          <q-btn unelevated icon="check" label="PROCEED" class="dialog-confirm-btn"
             :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
             @click="proceedWithAction" :loading="actionLoading" />
         </q-card-actions>
@@ -1284,15 +1227,8 @@ const checkExistingPatients = async (isPrint = false) => {
 
   pendingAction.value = isPrint ? 'print' : 'save'
 
-  // If user selected from dropdown, show final confirmation
-  if (usedBrowserPatient.value && selectedBrowserPatient.value) {
-    showFinalConfirmDialog.value = true
-    return
-  }
-
-  // If user did NOT select from dropdown, treat as new patient
-  // Show "are you sure" dialog directly
-  showAreYouSureDialog.value = true
+  // Always show final confirmation dialog with all details first
+  showFinalConfirmDialog.value = true
 }
 
 const proceedWithAction = async () => {
@@ -1950,7 +1886,7 @@ label span {
    DIALOG BUTTONS
 ========================= */
 
-.dialog-cancel-btn {
+.dialog-confirm-btn {
   background: #0aa64f !important;
   color: white !important;
   font-weight: 600;
@@ -1966,7 +1902,7 @@ label span {
   border-radius: 4px;
 }
 
-.dialog-cancel-btn .q-icon,
+.dialog-confirm-btn .q-icon,
 .dialog-goback-btn .q-icon {
   margin-right: 6px;
 }
