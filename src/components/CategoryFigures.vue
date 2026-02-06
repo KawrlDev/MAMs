@@ -161,11 +161,11 @@ onMounted(async () => {
 
 /* CONTAINER */
 .dashboard-container {
-  width: 1000px;
+  width: 100%;
+  max-width: 500px;
   padding: 10px;
   box-sizing: border-box;
-  margin-left: -2.5%;
-  margin-bottom: 1%;
+  margin: 0 auto 1%;
 }
 
 /* CATEGORY GRID */
@@ -185,6 +185,7 @@ onMounted(async () => {
   text-align: center;
   overflow: hidden;
   padding: 0;
+  transition: transform 0.2s ease;
 }
 
 /* HEADER */
@@ -227,7 +228,7 @@ onMounted(async () => {
   font-size: 13px;
   font-weight: 700;
   background-color: green;
-  padding: 4px 4px;
+  padding: 4px;
   border-radius: 4px;
   color: white;
   width: 100%;
@@ -297,13 +298,11 @@ onMounted(async () => {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  flex-wrap: wrap;
 }
 
 .total-left,
 .total-right {
   flex: 1;
-  min-width: 200px;
   display: flex;
   flex-direction: column;
 }
@@ -353,8 +352,8 @@ onMounted(async () => {
   box-sizing: border-box;
   overflow: hidden;
   padding: 0;
-  margin-bottom: -10%;
-  margin-top: -2%;
+  margin-bottom: -8.5%;
+  margin-top: 2%;
 }
 
 .chart-header {
@@ -378,51 +377,61 @@ onMounted(async () => {
   padding: 16px;
 }
 
-/* TABLET */
-@media (max-width: 1024px) {
-  .dashboard-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  .totals-container {
-    gap: 12px;
-  }
-
-  .amount-titles,
-  .amount-titles2 {
-    font-size: 24px;
-  }
-
-  .chart-container {
-    height: 250px;
-  }
-}
-
-/* MOBILE */
-@media (max-width: 600px) {
+/* SMALL MOBILE (up to 480px) */
+@media (max-width: 480px) {
   .dashboard-container {
+    width: 100%;
+    max-width: 100%;
     padding: 8px;
+    margin: 0 auto 1%;
   }
 
   .dashboard-row {
     grid-template-columns: 1fr;
     gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .enhanced-card {
+    border-radius: 10px;
   }
 
   .enhanced-header {
     font-size: 14px;
-    padding: 12px;
+    padding: 10px;
+    gap: 8px;
   }
 
-  .totals-header,
-  .chart-header {
-    font-size: 14px;
-    padding: 12px;
+  .enhanced-header .q-icon {
+    font-size: 18px;
   }
 
   .card-body {
     padding: 12px;
+    gap: 10px;
+  }
+
+  .label {
+    font-size: 11px;
+    max-width: 180px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 16px;
+  }
+
+  .remaining-value {
+    font-size: 15px;
+  }
+
+  .divider {
+    margin: 2px 0;
+  }
+
+  .totals-card {
+    border-radius: 10px;
+    margin-bottom: 16px;
   }
 
   .totals-container {
@@ -433,9 +442,101 @@ onMounted(async () => {
     display: none;
   }
 
-  .total-left,
-  .total-right {
+  .totals-header {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .total-item {
+    padding: 16px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 22px;
+  }
+
+  .chart-card {
+    border-radius: 10px;
+    margin-bottom: 0;
+  }
+
+  .chart-header {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .chart-container {
+    height: 200px;
+    padding: 12px;
+  }
+}
+
+/* MOBILE (481px to 600px) */
+@media (min-width: 481px) and (max-width: 600px) {
+  .dashboard-container {
     width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin: 0 auto 1%;
+  }
+
+  .dashboard-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .enhanced-card {
+    border-radius: 12px;
+  }
+
+  .enhanced-header {
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .enhanced-header .q-icon {
+    font-size: 20px;
+  }
+
+  .card-body {
+    padding: 14px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 18px;
+  }
+
+  .remaining-value {
+    font-size: 16px;
+  }
+
+  .totals-card {
+    border-radius: 12px;
+    margin-bottom: 18px;
+  }
+
+  .totals-container {
+    flex-direction: column;
+  }
+
+  .vertical-divider {
+    display: none;
+  }
+
+  .totals-header {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .total-item {
+    padding: 18px;
   }
 
   .amount-titles,
@@ -443,9 +544,462 @@ onMounted(async () => {
     font-size: 24px;
   }
 
-  .chart-container {
-    height: 200px;
+  .chart-card {
+    border-radius: 12px;
+  }
+
+  .chart-header {
+    font-size: 14px;
     padding: 12px;
+  }
+
+  .chart-container {
+    height: 220px;
+    padding: 14px;
+  }
+}
+
+/* TABLET PORTRAIT (601px to 768px) */
+@media (min-width: 601px) and (max-width: 768px) {
+  .dashboard-container {
+    width: 95%;
+    max-width: 720px;
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .enhanced-card {
+    border-radius: 12px;
+  }
+
+  .enhanced-header {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 14px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 18px;
+  }
+
+  .remaining-value {
+    font-size: 17px;
+  }
+
+  .totals-card {
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  .totals-header {
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  .total-item {
+    padding: 18px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 26px;
+  }
+
+  .chart-card {
+    border-radius: 12px;
+  }
+
+  .chart-header {
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  .chart-container {
+    height: 240px;
+    padding: 14px;
+  }
+}
+
+/* TABLET LANDSCAPE (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-container {
+    width: 90%;
+    max-width: 900px;
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  .enhanced-card {
+    border-radius: 13px;
+  }
+
+  .enhanced-header {
+    font-size: 17px;
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 19px;
+  }
+
+  .remaining-value {
+    font-size: 17px;
+  }
+
+  .totals-card {
+    border-radius: 13px;
+    margin-bottom: 22px;
+  }
+
+  .totals-header {
+    font-size: 15px;
+    padding: 15px;
+  }
+
+  .total-item {
+    padding: 19px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 28px;
+  }
+
+  .chart-card {
+    border-radius: 13px;
+  }
+
+  .chart-header {
+    font-size: 15px;
+    padding: 15px;
+  }
+
+  .chart-container {
+    height: 260px;
+    padding: 15px;
+  }
+}
+
+/* DESKTOP SMALL (1025px to 1280px) */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .dashboard-container {
+    width: 80%;
+    max-width: 1000px;
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 23px;
+  }
+
+  .enhanced-card {
+    border-radius: 14px;
+  }
+
+  .enhanced-header {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 20px;
+  }
+
+  .remaining-value {
+    font-size: 18px;
+  }
+
+  .totals-card {
+    border-radius: 14px;
+    margin-bottom: 23px;
+  }
+
+  .totals-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .total-item {
+    padding: 20px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 30px;
+  }
+
+  .chart-card {
+    border-radius: 14px;
+  }
+
+  .chart-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .chart-container {
+    height: 270px;
+    padding: 16px;
+  }
+}
+
+/* DESKTOP MEDIUM (1281px to 1440px) */
+@media (min-width: 1281px) and (max-width: 1440px) {
+  .dashboard-container {
+    width: 75%;
+    max-width: 1100px;
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-bottom: 24px;
+  }
+
+  .enhanced-card {
+    border-radius: 14px;
+  }
+
+  .enhanced-header {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 20px;
+  }
+
+  .remaining-value {
+    font-size: 18px;
+  }
+
+  .totals-card {
+    border-radius: 14px;
+    margin-bottom: 24px;
+  }
+
+  .totals-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .total-item {
+    padding: 20px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 30px;
+  }
+
+  .chart-card {
+    border-radius: 14px;
+  }
+
+  .chart-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .chart-container {
+    height: 280px;
+    padding: 16px;
+  }
+}
+
+/* DESKTOP LARGE (1441px to 1920px) */
+@media (min-width: 1441px) and (max-width: 1920px) {
+  .dashboard-container {
+    width: 70%;
+    max-width: 1200px;
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .enhanced-card {
+    border-radius: 14px;
+  }
+
+  .enhanced-header {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 20px;
+  }
+
+  .remaining-value {
+    font-size: 18px;
+  }
+
+  .totals-card {
+    border-radius: 14px;
+    margin-bottom: 24px;
+  }
+
+  .totals-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .total-item {
+    padding: 20px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 32px;
+  }
+
+  .chart-card {
+    border-radius: 14px;
+  }
+
+  .chart-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .chart-container {
+    height: 300px;
+    padding: 16px;
+  }
+}
+
+/* ULTRA WIDE (1921px and above) */
+@media (min-width: 1921px) {
+  .dashboard-container {
+    width: 65%;
+    max-width: 1400px;
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+    margin-bottom: 26px;
+  }
+
+  .enhanced-card {
+    border-radius: 14px;
+  }
+
+  .enhanced-header {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 20px;
+  }
+
+  .remaining-value {
+    font-size: 18px;
+  }
+
+  .totals-card {
+    border-radius: 14px;
+    margin-bottom: 26px;
+  }
+
+  .totals-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .total-item {
+    padding: 20px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 34px;
+  }
+
+  .chart-card {
+    border-radius: 14px;
+  }
+
+  .chart-header {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .chart-container {
+    height: 320px;
+    padding: 16px;
   }
 }
 

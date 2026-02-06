@@ -4,12 +4,12 @@
     
     <q-card-section class="text-center card-content">
       <div class="charts-container">
-        <div class="chart-item chart-medium">
+        <div class="chart-items chart-medium">
           <p>PER CATEGORY</p>
           <canvas ref="perCategoryChart" />
         </div>
 
-        <div class="chart-item chart-small">
+        <div class="chart-itemss chart-small">
           <p>PER SEX</p>
           <canvas ref="perSexChart" />
         </div>
@@ -197,11 +197,9 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.33);
   font-family: Arial, sans-serif;
   box-sizing: border-box;
-  margin-top: 10px;
-  margin-bottom: -2.5%;
-  margin-right: -2%;
+  margin: 10px 0;
   overflow: hidden;
-  
+  margin-bottom: -2%;
 }
 
 .amount-title {
@@ -209,7 +207,7 @@ onMounted(async () => {
   font-size: 22px;
   color: #ffffff;
   background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
-  padding: 8px 20px;
+  padding: 12px 20px;
   margin: 0;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -220,15 +218,16 @@ onMounted(async () => {
 }
 
 .card-content {
-  padding: 20px;
+  padding: 15px;
 }
 
 .barangay-title {
   font-weight: 900;
   font-size: 22px;
   color: #2e7d32;
-  margin-top: 50px;
-  margin-bottom: 30px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 /* Charts Container */
@@ -238,9 +237,9 @@ onMounted(async () => {
   align-items: center;
   gap: 3px;
   margin-bottom: 40px;
-  padding: 0 10px;
+  padding: 0 5px;
   margin-top: 30px;
-  margin-left: -4%;
+  flex-wrap: wrap;
 }
 
 .chart-item {
@@ -257,15 +256,30 @@ onMounted(async () => {
   margin-bottom: 15px;
   letter-spacing: 0.3px;
 }
-
-/* Chart Sizes */
+.chart-items p {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 60px;
+  letter-spacing: 0.3px;
+  margin-top: -10%;
+}
+.chart-itemss p {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 100px;
+  letter-spacing: 0.3px;
+   margin-top: -15%;
+}
+/* Chart Sizes - Original Dimensions */
 .chart-small {
   flex: 0 0 180px;
 }
 
 .chart-small canvas {
-  width: 180px !important;
-  height: 180px !important;
+  width: 160px !important;
+  height: 190px !important;
 }
 
 .chart-medium {
@@ -273,7 +287,7 @@ onMounted(async () => {
 }
 
 .chart-medium canvas {
-  width: 190px !important;
+  width: 220px !important;
   height: 220px !important;
 }
 
@@ -290,12 +304,12 @@ onMounted(async () => {
 .table-container {
   width: 100%;
   border-radius: 8px;
-  overflow-x: hidden;
-}
-.q-table__container {
-  overflow-x: hidden !important;
+  overflow-x: auto;
 }
 
+.q-table__container {
+  overflow-x: auto !important;
+}
 
 .sticky-header {
   position: sticky;
@@ -305,7 +319,7 @@ onMounted(async () => {
 }
 
 .sticky-header.second-row {
-  top: 28px;
+  top: 40px;
 }
 
 .sticky-header th {
@@ -316,38 +330,238 @@ onMounted(async () => {
   text-align: center;
   padding: 10px 8px;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .budget-table {
   width: 100%;
+  min-width: 800px;
 }
 
 .budget-table td {
   padding: 8px;
   font-size: 13px;
+  white-space: nowrap;
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
+/* Mobile - Extra Small screens (below 600px) */
+@media (max-width: 599px) {
+  .charts-container {
+    flex-direction: column;
+    gap: 25px;
+    justify-content: center;
+  }
+  
+  .card-content {
+    padding: 10px;
+  }
+
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    font-size: 16px;
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    width: 200px !important;
+    height: 200px !important;
+  }
+
+  .amount-title {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .barangay-title {
+    font-size: 18px;
+  }
+
+  .budget-table {
+    min-width: 700px;
+  }
+}
+
+/* Mobile - Small screens (600px to 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
   .charts-container {
     flex-direction: column;
     gap: 30px;
+    justify-content: center;
   }
 
-  .chart-small,
-  .chart-medium,
-  .chart-large {
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
     flex: 0 0 auto;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas {
+    width: 220px !important;
+    height: 220px !important;
+  }
+
+  .chart-large canvas {
+    width: 250px !important;
+    height: 250px !important;
+  }
+}
+
+/* Tablet - Small (768px to 900px) */
+@media (min-width: 768px) and (max-width: 900px) {
+  .charts-container {
+    flex-direction: column;
+    gap: 30px;
+    justify-content: center;
+  }
+
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
   }
 
   .chart-small canvas {
-    width: 200px !important;
-    height: 200px !important;
+    width: 220px !important;
+    height: 220px !important;
   }
 
   .chart-medium canvas {
     width: 240px !important;
     height: 240px !important;
+  }
+
+  .chart-large canvas {
+    width: 270px !important;
+    height: 270px !important;
+  }
+}
+
+/* Tablet - Medium (901px to 1200px) */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .charts-container {
+    gap: 15px;
+    padding: 0 10px;
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-small {
+    flex: 0 0 160px;
+  }
+
+  .chart-small canvas {
+    width: 150px !important;
+    height: 150px !important;
+  }
+
+  .chart-medium {
+    flex: 0 0 200px;
+  }
+
+  .chart-medium canvas {
+    width: 190px !important;
+    height: 190px !important;
+  }
+
+  .chart-large {
+    flex: 0 0 240px;
+  }
+
+  .chart-large canvas {
+    width: 230px !important;
+    height: 230px !important;
+  }
+}
+
+/* Desktop - Standard (1201px to 1399px) */
+@media (min-width: 1201px) and (max-width: 1399px) {
+  .charts-container {
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-items p {
+    margin-bottom: 60px;
+    margin-top: -10%;
+  }
+
+  .chart-itemss p {
+    margin-bottom: 100px;
+    margin-top: -15%;
+  }
+
+  .chart-small {
+    flex: 0 0 180px;
+  }
+
+  .chart-small canvas {
+    width: 160px !important;
+    height: 190px !important;
+  }
+
+  .chart-medium {
+    flex: 0 0 220px;
+  }
+
+  .chart-medium canvas {
+    width: 220px !important;
+    height: 220px !important;
+  }
+
+  .chart-large {
+    flex: 0 0 280px;
   }
 
   .chart-large canvas {
@@ -356,48 +570,36 @@ onMounted(async () => {
   }
 }
 
-@media (min-width: 901px) and (max-width: 1200px) {
-  .charts-container {
-    gap: 20px;
-    padding: 0 10px;
+/* Desktop - Large (1400px to 1599px) */
+@media (min-width: 1400px) and (max-width: 1599px) {
+  .card-content {
+    padding: 25px;
   }
 
-  .chart-small {
-    flex: 0 0 160px;
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
   }
 
-  .chart-small canvas {
-    width: 160px !important;
-    height: 160px !important;
+  .chart-items p {
+    margin-bottom: 60px;
+    margin-top: -10%;
   }
 
-  .chart-medium {
-    flex: 0 0 200px;
+  .chart-itemss p {
+    margin-bottom: 100px;
+    margin-top: -15%;
   }
 
-  .chart-medium canvas {
-    width: 200px !important;
-    height: 200px !important;
-  }
-
-  .chart-large {
-    flex: 0 0 240px;
-  }
-
-  .chart-large canvas {
-    width: 240px !important;
-    height: 240px !important;
-  }
-}
-
-@media (min-width: 1400px) {
   .chart-small {
     flex: 0 0 200px;
   }
 
   .chart-small canvas {
-    width: 200px !important;
-    height: 200px !important;
+    width: 180px !important;
+    height: 210px !important;
   }
 
   .chart-medium {
@@ -419,14 +621,27 @@ onMounted(async () => {
   }
 }
 
-@media (min-width: 1601px) {
-  .dashboard-card {
-    max-width: 1400px;
-    margin: 86px auto 0;
-  }
-
+/* Desktop - Extra Large (1600px and up) */
+@media (min-width: 1600px) {
   .card-content {
     padding: 30px;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-items p {
+    margin-bottom: 60px;
+    margin-top: -10%;
+  }
+
+  .chart-itemss p {
+    margin-bottom: 100px;
+    margin-top: -15%;
   }
 
   .chart-small {
@@ -434,8 +649,8 @@ onMounted(async () => {
   }
 
   .chart-small canvas {
-    width: 220px !important;
-    height: 220px !important;
+    width: 200px !important;
+    height: 230px !important;
   }
 
   .chart-medium {
@@ -454,6 +669,19 @@ onMounted(async () => {
   .chart-large canvas {
     width: 360px !important;
     height: 360px !important;
+  }
+
+  .sticky-header.second-row {
+    top: 42px;
+  }
+
+  .amount-title {
+    font-size: 24px;
+    padding: 15px 20px;
+  }
+
+  .barangay-title {
+    font-size: 24px;
   }
 }
 </style>
