@@ -50,14 +50,14 @@
       <q-card style="min-width: 650px; max-width: 750px;">
         <q-card-section class="bg-orange-6 text-white q-pa-md">
           <div class="text-h6">
-            <q-icon name="info" size="sm" class="q-mr-sm" />
-            Confirm Patient Information
+            <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
+            Record Details - GL No: {{ selectedRecord?.glNum }}
           </div>
         </q-card-section>
 
         <q-card-section>
           <div class="info-section q-mb-md">
-            <div class="section-title">Transcation Details</div>
+            <div class="section-title">Record Information</div>
             
             <!-- VIEW MODE -->
             <div v-if="!editMode">
@@ -92,7 +92,8 @@
                     <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + selectedRecord.hospitalBill : 'N/A' }}</span>
                   </div>
                   <div class="info-item">
-                    <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }} (unchanged)
+                    <span class="info-label">Issued Amount:</span>
+                    <span class="info-value">₱{{ selectedRecord?.issuedAmount }}</span>
                   </div>
                 </template>
 
@@ -102,48 +103,28 @@
                 </div>
               </div>
 
-            <q-banner class="bg-blue-1 text-blue-9 q-mt-md">
-              <template v-slot:avatar>
-                <q-icon name="info" color="blue" />
+              <!-- Client Information Section - Only show if client exists -->
+              <template v-if="selectedRecord?.clientName">
+                <div class="section-title q-mt-md q-mb-sm">Client Information</div>
+                <div class="info-grid">
+                  <div class="info-item info-item-full">
+                    <span class="info-label">Client Name:</span>
+                    <span class="info-value">{{ selectedRecord?.clientName }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Relationship:</span>
+                    <span class="info-value">{{ selectedRecord?.relationship }}</span>
+                  </div>
+                </div>
               </template>
-              Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future records.
-            </q-banner>
             </div>
-          </div>
 
-          <!-- Show just current info if no changes -->
-          <div v-else-if="selectedBrowserPatient && !browserPatientEdited">
-            <div class="patient-info-box">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-  <q-icon
-    name="person"
-    size="sm"
-    color="purple-8"
-    class="q-mr-xs"
-  />
-  Patient Information:
-</div>
-
-
-              <div class="info-grid">
-                <div class="info-item">
-                  <strong>Name:</strong>
-                  {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
-                  <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
-                  <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
-                </div>
-                <div class="info-item">
-                  <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
-                </div>
-                <div class="info-item">
-                  <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
-                    formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
+            <!-- EDIT MODE -->
+            <div v-else>
+              <div class="edit-grid">
+                <div class="edit-item">
+                  <label class="edit-label">GL Number:</label>
+                  <q-input v-model="editData.glNum" dense outlined readonly class="edit-input" />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Category:</label>
@@ -205,24 +186,23 @@
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <!-- VIEW MODE BUTTONS -->
           <template v-if="!editMode">
-            <q-btn
-  label="CLOSE"
-  icon="close"
-  unelevated
-  class="dialog-close-btn"
-  @click="showCloseConfirmDialog = true"
+            <q-btn 
+  label="CLOSE" 
+  icon="close" 
+  unelevated 
+  class="dialog-close-btn" 
+  @click="showCloseConfirmDialog = true" 
 />
-
-
             <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
-            <q-btn
-  label="PRINT PDF"
-  icon="print"
-  unelevated
-  class="dialog-print-btn"
-  @click="showPrintConfirmDialog = true"
-  :loading="pdfLoading"
+            <q-btn 
+  label="PRINT PDF" 
+  icon="print" 
+  unelevated 
+  class="dialog-print-btn" 
+  @click="showPrintConfirmDialog = true" 
+  :loading="pdfLoading" 
 />
+
           </template>
 
           <!-- EDIT MODE BUTTONS -->
@@ -234,75 +214,15 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="showCloseConfirmDialog">
-  <q-card style="min-width: 350px">
-    <q-card-section>
-      <div class="text-h6">Close Form?</div>
-    </q-card-section>
-
-    <q-card-section class="q-pt-none">
-      Are you sure you want to close?
-    </q-card-section>
-
-    <q-card-actions align="right" class="q-px-md q-pb-md">
-      <q-btn
-        unelevated
-        icon="close"
-        label="NO"
-        class="dialog-goback-btn"
-        v-close-popup
-      />
-      <q-btn
-        unelevated
-        icon="check"
-        label="YES"
-        class="dialog-confirm-btn"
-        @click="confirmClose"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
-
-
-<q-dialog v-model="showPrintConfirmDialog">
-  <q-card style="min-width: 350px">
-    <q-card-section>
-      <div class="text-h6">Print PDF?</div>
-    </q-card-section>
-
-    <q-card-section class="q-pt-none">
-      Do you want to generate and print this PDF?
-    </q-card-section>
-
-    <q-card-actions align="right">
-      <q-btn
-        unelevated
-        icon="close"
-        label="NO"
-        class="dialog-goback-btn"
-        v-close-popup
-      />
-      <q-btn
-        unelevated
-        icon="print"
-        label="YES"
-        class="dialog-confirm-btn"
-        @click="confirmPrint"
-        :loading="pdfLoading"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
-
-    <!-- CANCEL CONFIRMATION DIALOG -->
-    <q-dialog v-model="showCancelDialog">
+    <!-- SAVE CONFIRMATION DIALOG -->
+    <q-dialog v-model="showSaveConfirmDialog">
       <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6">Close Form?</div>
+          <div class="text-h6">Save Changes?</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          Are you sure you want to close? All unsaved changes will be lost.
+          Are you sure you want to save these changes to GL Number {{ editData.glNum }}?
         </q-card-section>
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
@@ -312,124 +232,76 @@
       </q-card>
     </q-dialog>
 
-    <!-- EXISTING PATIENTS DIALOG (for new patients found during save) -->
-    <q-dialog v-model="showExistingDialog" persistent>
-      <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-blue-6 text-white">
-          <div class="text-h6">
-            <q-icon name="info" size="sm" class="q-mr-sm" />
-            Existing Patients Found
-          </div>
-        </q-card-section>
+     <q-dialog v-model="showCloseConfirmDialog">
+  <q-card style="min-width: 350px">
+    <q-card-section>
+      <div class="text-h6">Close Dialog?</div>
+    </q-card-section>
 
+    <q-card-section class="q-pt-none">
+      Are you sure you want to close? Any unsaved changes will be lost.
+    </q-card-section>
+
+    <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+      <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmCloseDialog" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
+
+    <!-- CANCEL EDIT CONFIRMATION DIALOG -->
+    <q-dialog v-model="showCancelConfirmDialog">
+      <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-subtitle1 q-mb-md">
-            One or more patients with the same name already exist in the system.
-          </div>
-
-          <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="help_outline" color="blue" />
-            </template>
-            Please choose whether to link this record to an existing patient or create a new patient entry.
-          </q-banner>
-
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Existing Patient(s):</div>
-          <q-list bordered separator class="q-mb-md">
-            <q-item v-for="patient in existingPatients" :key="patient.patient_id" clickable
-              @click="selectedExistingPatient = patient"
-              :active="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
-              active-class="bg-blue-1">
-              <q-item-section>
-                <q-item-label class="text-weight-bold">
-                  {{ patient.lastname }}, {{ patient.firstname }}
-                  <span v-if="patient.middlename"> {{ patient.middlename }}</span>
-                  <span v-if="patient.suffix"> {{ patient.suffix }}</span>
-                </q-item-label>
-                <q-item-label caption>Patient ID: {{ patient.patient_id }}</q-item-label>
-                <q-item-label caption v-if="patient.gl_numbers">
-                  GL Numbers: {{ patient.gl_numbers }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon v-if="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
-                  name="check_circle" color="blue" size="sm" />
-              </q-item-section>
-            </q-item>
-          </q-list>
+          <div class="text-h6">Cancel Editing?</div>
         </q-card-section>
 
-        <q-separator />
-
-        <q-card-section class="q-pt-md">
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Choose an Action:</div>
-          <div class="options-grid">
-            <!-- Option 1: Use Existing Patient -->
-            <div class="option-card" @click="selectedAction = 'existing'"
-              :class="{ 'option-selected': selectedAction === 'existing', 'option-disabled': !selectedExistingPatient }">
-              <q-icon name="link" size="md" color="blue" />
-              <div class="option-title">Use Existing Patient</div>
-              <div class="option-description">
-                Link this record to the selected patient above. This will add a new GL record under the same Patient ID.
-                <span v-if="!selectedExistingPatient" class="text-red"> (Please select a patient first)</span>
-              </div>
-            </div>
-
-            <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="selectedAction = 'new'"
-              :class="{ 'option-selected': selectedAction === 'new' }">
-              <q-icon name="person_add" size="md" color="green" />
-              <div class="option-title">Create New Patient</div>
-              <div class="option-description">
-                Create a completely new patient with a new Patient ID. Use this if this is actually a different person.
-              </div>
-            </div>
-          </div>
+        <q-card-section class="q-pt-none">
+          Are you sure you want to cancel? All unsaved changes will be lost.
         </q-card-section>
 
-        <q-separator />
-
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelExistingDialog" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-confirm-btn"
-            :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
-            @click="proceedWithAction" :loading="actionLoading" />
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmCancel" />
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="showPrintConfirmDialog">
+  <q-card style="min-width: 350px">
+    <q-card-section>
+      <div class="text-h6">Generate PDF?</div>
+    </q-card-section>
+
+    <q-card-section class="q-pt-none">
+      Are you sure you want to generate the PDF for GL Number {{ selectedRecord?.glNum }}?
+    </q-card-section>
+
+    <q-card-actions align="right" class="q-px-md q-pb-md">
+      <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+      <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmPrintPDF" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
   </div>
 </template>
 
 <script setup>
-import axios from 'axios'
-import { ref, computed, watch } from 'vue';
-import { date, useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { toWords } from 'number-to-words'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { useQuasar } from 'quasar'
 
-dayjs.extend(relativeTime)
-dayjs.extend(customParseFormat)
+dayjs.extend(isSameOrAfter)
 
-const router = useRouter()
+const route = useRoute()
 const $q = useQuasar()
-
-const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
-const options = [
-  ['MALE', 'FEMALE'],
-  ['N/A', 'Gay', 'Lesbian'],
-  [
-    "APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA", "LIBOGANON", "MADAUM",
-    "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH", "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST",
-    "MANKILAM", "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN", "SAN ISIDRO",
-    "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"
-  ]
-]
-
-const patientForm = ref(null);
+const glNum = computed(() => route.params.glNum)
 
 const rows = ref([])
 const showDetailsDialog = ref(false)
@@ -441,7 +313,6 @@ const showSaveConfirmDialog = ref(false)
 const showCancelConfirmDialog = ref(false)
 const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
-
 const editData = ref({
   glNum: null,
   category: null,
@@ -457,240 +328,66 @@ const editData = ref({
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
 
 const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
+  if (editData.value.category === 'MEDICINE') return ['PHARMACITI', 'QURESS']
+  if (editData.value.category === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
+  if (editData.value.category === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
   return []
 })
 
-const filteredSearchResults = computed(() => {
-  const searchField = activeSearchField.value
-  let searchValue = null
-
-  if (searchField === 'lastname') searchValue = lastNameValue.value
-  else if (searchField === 'firstname') searchValue = firstNameValue.value
-  else if (searchField === 'middlename') searchValue = middleNameValue.value
-
-  if (!searchValue || searchValue.trim().length < 2) {
-    return []
-  }
-
-  const query = searchValue.toLowerCase().trim()
-
-  return patientSearchResults.value
-    .filter(patient => {
-      const lastname = (patient.lastname || '').toLowerCase()
-      const firstname = (patient.firstname || '').toLowerCase()
-      const middlename = (patient.middlename || '').toLowerCase()
-
-      // Match based on which field is active
-      if (searchField === 'lastname') return lastname.startsWith(query)
-      if (searchField === 'firstname') return firstname.startsWith(query)
-      if (searchField === 'middlename') return middlename.startsWith(query)
-
-      return false
-    })
-    .sort((a, b) => {
-      // Sort eligible patients first
-      if (a.eligible && !b.eligible) return -1
-      if (!a.eligible && b.eligible) return 1
-      // Then by days remaining if both ineligible
-      if (!a.eligible && !b.eligible) {
-        return (a.days_remaining || 0) - (b.days_remaining || 0)
-      }
-      // Then alphabetically by last name
-      return a.lastname.localeCompare(b.lastname)
-    })
-})
-
-const showCancelDialog = ref(false)
-const showExistingDialog = ref(false)
-const showEligibilityWarning = ref(false)
-const showAreYouSureDialog = ref(false)
-const actionLoading = ref(false)
-const areYouSureLoading = ref(false)
-
-const pendingAction = ref(null)
-
-const existingPatients = ref([])
-const selectedExistingPatient = ref(null)
-const selectedAction = ref(null)
-const eligibilityWarningData = ref(null)
-
-// Helper functions for date formatting
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A'
-  return dayjs(dateString).format('MMMM DD, YYYY')
-}
-
-const calculateDaysRemaining = (eligibilityDate) => {
-  const today = dayjs()
-  const eligible = dayjs(eligibilityDate)
-  return eligible.diff(today, 'days')
-}
-
-const formatAddress = (patient) => {
-  const parts = [
-    patient.house_address,
-    patient.barangay,
-    patient.city,
-    patient.province
-  ].filter(Boolean)
-  return parts.join(', ') || 'N/A'
-}
+const columns = [
+  { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'right' },
+  { name: 'Category', label: 'Category', field: 'category' },
+  { name: 'Issued At', label: 'Date Issued', field: 'issuedAt' },
+  { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate' },
+  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
+  { name: 'action', label: 'Action', field: 'action', align: 'center' }
+]
 
 const calculateAge = (birthdate) => {
   if (!birthdate) return null
-
-  const parts = birthdate.split('/')
-  if (parts.length !== 3) return null
-
-  const birthDate = new Date(parts[2], parts[1] - 1, parts[0])
-  const today = new Date()
-  let age = today.getFullYear() - birthDate.getFullYear()
-  const monthDiff = today.getMonth() - birthDate.getMonth()
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--
-  }
-
-  return age
+  const birth = dayjs(birthdate)
+  if (!birth.isValid()) return null
+  if (birth.isAfter(dayjs())) return null
+  return dayjs().diff(birth, 'year')
 }
 
-const calculateAgeFromDate = (dateString) => {
-  if (!dateString) return null
-
-  const birthDate = new Date(dateString)
-  const today = new Date()
-  let age = today.getFullYear() - birthDate.getFullYear()
-  const monthDiff = today.getMonth() - birthDate.getMonth()
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--
-  }
-
-  return age
-}
-
-// Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
-const convertToMySQLDate = (dateString) => {
-  if (!dateString) return null
-
-  // Handle if already in YYYY-MM-DD format
-  if (dateString.includes('-') && dateString.split('-').length === 3) {
-    return dateString
-  }
-
-  const parts = dateString.split('/')
-  if (parts.length !== 3) return null
-
-  // parts[0] = day, parts[1] = month, parts[2] = year
-  const day = parts[0].padStart(2, '0')
-  const month = parts[1].padStart(2, '0')
-  const year = parts[2]
-
-  return `${year}-${month}-${day}`
-}
-
-// Convert MySQL YYYY-MM-DD to DD/MM/YYYY format
-const convertFromMySQLDate = (dateString) => {
-  if (!dateString) return null
-
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-
-  return `${day}/${month}/${year}`
-}
-
-// Unified search handler
-const handleNameSearch = (value) => {
-  // Clear previous timer
-  if (searchDebounceTimer.value) {
-    clearTimeout(searchDebounceTimer.value)
-  }
-
-  // If less than 2 characters, hide dropdown
-  if (!value || value.trim().length < 2) {
-    showPatientDropdown.value = false
-    patientSearchResults.value = []
-    return
-  }
-
-  // Debounce the search
-  searchDebounceTimer.value = setTimeout(async () => {
-    await searchPatients(value)
-  }, 300)
-}
-
-// Auto-search when last name changes
-const onLastNameChange = (value) => {
-  activeSearchField.value = 'lastname'
-  handleNameSearch(value)
-}
-
-// Auto-search when first name changes
-const onFirstNameChange = (value) => {
-  activeSearchField.value = 'firstname'
-  handleNameSearch(value)
-  checkForPatientEdits()
-}
-
-// Auto-search when middle name changes
-const onMiddleNameChange = (value) => {
-  activeSearchField.value = 'middlename'
-  handleNameSearch(value)
-  checkForPatientEdits()
-}
-
-const onLastNameBlur = () => {
-  // Delay hiding dropdown to allow click events to register
-  setTimeout(() => {
-    lastNameFocused.value = false
-    // Only hide if user didn't click on a patient
-    if (!usedBrowserPatient.value) {
-      showPatientDropdown.value = false
-    }
-  }, 200)
-}
-
-const onFirstNameBlur = () => {
-  setTimeout(() => {
-    firstNameFocused.value = false
-    if (!usedBrowserPatient.value) {
-      showPatientDropdown.value = false
-    }
-  }, 200)
-}
-
-const onMiddleNameBlur = () => {
-  setTimeout(() => {
-    middleNameFocused.value = false
-    if (!usedBrowserPatient.value) {
-      showPatientDropdown.value = false
-    }
-  }, 200)
-}
-
-const searchPatients = async (query) => {
-  if (!query || query.trim().length < 2) return
-
-  searchingPatients.value = true
-
+const viewDetails = async (glNumber) => {
   try {
-    const res = await axios.get('http://localhost:8000/api/patients/all-with-eligibility')
-    patientSearchResults.value = res.data
-    showPatientDropdown.value = true
+    const res = await axios.get(`http://localhost:8000/api/patient-details/${glNumber}`)
+    const data = res.data
+
+    // Format client name if exists
+    let clientName = null
+    if (data.client_lastname) {
+      clientName = `${data.client_lastname}, ${data.client_firstname}` +
+        (data.client_middlename ? ` ${data.client_middlename}` : '') +
+        (data.client_suffix ? ` ${data.client_suffix}` : '')
+    }
+
+    selectedRecord.value = {
+      glNum: glNumber,
+      category: data.category,
+      partner: data.partner,
+      issuedBy: data.issued_by,
+      issuedAmount: data.issued_amount,
+      hospitalBill: data.hospital_bill,
+      clientName: clientName,
+      relationship: data.relationship,
+      // Store raw data for PDF generation
+      rawData: data
+    }
+
+    // Reset edit mode
+    editMode.value = false
+
+    showDetailsDialog.value = true
   } catch (err) {
-    console.error('Failed to fetch patients', err)
+    console.error('Error fetching details:', err)
     $q.notify({
       type: 'negative',
-      message: 'Failed to search patients',
+      message: 'Failed to load record details',
       position: 'top'
     })
-  } finally {
-    searchingPatients.value = false
   }
 }
 
@@ -711,14 +408,33 @@ const enterEditMode = () => {
   editMode.value = true
 }
 
-const closeEligibilityWarning = () => {
-  showEligibilityWarning.value = false
-  eligibilityWarningData.value = null
-}
-
 const cancelEdit = () => {
   showCancelConfirmDialog.value = true
 }
+const confirmPrintPDF = async () => {
+  showPrintConfirmDialog.value = false
+  await generatePDF()
+}
+
+const confirmCloseDialog = () => {
+  showCloseConfirmDialog.value = false
+  showDetailsDialog.value = false
+  editMode.value = false
+  selectedRecord.value = null
+  editData.value = {
+    glNum: null,
+    category: null,
+    partner: null,
+    issuedBy: null,
+    issuedAmount: null,
+    hospitalBill: null,
+    clientName: null,
+    relationship: null,
+    isChecked: false
+  }
+}
+
+
 
 const confirmCancel = () => {
   showCancelConfirmDialog.value = false
@@ -736,14 +452,10 @@ const confirmCancel = () => {
   }
 }
 
-const cancelFinalConfirm = () => {
-  showFinalConfirmDialog.value = false
-  pendingAction.value = null
-}
-
-const proceedWithFinalConfirm = () => {
-  showFinalConfirmDialog.value = false
-  showAreYouSureDialog.value = true
+const closeDialog = () => {
+  showDetailsDialog.value = false
+  editMode.value = false
+  selectedRecord.value = null
 }
 
 const onCategoryChange = () => {
@@ -758,12 +470,7 @@ const onCheckboxChange = () => {
     editData.value.relationship = null
   }
 }
-const confirmClose = () => {
-  showCloseConfirmDialog.value = false
-  showDetailsDialog.value = false
-  editMode.value = false
-  selectedRecord.value = null
-}
+
 const confirmSave = async () => {
   saveLoading.value = true
   try {
@@ -781,11 +488,10 @@ const confirmSave = async () => {
     await axios.post('http://localhost:8000/api/patient-details/update', formData)
 
     $q.notify({
-      type: 'negative',
-      message: 'Operation failed',
+      type: 'positive',
+      message: 'Record updated successfully',
       position: 'top'
     })
-
 
     showSaveConfirmDialog.value = false
 
@@ -816,579 +522,322 @@ const confirmSave = async () => {
     console.error('Save error:', error)
     $q.notify({
       type: 'negative',
-      message: 'Please fill in all required fields',
+      message: 'Failed to update record',
       position: 'top'
     })
+  } finally {
+    saveLoading.value = false
   }
-}
-
-const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = false) => {
-  dateToday.value = date.formatDate(new Date(), 'YYYY-MM-DD')
-
-  const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
-
-  if (!mysqlBirthdate) {
-    $q.notify({
-      type: 'negative',
-      message: 'Invalid birthdate format',
-      position: 'top'
-    })
-    return
-  }
-
-  const formData = new FormData()
-  formData.append('category', categoryValue.value)
-  formData.append('lastname', lastNameValue.value)
-  formData.append('firstname', firstNameValue.value)
-  formData.append('middlename', middleNameValue.value || '')
-  formData.append('suffix', suffixValue.value || '')
-  formData.append('birthdate', mysqlBirthdate)
-  formData.append('sex', sexValue.value)
-  formData.append('preference', preferenceValue.value || '')
-  formData.append('is_checked', isChecked.value ? 1 : 0)
-  formData.append('issued_at', dateToday.value)
-  formData.append('province', provinceValue.value)
-  formData.append('city', cityValue.value)
-  formData.append('barangay', barangayValue.value)
-  formData.append('house_address', houseAddressValue.value)
-  formData.append('partner', partnerValue.value)
-  formData.append('hospital_bill', hospitalBillValue.value || 0)
-  formData.append('issued_amount', issuedAmountValue.value)
-  formData.append('issued_by', issuedByValue.value)
-  formData.append('client_lastname', clientLastNameValue.value || '')
-  formData.append('client_firstname', clientFirstNameValue.value || '')
-  formData.append('client_middlename', clientMiddleNameValue.value || '')
-  formData.append('client_suffix', clientSuffixValue.value || '')
-  formData.append('relationship', relationshipValue.value || '')
-
-  if (patientId) {
-    formData.append('patient_id', patientId)
-    if (updatePatientInfo) {
-      formData.append('update_patient_info', '1')
-    }
-  }
-
-  try {
-    const res = await axios.post('http://localhost:8000/api/patients', formData)
-    glNum.value = res.data.gl_no
-
-    $q.notify({
-      type: 'positive',
-      message: 'Patient record saved successfully',
-      position: 'top'
-    })
-
-    if (shouldPrint) {
-      await generatePDF()
-    }
-
-    router.push('/patient-records')
-  } catch (err) {
-    console.error("Failed to save patient:", err)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to save patient record',
-      position: 'top'
-    })
-  }
-}
-
-const formatPatientName = (patient) => {
-  const parts = [
-    patient.lastname,
-    patient.firstname,
-    patient.middlename,
-    patient.suffix
-  ].filter(Boolean)
-
-  if (parts.length === 0) return 'N/A'
-
-  // Format as: LASTNAME, FIRSTNAME MIDDLENAME SUFFIX
-  const lastname = parts[0]
-  const rest = parts.slice(1).join(' ')
-  return `${lastname}, ${rest}`
 }
 
 const generatePDF = async () => {
-  const pdfMap = {
-    MEDICINE: '/med.pdf',
-    LABORATORY: '/lab.pdf',
-    HOSPITAL: '/hosp.pdf',
-  }
+  if (!selectedRecord.value) return
 
-  const pdfPath = pdfMap[categoryValue.value]
-  const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
-  const pdfDoc = await PDFDocument.load(existingPdfBytes)
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-  const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
-  const page = pdfDoc.getPages()[0]
-  page.setSize(page.getWidth(), 1200)
-  page.translateContent(0, 605)
-  const parsedDate = new Date(dateToday.value)
-  const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
-  const monthName = parsedDate.toLocaleString('default', { month: 'long' })
+  pdfLoading.value = true
 
-  const fullNameValue =
-    lastNameValue.value + ", " + firstNameValue.value +
-    (middleNameValue.value ? " " + middleNameValue.value : "") +
-    (suffixValue.value ? " " + suffixValue.value : "");
+  try {
+    const data = selectedRecord.value.rawData
 
-  const clientValue = ref(null);
-  const fullAddressValue = houseAddressValue.value + ", " + barangayValue.value + ", " + cityValue.value + ", " + provinceValue.value
+    const pdfMap = {
+      MEDICINE: '/med.pdf',
+      LABORATORY: '/lab.pdf',
+      HOSPITAL: '/hosp.pdf',
+    }
 
-  if (isChecked.value == true) {
-    clientValue.value = fullNameValue;
-  } else {
-    clientValue.value = clientLastNameValue.value + ", " + clientFirstNameValue.value +
-      (clientMiddleNameValue.value ? " " + clientMiddleNameValue.value : "") +
-      (clientSuffixValue.value ? " " + clientSuffixValue.value : "") + " / " + (relationshipValue.value ? " " + relationshipValue.value : "");
-  }
+    const pdfPath = pdfMap[data.category]
+    const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
+    const pdfDoc = await PDFDocument.load(existingPdfBytes)
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
 
-  const age = calculateAge(birthdateValue.value)
+    const amountWords = toWords(parseInt(data.issued_amount)).toUpperCase() + ' PESOS'
+    const page = pdfDoc.getPages()[0]
+    page.setSize(page.getWidth(), 1200)
+    page.translateContent(0, 605)
 
-  page.drawText(glNum.value + ' / ' + partnerValue.value, {
-    x: 600,
-    y: 489,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(fullNameValue.toUpperCase(), {
-    x: 140,
-    y: 375,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(String(age), {
-    x: 400,
-    y: 375,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(sexValue.value.toUpperCase(), {
-    x: 455,
-    y: 375,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(fullAddressValue.toUpperCase(), {
-    x: 95,
-    y: 350,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(clientValue.value.toUpperCase(), {
-    x: 70,
-    y: 300,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
+    const parsedDate = new Date(data.date_issued)
+    const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
+    const monthName = parsedDate.toLocaleString('default', { month: 'long' })
 
-  if (categoryValue.value == 'MEDICINE') {
-    page.drawText(amountWords, {
-      x: 245,
-      y: 273,
+    const fullNameValue = data.patient_lastname + ", " + data.patient_firstname +
+      (data.patient_middlename ? " " + data.patient_middlename : "") +
+      (data.patient_suffix ? " " + data.patient_suffix : "")
+
+    let clientValue = fullNameValue
+    if (data.client_lastname) {
+      clientValue = data.client_lastname + ", " + data.client_firstname +
+        (data.client_middlename ? " " + data.client_middlename : "") +
+        (data.client_suffix ? " " + data.client_suffix : "") +
+        " / " + (data.relationship ? " " + data.relationship : "")
+    }
+
+    const fullAddressValue = data.house_address + ", " + data.barangay + ", " + data.city + ", " + data.province
+    const age = calculateAge(data.birthdate)
+
+    page.drawText(data.gl_no + ' / ' + data.partner, {
+      x: 600,
+      y: 489,
+      size: 14,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+    page.drawText(fullNameValue.toUpperCase(), {
+      x: 140,
+      y: 375,
       size: 10,
       color: rgb(0, 0, 0),
       font: boldFont,
     })
-  } else {
-    page.drawText(amountWords, {
-      x: 260,
-      y: 273,
+
+    if (age !== null) {
+      page.drawText(String(age), {
+        x: 400,
+        y: 375,
+        size: 12,
+        color: rgb(0, 0, 0),
+        font: boldFont,
+      })
+    }
+
+    page.drawText(data.sex.toUpperCase(), {
+      x: 455,
+      y: 375,
       size: 10,
       color: rgb(0, 0, 0),
       font: boldFont,
     })
-  }
+    page.drawText(fullAddressValue.toUpperCase(), {
+      x: 95,
+      y: 350,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+    page.drawText(clientValue.toUpperCase(), {
+      x: 70,
+      y: 300,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
 
-  page.drawText(
-    Number(issuedAmountValue.value).toFixed(2),
-    {
+    if (data.category == 'MEDICINE') {
+      page.drawText(amountWords, {
+        x: 245,
+        y: 273,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: boldFont,
+      })
+    } else {
+      page.drawText(amountWords, {
+        x: 260,
+        y: 273,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: boldFont,
+      })
+    }
+
+    page.drawText(Number(data.issued_amount).toFixed(2), {
       x: 90,
       y: 248,
       size: 12,
       color: rgb(0, 0, 0),
       font: boldFont,
-    },
-  )
-  page.drawText(dayNum, {
-    x: 137,
-    y: 197,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(monthName.toUpperCase(), {
-    x: 225,
-    y: 197,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(issuedByValue.value.toUpperCase(), {
-    x: 340,
-    y: 65,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
+    })
+    page.drawText(dayNum, {
+      x: 137,
+      y: 197,
+      size: 12,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+    page.drawText(monthName.toUpperCase(), {
+      x: 225,
+      y: 197,
+      size: 12,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+    page.drawText(data.issued_by.toUpperCase(), {
+      x: 340,
+      y: 65,
+      size: 12,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
 
-  const pdfBytes = await pdfDoc.save()
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-  const url = URL.createObjectURL(blob)
-  window.open(url)
-  setTimeout(() => URL.revokeObjectURL(url), 100)
+    const pdfBytes = await pdfDoc.save()
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+
+    window.open(url)
+
+    $q.notify({
+      type: 'positive',
+      message: 'PDF generated successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('PDF generation error:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to generate PDF',
+      position: 'top'
+    })
+  } finally {
+    pdfLoading.value = false
+  }
 }
 
 function getDaySuffix(day) {
   if (day > 3 && day < 21) return 'th'
   switch (day % 10) {
-    case 1: return 'st'
-    case 2: return 'nd'
-    case 3: return 'rd'
-    default: return 'th'
+    case 1:
+      return 'st'
+    case 2:
+      return 'nd'
+    case 3:
+      return 'rd'
+    default:
+      return 'th'
   }
 }
+
+onMounted(() => {
+  const getPatientHistory = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
+      const today = dayjs().startOf('day')
+      rows.value = res.data.history.map(item => {
+        const eligibilityDate = dayjs(item.date_issued).add(3, 'month')
+        const diff = eligibilityDate.diff(today, 'day')
+        const isEligible = diff <= 0
+
+        return {
+          glNum: item.gl_no,
+          category: item.category,
+          issuedAt: item.date_issued,
+          eligibilityDate: eligibilityDate.format('YYYY-MM-DD'),
+          eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
+          daysRemaining: diff > 0 ? diff : 0,
+          issuedBy: item.issued_by
+        }
+      })
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  getPatientHistory()
+})
 </script>
 
 <style scoped>
-/* All existing styles remain the same... */
-/* =========================
-   PAGE & CARD
-========================= */
-
-.page-wrapper {
-  padding: 24px;
-  background: #f5f5f5;
+.cancel-btn {
+  background: #ff3b3b;
+  color: white;
+  font-weight: bold;
 }
 
-.form-card {
-  margin: auto;
-  background: #ffffff;
-  border: 1px solid #989b98;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
+.budget-table :deep(thead tr) {
+  background: #1f8f2e;
 }
 
-/* =========================
-   HEADER / TITLE
-========================= */
+.budget-table :deep(thead th) {
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+}
 
-.patient-info-pill {
+.budget-table :deep(td) {
+  text-align: center;
+}
+
+.budget-table :deep(.q-table__title) {
   font-size: 40px;
-  font-weight: 700;
-  color: #1f8f2e;
-  margin: 0;
-  line-height: 0.5;
-  margin-top: 15px;
-}
-
-/* =========================
-   SECTION TITLES
-========================= */
-
-.section-title {
-  margin: 30px 0 12px;
-  font-weight: 600;
-}
-
-/* =========================
-   CATEGORY
-========================= */
-
-div.category {
-  margin-top: 30px;
-}
-
-label {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  display: block;
-}
-
-label span {
-  color: red;
-}
-
-/* =========================
-   GRID LAYOUTS
-========================= */
-
-.grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 1px;
-}
-
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 14px;
-}
-
-.row-1 {
-  max-width: 300px;
-  margin-bottom: 14px;
-}
-
-.field {
-  position: relative;
-  margin-bottom: 12px;
-}
-
-.field.full {
-  grid-column: 1 / -1;
-}
-
-/* =========================
-   PATIENT DROPDOWN (ALL NAME FIELDS)
-========================= */
-
-.patient-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 2px solid #2196f3;
-  border-radius: 4px;
-  margin-top: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  max-height: 400px;
-  overflow: hidden;
-}
-
-.dropdown-header {
-  background: #e3f2fd;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1976d2;
-  border-bottom: 1px solid #bbdefb;
-  display: flex;
-  align-items: center;
-}
-
-.dropdown-patient-item {
-  padding: 12px;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.dropdown-patient-item:hover:not(.patient-ineligible) {
-  background-color: #f5f5f5;
-}
-
-.dropdown-patient-item.patient-eligible {
-  cursor: pointer;
-}
-
-.dropdown-patient-item.patient-ineligible {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: #fafafa;
-}
-
-.patient-name-dropdown {
-  font-size: 14px;
   font-weight: 600;
   color: #1f8f2e;
-  margin-bottom: 4px;
 }
 
-.patient-details-dropdown {
-  font-size: 11px;
-  color: #666;
+.budget-table :deep(td) {
+  vertical-align: middle;
 }
 
-.detail-row-dropdown {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 2px;
-}
-
-.detail-row-dropdown span {
-  color: #666;
-}
-
-.eligibility-badge-container-dropdown {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.eligibility-badge-dropdown {
-  padding: 4px 8px;
-  font-size: 10px;
-  font-weight: 700;
+.budget-table :deep(.action-cell) {
+  height: 100%;
+  min-height: 48px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.eligibility-info-dropdown {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: 9px;
-  color: #666;
-  margin-top: 2px;
-}
-
-/* =========================
-   PATIENT INFO BOX
-========================= */
-
-.patient-info-box {
+/* Dialog Styling */
+.info-section {
   background: #f5f5f5;
-  border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
 }
 
-.patient-info-box.highlight-changes {
-  background: #fff3e0;
-  border: 2px solid #ff9800;
-}
-
-.comparison-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.comparison-arrow {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 0;
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
 .info-item {
-  font-size: 13px;
-  color: #333;
-}
-
-.required {
-  color: red;
-}
-
-.info-item strong {
-  color: #1f8f2e;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .info-item-full {
   grid-column: 1 / -1;
+  padding: 8px 0;
 }
 
-/* =========================
-   INPUTS & SELECTS
-========================= */
-
-:deep(.q-field--outlined .q-field__control) {
-  background-color: #f3f3f3;
-  border: 1px solid #bdbdbd;
-  border-radius: 3px;
-  min-height: 36px;
-  box-shadow: none !important;
-}
-
-:deep(.q-field__control:before),
-:deep(.q-field__control:after) {
-  display: none !important;
-}
-
-:deep(.q-field__native),
-:deep(.q-field__input),
-:deep(input) {
-  outline: none !important;
-  box-shadow: none !important;
-  padding: 6px 10px;
-  font-weight: 500;
-}
-
-:deep(.q-field--focused .q-field__control) {
-  border-color: #9e9e9e !important;
-  box-shadow: none !important;
-}
-
-:deep(.q-field--readonly .q-field__control) {
-  background-color: #ededed;
-  border-color: #cfcfcf;
-}
-
-:deep(.q-field--disabled .q-field__control) {
-  background-color: #e0e0e0;
-  border-color: #c0c0c0;
-  color: #9e9e9e;
-}
-
-:deep(.q-checkbox) {
-  margin-top: -20px;
-}
-
-/* =========================
-   ACTION BUTTONS
-========================= */
-
-.actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 24px;
-}
-
-.actions .q-btn {
+.info-label {
   font-weight: 600;
+  color: #1f8f2e;
+  font-size: 13px;
+}
+
+.info-value {
+  color: #333;
   font-size: 14px;
-  padding: 4px 12px;
-  color: white;
 }
 
-.btn-cancel {
-  background: #ff3b3b;
+.dialog-close-btn {
+  background: #ff3b3b !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
 }
 
-.btn-save {
-  background: #0aa64f;
+.dialog-print-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
 }
 
-.btn-print {
-  background: #0aa64f;
+.dialog-edit-btn {
+  background: #ff9800 !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
 }
 
-.actions .q-btn .q-icon {
-  margin-right: 6px;
-}
-
-/* =========================
-   DIALOG BUTTONS
-========================= */
-
-.dialog-confirm-btn {
+.dialog-save-btn {
   background: #0aa64f !important;
   color: white !important;
   font-weight: 600;
@@ -1404,70 +853,94 @@ label span {
   border-radius: 4px;
 }
 
-.dialog-confirm-btn .q-icon,
-.dialog-goback-btn .q-icon {
-  margin-right: 6px;
+.dialog-confirm-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
 }
 
-.dialog-actions-sticky {
-  position: sticky;
-  bottom: 0;
-  background: white;
-  border-top: 1px solid #e0e0e0;
-  z-index: 10;
-}
-
-/* =========================
-   EXISTING PATIENTS DIALOG
-========================= */
-
-.options-grid {
+/* Edit Mode Styles */
+.edit-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.option-card {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.edit-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
-.option-card:hover {
-  border-color: #0aa64f;
-  background-color: #f5f5f5;
+.edit-item-full {
+  grid-column: 1 / -1;
 }
 
-.option-selected {
-  border-color: #0aa64f;
-  background-color: #e8f5e9;
-  border-width: 3px;
-}
-
-.option-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.option-disabled:hover {
-  border-color: #e0e0e0;
-  background-color: transparent;
-}
-
-.option-title {
-  font-weight: 700;
-  font-size: 16px;
+.edit-label {
+  font-weight: 600;
   color: #1f8f2e;
+  font-size: 13px;
 }
 
-.option-description {
-  font-size: 13px;
-  color: #666;
-  line-height: 1.4;
+.edit-input :deep(.q-field__control) {
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  box-shadow: none !important;
+}
+
+.edit-input :deep(.q-field__control:before),
+.edit-input :deep(.q-field__control:after) {
+  display: none !important;
+}
+
+.edit-input :deep(.q-field__native),
+.edit-input :deep(.q-field__input),
+.edit-input :deep(input) {
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 6px 10px;
+  font-weight: 500;
+}
+
+.edit-input :deep(.q-field--focused .q-field__control) {
+  border-color: #9e9e9e !important;
+  box-shadow: none !important;
+}
+
+.edit-input :deep(input[readonly]),
+.edit-input :deep(input:read-only) {
+  color: #757575 !important;
+}
+
+.edit-input :deep(.q-field--readonly .q-field__control) {
+  background-color: #ededed;
+  border-color: #cfcfcf;
+}
+
+.edit-input :deep(.q-field--readonly .q-field__native),
+.edit-input :deep(.q-field--readonly .q-field__input) {
+  color: #757575 !important;
+}
+
+/* Checkbox Styles */
+.form-checkbox :deep(.q-checkbox__bg) {
+  border: 2px solid #000;
+  border-radius: 2px;
+}
+
+.form-checkbox :deep(.q-checkbox__label) {
+  font-weight: 600;
+}
+
+.form-checkbox :deep(.q-checkbox--disabled .q-checkbox__label) {
+  color: #757575;
+}
+
+.form-checkbox :deep(.q-checkbox--disabled .q-checkbox__bg) {
+  border-color: #757575;
 }
 </style>
