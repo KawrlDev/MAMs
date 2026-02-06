@@ -55,31 +55,33 @@
 
     <!-- TOTAL PATIENTS & AMOUNT CARD -->
     <q-card class="totals-card">
-      <q-card-section>
-        <div class="totals-container">
-          <div class="total-left">
-            <div class="total-item">
-              <div class="amount-title">TOTAL PATIENTS</div>
-              <div class="amount-titles">{{ totalPatients }}</div>
-            </div>
-          </div>
-
-          <div class="vertical-divider"></div>
-
-          <div class="total-right">
-            <div class="total-item">
-              <div class="amount-title2">TOTAL AMOUNT RELEASED</div>
-              <div class="amount-titles2">{{ formatPeso(totalAmount) }}</div>
-            </div>
+      <div class="totals-container">
+        <div class="total-left">
+          <!-- HEADER -->
+          <div class="totals-header">TOTAL PATIENTS CATERED</div>
+          <div class="total-item">
+            <div class="amount-titles">{{ totalPatients }}</div>
           </div>
         </div>
-      </q-card-section>
+
+        <div class="vertical-divider"></div>
+
+        <div class="total-right">
+          <!-- HEADER -->
+          <div class="totals-header">TOTAL AMOUNT RELEASED</div>
+          <div class="total-item">
+            <div class="amount-titles2">{{ formatPeso(totalAmount) }}</div>
+          </div>
+        </div>
+      </div>
     </q-card>
 
     <!-- MONTHLY CHART -->
     <q-card class="chart-card">
+      <!-- HEADER -->
+      <div class="chart-header">MONTHLY CATERED PATIENTS</div>
+
       <q-card-section class="text-center">
-        <div class="chart-title">MONTHLY CATERED PATIENTS</div>
         <div class="chart-container">
           <canvas ref="monthlyCateredPatients"></canvas>
         </div>
@@ -159,15 +161,18 @@ onMounted(async () => {
 
 /* CONTAINER */
 .dashboard-container {
-  width: 100%;
+  width: 1000px;
   padding: 10px;
+  box-sizing: border-box;
+  margin-left: -2.5%;
+  margin-bottom: 1%;
 }
 
 /* CATEGORY GRID */
 .dashboard-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 22px;
   margin-bottom: 24px;
 }
 
@@ -178,18 +183,27 @@ onMounted(async () => {
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   text-align: center;
+  overflow: hidden;
+  padding: 0;
 }
 
 /* HEADER */
 .enhanced-header {
-  padding: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #2e7d32;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* BODY */
@@ -205,26 +219,33 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 /* LABEL */
 .label {
   font-size: 13px;
-  color: rgb(103, 103, 103);
   font-weight: 700;
+  background-color: green;
+  padding: 4px 4px;
+  border-radius: 4px;
+  color: white;
+  width: 100%;
+  max-width: 200px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 /* VALUE */
 .value {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: #23424b;
 }
 
 /* PATIENT VALUE */
 .patient-value {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
 }
 
@@ -235,9 +256,18 @@ onMounted(async () => {
 }
 
 /* REMAINING */
+.remaining {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 .remaining-label {
-  color: green;
+  color: #000000;
   font-weight: 700;
+  background-color: transparent;
+  padding: 0;
 }
 
 .remaining-value {
@@ -253,31 +283,53 @@ onMounted(async () => {
 /* TOTAL CARD */
 .totals-card {
   width: 100%;
-  padding: 10px;
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 2px solid grey;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
   margin-bottom: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0;
 }
 
 .totals-container {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.total-left,
+.total-right {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.totals-header {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .total-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.amount-title,
-.amount-title2 {
-  font-weight: 700;
-  font-size: 15px;
-  color: green;
+  justify-content: center;
+  padding: 20px;
+  flex: 1;
 }
 
 .amount-titles,
@@ -291,24 +343,109 @@ onMounted(async () => {
   width: 2px;
   background-color: #000;
   align-self: stretch;
-  margin: 0 10px;
 }
 
 /* CHART CARD */
 .chart-card {
-  border-radius: 12px;
+  border-radius: 14px;
   border: 2px solid grey;
   box-shadow: 0 4px 12px rgba(79, 78, 78, 0.334);
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0;
+  margin-bottom: -10%;
+  margin-top: -2%;
+}
+
+.chart-header {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chart-container {
   height: 280px;
+  position: relative;
+  padding: 16px;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .dashboard-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .totals-container {
+    gap: 12px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 24px;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
 }
 
 /* MOBILE */
 @media (max-width: 600px) {
+  .dashboard-container {
+    padding: 8px;
+  }
+
   .dashboard-row {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .enhanced-header {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .totals-header,
+  .chart-header {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .card-body {
+    padding: 12px;
+  }
+
+  .totals-container {
+    flex-direction: column;
+  }
+
+  .vertical-divider {
+    display: none;
+  }
+
+  .total-left,
+  .total-right {
+    width: 100%;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 24px;
+  }
+
+  .chart-container {
+    height: 200px;
+    padding: 12px;
   }
 }
 
