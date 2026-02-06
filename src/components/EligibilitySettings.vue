@@ -3,36 +3,55 @@
     <div class="form-container settings-block">
       <h4>ELIGIBILITY PERIOD</h4>
 
-      <!-- DAYS INPUT -->
-      <q-input
-        v-model="days"
-        type="text"
-        outlined
-        dense
-        class="q-mb-sm"
-        placeholder="Enter number of days"
-        @input="days = days.replace(/[^0-9]/g, '')"
-      />
+      <!-- DEFAULT VIEW -->
+      <div v-if="!isEditing">
+        <div class="q-mb-sm">
+          Current Eligibility Period:
+          <strong>{{ currentDays }} days</strong>
+        </div>
 
-      <!-- ACTION BUTTONS -->
-      <div class="actions">
-        <q-btn
-          label="CANCEL"
-          icon="close"
-          unelevated
-          class="btn-cancel"
-          @click="showCancelDialog = true"
-        />
-        <q-btn
-          label="SAVE"
-          icon="save"
-          unelevated
-          class="btn-save"
-          @click="showSaveDialog = true"
-        />
+        <div class="actions">
+          <q-btn
+            label="EDIT"
+            icon="edit"
+            unelevated
+            class="btn-save"
+            @click="startEdit"
+          />
+        </div>
       </div>
 
-      <!-- CANCEL CONFIRMATION DIALOG -->
+      <!-- EDIT MODE -->
+      <div v-else>
+        <q-input
+          v-model="days"
+          type="text"
+          outlined
+          dense
+          class="q-mb-sm"
+          placeholder="Enter number of days"
+          @input="days = days.replace(/[^0-9]/g, '')"
+        />
+
+        <div class="actions">
+          <q-btn
+            label="CANCEL"
+            icon="close"
+            unelevated
+            class="btn-cancel"
+            @click="showCancelDialog = true"
+          />
+          <q-btn
+            label="SAVE"
+            icon="save"
+            unelevated
+            class="btn-save"
+            @click="showSaveDialog = true"
+          />
+        </div>
+      </div>
+
+      <!-- CANCEL CONFIRMATION -->
       <q-dialog v-model="showCancelDialog">
         <q-card style="min-width: 360px; border-radius: 8px;">
           <q-card-section>
@@ -60,7 +79,7 @@
         </q-card>
       </q-dialog>
 
-      <!-- SAVE CONFIRMATION DIALOG -->
+      <!-- SAVE CONFIRMATION -->
       <q-dialog v-model="showSaveDialog">
         <q-card style="min-width: 360px; border-radius: 8px;">
           <q-card-section>
@@ -87,29 +106,35 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
+
 const days = ref('')
+const currentDays = ref(0)
+const isEditing = ref(false)
 
 const showCancelDialog = ref(false)
 const showSaveDialog = ref(false)
 
-// Cancel confirmation
-const handleCancelConfirm = () => {
-  days.value = ''
-  showCancelDialog.value = false
-  $q.notify({ type: 'info', message: 'Changes canceled' })
+const startEdit = () => {
+  days.value = currentDays.value.toString()
+  isEditing.value = true
 }
 
-// Save confirmation
+const handleCancelConfirm = () => {
+  isEditing.value = false
+  showCancelDialog.value = false
+}
+
 const updatePeriod = async () => {
   showSaveDialog.value = false
 
@@ -123,12 +148,30 @@ const updatePeriod = async () => {
       days: parseInt(days.value)
     })
 
-    $q.notify({ type: 'positive', message: 'Eligibility Updated Successfully' })
+    currentDays.value = parseInt(days.value)
+    isEditing.value = false
+
+    $q.notify({
+      type: 'positive',
+      message: 'Eligibility Updated Successfully'
+    })
 
   } catch {
-    $q.notify({ type: 'negative', message: 'Error updating eligibility' })
+    $q.notify({
+      type: 'negative',
+      message: 'Error updating eligibility'
+    })
   }
 }
+
+onMounted(async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/get-eligibility')
+    currentDays.value = res.data.days
+  } catch {
+    currentDays.value = 0
+  }
+})
 </script>
 
 <style scoped>
@@ -180,7 +223,6 @@ const updatePeriod = async () => {
   background: #0aa64f;
 }
 
-/* Dialog Button Styling */
 .dialog-cancel-btn {
   background: #0aa64f !important;
   color: white !important;

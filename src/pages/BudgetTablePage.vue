@@ -24,7 +24,7 @@ onMounted(() => {
         router.push('/error')
     }
 })
-</script>
+</script> 
 
 <style scoped>
 .container {
