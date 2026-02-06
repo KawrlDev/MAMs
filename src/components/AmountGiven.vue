@@ -239,7 +239,7 @@ onMounted(async () => {
   margin-bottom: 40px;
   padding: 0 5px;
   margin-top: 30px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .chart-item {
@@ -349,29 +349,34 @@ onMounted(async () => {
   .charts-container {
     flex-direction: column;
     gap: 25px;
+    justify-content: center;
   }
   
   .card-content {
     padding: 10px;
   }
 
-  .chart-item p {
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
     font-size: 16px;
+    margin-bottom: 15px;
+    margin-top: 0;
   }
 
-  .chart-small canvas {
-    width: 150px !important;
-    height: 150px !important;
-  }
-
-  .chart-medium canvas {
-    width: 180px !important;
-    height: 180px !important;
-  }
-
+  .chart-small canvas,
+  .chart-medium canvas,
   .chart-large canvas {
-    width: 220px !important;
-    height: 220px !important;
+    width: 200px !important;
+    height: 200px !important;
   }
 
   .amount-title {
@@ -382,6 +387,10 @@ onMounted(async () => {
   .barangay-title {
     font-size: 18px;
   }
+
+  .budget-table {
+    min-width: 700px;
+  }
 }
 
 /* Mobile - Small screens (600px to 767px) */
@@ -389,21 +398,33 @@ onMounted(async () => {
   .charts-container {
     flex-direction: column;
     gap: 30px;
+    justify-content: center;
   }
 
-  .chart-small canvas {
-    width: 180px !important;
-    height: 180px !important;
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 280px;
   }
 
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-small canvas,
   .chart-medium canvas {
     width: 220px !important;
     height: 220px !important;
   }
 
   .chart-large canvas {
-    width: 280px !important;
-    height: 280px !important;
+    width: 250px !important;
+    height: 250px !important;
   }
 }
 
@@ -412,29 +433,61 @@ onMounted(async () => {
   .charts-container {
     flex-direction: column;
     gap: 30px;
+    justify-content: center;
+  }
+
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
   }
 
   .chart-small canvas {
-    width: 180px !important;
-    height: 180px !important;
-  }
-
-  .chart-medium canvas {
     width: 220px !important;
     height: 220px !important;
   }
 
+  .chart-medium canvas {
+    width: 240px !important;
+    height: 240px !important;
+  }
+
   .chart-large canvas {
-    width: 280px !important;
-    height: 280px !important;
+    width: 270px !important;
+    height: 270px !important;
   }
 }
 
 /* Tablet - Medium (901px to 1200px) */
 @media (min-width: 901px) and (max-width: 1200px) {
   .charts-container {
-    gap: 20px;
+    gap: 15px;
     padding: 0 10px;
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+
+  .chart-item,
+  .chart-items,
+  .chart-itemss {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
   }
 
   .chart-small {
@@ -442,8 +495,8 @@ onMounted(async () => {
   }
 
   .chart-small canvas {
-    width: 160px !important;
-    height: 160px !important;
+    width: 150px !important;
+    height: 150px !important;
   }
 
   .chart-medium {
@@ -451,8 +504,8 @@ onMounted(async () => {
   }
 
   .chart-medium canvas {
-    width: 200px !important;
-    height: 200px !important;
+    width: 190px !important;
+    height: 190px !important;
   }
 
   .chart-large {
@@ -460,8 +513,8 @@ onMounted(async () => {
   }
 
   .chart-large canvas {
-    width: 240px !important;
-    height: 240px !important;
+    width: 230px !important;
+    height: 230px !important;
   }
 }
 
@@ -469,6 +522,24 @@ onMounted(async () => {
 @media (min-width: 1201px) and (max-width: 1399px) {
   .charts-container {
     gap: 3px;
+    flex-wrap: nowrap;
+  }
+
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-items p {
+    margin-bottom: 60px;
+    margin-top: -10%;
+  }
+
+  .chart-itemss p {
+    margin-bottom: 100px;
+    margin-top: -15%;
   }
 
   .chart-small {
@@ -476,8 +547,8 @@ onMounted(async () => {
   }
 
   .chart-small canvas {
-    width: 180px !important;
-    height: 180px !important;
+    width: 160px !important;
+    height: 190px !important;
   }
 
   .chart-medium {
@@ -505,13 +576,30 @@ onMounted(async () => {
     padding: 25px;
   }
 
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-items p {
+    margin-bottom: 60px;
+    margin-top: -10%;
+  }
+
+  .chart-itemss p {
+    margin-bottom: 100px;
+    margin-top: -15%;
+  }
+
   .chart-small {
     flex: 0 0 200px;
   }
 
   .chart-small canvas {
-    width: 200px !important;
-    height: 200px !important;
+    width: 180px !important;
+    height: 210px !important;
   }
 
   .chart-medium {
@@ -539,13 +627,30 @@ onMounted(async () => {
     padding: 30px;
   }
 
+  .chart-item p,
+  .chart-items p,
+  .chart-itemss p {
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+
+  .chart-items p {
+    margin-bottom: 60px;
+    margin-top: -10%;
+  }
+
+  .chart-itemss p {
+    margin-bottom: 100px;
+    margin-top: -15%;
+  }
+
   .chart-small {
     flex: 0 0 220px;
   }
 
   .chart-small canvas {
-    width: 220px !important;
-    height: 220px !important;
+    width: 200px !important;
+    height: 230px !important;
   }
 
   .chart-medium {
