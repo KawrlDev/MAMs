@@ -381,6 +381,7 @@ onMounted(async () => {
 @media (max-width: 480px) {
   .dashboard-container {
     padding: 8px;
+    width: 95%;
   }
 
   .dashboard-row {
@@ -471,6 +472,7 @@ onMounted(async () => {
 @media (min-width: 481px) and (max-width: 599px) {
   .dashboard-container {
     padding: 9px;
+    width: 95%;
   }
 
   .dashboard-row {
@@ -554,10 +556,11 @@ onMounted(async () => {
 @media (min-width: 600px) and (max-width: 767px) {
   .dashboard-container {
     padding: 10px;
+    width: 90%;
   }
 
   .dashboard-row {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 14px;
     margin-bottom: 16px;
   }
@@ -629,6 +632,7 @@ onMounted(async () => {
 @media (min-width: 768px) and (max-width: 1023px) {
   .dashboard-container {
     padding: 10px;
+    width: 85%;
   }
 
   .dashboard-row {
@@ -704,6 +708,7 @@ onMounted(async () => {
 @media (min-width: 1024px) and (max-width: 1279px) {
   .dashboard-container {
     padding: 10px;
+    width: 80%;
   }
 
   .dashboard-row {
@@ -779,6 +784,7 @@ onMounted(async () => {
 @media (min-width: 1280px) and (max-width: 1599px) {
   .dashboard-container {
     padding: 10px;
+    width: 75%;
   }
 
   .dashboard-row {
@@ -854,6 +860,7 @@ onMounted(async () => {
 @media (min-width: 1600px) and (max-width: 1919px) {
   .dashboard-container {
     padding: 10px;
+    width: 70%;
   }
 
   .dashboard-row {
@@ -929,6 +936,7 @@ onMounted(async () => {
 @media (min-width: 1920px) {
   .dashboard-container {
     padding: 12px;
+    width: 70%;
   }
 
   .dashboard-row {
