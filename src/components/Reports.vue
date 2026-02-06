@@ -19,11 +19,11 @@
               Filter by Period:
             </span>
 
-            <q-input 
-              style="width: 250px;" 
-              :model-value="formattedDate" 
-              outlined 
-              dense 
+            <q-input
+              style="width: 250px;"
+              :model-value="formattedDate"
+              outlined
+              dense
               placeholder="dd/mm/yyyy - dd/mm/yyyy"
               @clear="onClearDate"
               readonly
@@ -31,10 +31,10 @@
               <template #append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover>
-                    <q-date 
-                      v-model="dateRange" 
-                      range 
-                      emit-immediately 
+                    <q-date
+                      v-model="dateRange"
+                      range
+                      emit-immediately
                       mask="DD/MM/YYYY"
                     >
                       <div class="row items-center justify-end q-pa-sm">
@@ -49,11 +49,11 @@
 
           <!-- CATEGORY -->
           <div style="width: 200px;">
-            <q-select 
-              v-model="categoryValue" 
-              :options="categoryOptions" 
-              label="Category" 
-              placeholder="Category" 
+            <q-select
+              v-model="categoryValue"
+              :options="categoryOptions"
+              label="Category"
+              placeholder="Category"
               dense
               outlined
               @clear="onClearCategory"
@@ -62,10 +62,10 @@
 
           <!-- PARTNER -->
           <div style="width: 200px;">
-            <q-select 
-              v-model="partnerValue" 
-              dense 
-              outlined 
+            <q-select
+              v-model="partnerValue"
+              dense
+              outlined
               :options="partnerOptions"
               label="Partner"
               placeholder="Partner"
@@ -76,12 +76,12 @@
 
           <!-- BARANGAY -->
           <div style="width: 200px;">
-            <q-select 
-              v-model="barangayValue" 
-              :options="barangayOptions" 
+            <q-select
+              v-model="barangayValue"
+              :options="barangayOptions"
               label="Barangay"
               placeholder="Barangay"
-              dense 
+              dense
               outlined
               @clear="onClearBarangay"
             />
@@ -108,7 +108,7 @@
       </q-table>
     </div>
 
-    
+
   </div>
 </template>
 
@@ -134,18 +134,39 @@ const categoryValue = ref(null)
 const partnerValue = ref(null)
 const barangayValue = ref(null)
 
-const columns = [
-  { name: 'date', label: "Date", field: 'date', align: 'center', sortable: true },
-  { name: 'glNo', label: 'Gl No.', field: 'glNo', align: 'center', sortable: true },
-  { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
-  { name: 'patient', label: "Patient's Name", field: 'patient', align: 'center', sortable: true },
-  { name: 'client', label: "Client's Name", field: 'client', align: 'center', sortable: true },
-  { name: 'address', label: 'Address', field: 'address', align: 'center' },
-  { name: 'age', label: 'Age', field: 'age', align: 'center' },
-  { name: 'sex', label: 'Sex', field: 'sex', align: 'center' },
-  { name: 'bill', label: 'Bill', field: 'bill', align: 'center' },
-  { name: 'issuedAmount', label: 'Issued Amount', field: 'issuedAmount', align: 'center' }
-]
+const columns = computed(() => {
+  const baseColumns = [
+    { name: 'no', label: "No.", field: 'no', align: 'center' },
+    { name: 'nameOfBeneficiaries', label: 'Name Of Beneficiaries', field: 'nameOfBeneficiaries', align: 'center' },
+    { name: 'address', label: 'Address', field: 'address', align: 'center' },
+    { name: 'contactNo', label: 'Contact No.', field: 'contactNo', align: 'center' },
+    { name: 'age', label: 'Age', field: 'age', align: 'center' },
+    { name: 'sex', label: 'Sex', field: 'sex', align: 'center' },
+    { name: 'preference', label: 'Preference', field: 'preference', align: 'center' },
+    { name: 'glNo', label: 'Gl No.', field: 'glNo', align: 'center' },
+    { name: 'partner', label: 'Partner', field: 'partner', align: 'center' },
+    { name: 'dateIssued', label: 'Date Issued', field: 'dateIssued', align: 'center' },
+  ]
+
+  // SHOW hospital bill when:
+  // - no category selected (default)
+  // - category is HOSPITAL
+  if (!categoryValue.value || categoryValue.value === 'HOSPITAL') {
+    baseColumns.push({
+      name: 'hospitalBill',
+      label: 'Hospital Bill',
+      field: 'hospitalBill',
+      align: 'center'
+    })
+  }
+
+  baseColumns.push(
+    { name: 'issuedAmount', label: 'Issued Amount', field: 'issuedAmount', align: 'center' },
+    { name: 'issuedBy', label: 'Issued By', field: 'issuedBy', align: 'center' }
+  )
+
+  return baseColumns
+})
 
 // Computed rows - filters by category, partner, and barangay on frontend
 const filteredRows = computed(() => {
@@ -153,20 +174,43 @@ const filteredRows = computed(() => {
 
   // Filter by category
   if (categoryValue.value) {
-    filtered = filtered.filter(patient => patient.category === categoryValue.value)
+    filtered = filtered.filter(p => p.category === categoryValue.value)
   }
 
   // Filter by partner
   if (partnerValue.value) {
-    filtered = filtered.filter(patient => patient.partner === partnerValue.value)
+    filtered = filtered.filter(p => p.partner === partnerValue.value)
   }
 
   // Filter by barangay
   if (barangayValue.value) {
-    filtered = filtered.filter(patient => patient.barangay === barangayValue.value)
+    filtered = filtered.filter(p => p.barangay === barangayValue.value)
   }
 
-  return filtered
+  // ✅ Calculate total based on CURRENT FILTERED DATA
+  const totalAmount = filtered.reduce((sum, p) => {
+    return sum + Number(p.issuedAmount || 0)
+  }, 0)
+
+  // Total row (FIRST ROW)
+  const totalRow = {
+    no: '',
+    nameOfBeneficiaries: 'TOTAL AMOUNT ISSUED',
+    address: '',
+    contactNo: '',
+    age: '',
+    sex: '',
+    preference: '',
+    glNo: '',
+    partner: '',
+    dateIssued: '',
+    hospitalBill: '',
+    issuedAmount: totalAmount,
+    issuedBy: '',
+    isTotal: true
+  }
+
+  return [totalRow, ...filtered]
 })
 
 const partnerOptions = computed(() => {
@@ -221,7 +265,7 @@ const formattedDate = computed(() => {
     return from
   }
   if (from && to) {
-    return `${from} - ${to}`
+    return $;{from} - $;{to}
   }
   return ''
 })
@@ -231,7 +275,7 @@ const fetchPatients = async (dateFilter = null) => {
   loading.value = true
   try {
     let params = {}
-    
+
     if (dateFilter) {
       if (typeof dateFilter === 'string') {
         params.date = dateFilter
@@ -245,7 +289,7 @@ const fetchPatients = async (dateFilter = null) => {
         }
       }
     }
-    
+
     const res = await axios.get('http://localhost:8000/api/patient-records', { params })
     allPatients.value = mapPatientsToRows(res.data)
   } catch (err) {
