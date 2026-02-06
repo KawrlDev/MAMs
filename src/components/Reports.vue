@@ -1,74 +1,92 @@
 <template>
   <div class="toolbar-wrapper">
+        <div class="title" style="margin-left: 30px;">GENERAL SUMMARY
+            <RouterLink to="/drmc">
+            <q-btn label="DRMC FILES" color="green" style="margin-left: 600px;" />
+            </RouterLink>
+            <RouterLink to="/add-patient">
+            <q-btn label="BUDGET SUMMARY" color="green" style="margin-left: 10px;" />
+          </RouterLink>
+        </div>
 
     <!-- SEARCH & ADD BUTTON -->
-    <q-card flat bordered class="filter-card">
-      <q-card-section class="row q-col-gutter-md items-center">
-        <div class="title">Patient's Record</div>
-        <!-- DATE SEARCH -->
-         <div class="search">
-        <!-- FILTER BY PERIOD (INLINE LABEL + INPUT) -->
-        <div class="col-7 row items-center q-gutter-sm" style="gap: 8px;">
-  <span class="text-body2 text-weight-medium" style="white-space: nowrap;">
-    Filter by Period:
-  </span>
+    <q-card flat bordered class="filter-card" style="margin-top: 20px; width: 85%; margin-left: 90px;">
+      <q-card-section>
+        <div class="row items-center" style="gap: 16px;">
+          <!-- DATE SEARCH -->
+          <div class="row items-center" style="gap: 8px;">
+            <span class="text-body2 text-weight-medium" style="white-space: nowrap; margin-left: 20px;">
+              Filter by Period:
+            </span>
 
-  <q-input 
-    style="flex-grow: 1; min-width: 250px;" 
-    :model-value="formattedDate" 
-    outlined 
-    dense 
-    placeholder="dd/mm/yyyy - dd/mm/yyyy"
-    @clear="onClearDate"
-    readonly
-  >
-    <template #append>
-      <q-icon name="event" class="cursor-pointer">
-        <q-popup-proxy cover>
-          <q-date 
-            v-model="dateRange" 
-            range 
-            emit-immediately 
-            mask="DD/MM/YYYY"
-          >
-            <div class="row items-center justify-end q-pa-sm">
-              <q-btn label="Close" color="primary" flat v-close-popup />
-            </div>
-          </q-date>
-        </q-popup-proxy>
-      </q-icon>
-    </template>
-  </q-input>
-</div>
+            <q-input 
+              style="width: 250px;" 
+              :model-value="formattedDate" 
+              outlined 
+              dense 
+              placeholder="dd/mm/yyyy - dd/mm/yyyy"
+              @clear="onClearDate"
+              readonly
+            >
+              <template #append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover>
+                    <q-date 
+                      v-model="dateRange" 
+                      range 
+                      emit-immediately 
+                      mask="DD/MM/YYYY"
+                    >
+                      <div class="row items-center justify-end q-pa-sm">
+                        <q-btn label="Close" color="primary" flat v-close-popup />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
+
+          <!-- CATEGORY -->
+          <div style="width: 200px;">
+            <q-select 
+              v-model="categoryValue" 
+              :options="categoryOptions" 
+              label="Category" 
+              placeholder="Category" 
+              dense
+              outlined
+              @clear="onClearCategory"
+            />
+          </div>
+
+          <!-- PARTNER -->
+          <div style="width: 200px;">
+            <q-select 
+              v-model="partnerValue" 
+              dense 
+              outlined 
+              :options="partnerOptions"
+              label="Partner"
+              placeholder="Partner"
+              @clear="onClearPartner"
+              :disable="categoryValue == null"
+            />
+          </div>
+
+          <!-- BARANGAY -->
+          <div style="width: 200px;">
+            <q-select 
+              v-model="barangayValue" 
+              :options="barangayOptions" 
+              label="Barangay"
+              placeholder="Barangay"
+              dense 
+              outlined
+              @clear="onClearBarangay"
+            />
+          </div>
         </div>
-        <div class="row-1">
-        <div class="category">
-          <q-select 
-            v-model="categoryValue" 
-            :options="categoryOptions" 
-            label="Category" 
-            placeholder="Category" 
-            dense
-            outlined
-            @clear="onClearCategory"
-          />
-        </div>
-      </div>
-      <div class="field">
-          <q-select 
-            v-model="partnerValue" 
-            dense 
-            outlined 
-            :options="partnerOptions"
-            label="Partner"
-            placeholder="Partner"
-            @clear="onClearPartner"
-            :disable="categoryValue == null"
-            :hint="categoryValue == null ? 'Must select a category before selecting a partner!' : ''"
-            :persistent-hint="categoryValue == null" 
-          />
-        </div>
-          
       </q-card-section>
     </q-card>
 
@@ -105,21 +123,31 @@ const loading = ref(false)
 const dateRange = ref(null)
 
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
+const barangayOptions = [
+  "APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA", "LIBOGANON", "MADAUM",
+  "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH", "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST",
+  "MANKILAM", "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN", "SAN ISIDRO",
+  "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"
+]
 
 const categoryValue = ref(null)
 const partnerValue = ref(null)
+const barangayValue = ref(null)
 
 const columns = [
-  { name: 'name', label: "Patient's Name", field: 'name', align: 'center', sortable: true },
-  { name: 'barangay', label: 'Barangay', field: 'barangay', align: 'center', sortable: true },
+  { name: 'date', label: "Date", field: 'date', align: 'center', sortable: true },
+  { name: 'glNo', label: 'Gl No.', field: 'glNo', align: 'center', sortable: true },
   { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
-  { name: 'partner', label: 'Partner', field: 'partner', align: 'center', sortable: true },
-  { name: 'glNum', label: 'GL No.', field: 'glNum', align: 'center', sortable: true },
-  { name: 'date', label: 'Date Issued', field: 'date', align: 'center', sortable: true },
-  { name: 'action', label: 'Action', field: 'action', align: 'center' }
+  { name: 'patient', label: "Patient's Name", field: 'patient', align: 'center', sortable: true },
+  { name: 'client', label: "Client's Name", field: 'client', align: 'center', sortable: true },
+  { name: 'address', label: 'Address', field: 'address', align: 'center' },
+  { name: 'age', label: 'Age', field: 'age', align: 'center' },
+  { name: 'sex', label: 'Sex', field: 'sex', align: 'center' },
+  { name: 'bill', label: 'Bill', field: 'bill', align: 'center' },
+  { name: 'issuedAmount', label: 'Issued Amount', field: 'issuedAmount', align: 'center' }
 ]
 
-// Computed rows - filters by category AND partner on frontend
+// Computed rows - filters by category, partner, and barangay on frontend
 const filteredRows = computed(() => {
   let filtered = allPatients.value
 
@@ -131,6 +159,11 @@ const filteredRows = computed(() => {
   // Filter by partner
   if (partnerValue.value) {
     filtered = filtered.filter(patient => patient.partner === partnerValue.value)
+  }
+
+  // Filter by barangay
+  if (barangayValue.value) {
+    filtered = filtered.filter(patient => patient.barangay === barangayValue.value)
   }
 
   return filtered
@@ -166,7 +199,7 @@ const mapPatientsToRows = (patients) => {
       name,
       barangay: patient.barangay,
       category: patient.category,
-      partner: patient.partner, // Make sure this field exists in your backend data
+      partner: patient.partner,
       glNum: patient.gl_no,
       date: patient.date_issued
     }
@@ -249,12 +282,17 @@ const onClearDate = () => {
 // Clear category filter
 const onClearCategory = () => {
   categoryValue.value = null
-  partnerValue.value = null // Also clear partner when category is cleared
+  partnerValue.value = null
 }
 
 // Clear partner filter
 const onClearPartner = () => {
   partnerValue.value = null
+}
+
+// Clear barangay filter
+const onClearBarangay = () => {
+  barangayValue.value = null
 }
 
 // Initial fetch on mount
@@ -265,23 +303,14 @@ onMounted(() => {
 
 <style scoped>
 .title {
-  font-size: 24px;
+  font-size: 33px;
   font-weight: 700;
   color: #1f8f2e;
 }
-.search {
-  margin-left: 100px;
-}
-.category {
-  width: 200px;
-}
-
-.field {
-  width: 200px;
-}
 
 .budget-table {
-  width: 100%;
+    margin-left: 90px;
+  width: 85%;
   overflow-x: auto;
 }
 
