@@ -154,35 +154,23 @@
     </q-dialog>
 
     <!-- FINAL SAVE CONFIRMATION -->
-<q-dialog v-model="showFinalSaveDialog">
-  <q-card style="min-width: 350px">
-    <q-card-section>
-      <div class="text-h6">Save Changes?</div>
-    </q-card-section>
+    <q-dialog v-model="showFinalSaveDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Save Changes?</div>
+        </q-card-section>
 
-    <q-card-section class="q-pt-none">
-      Are you sure you want to save these changes?
-    </q-card-section>
+        <q-card-section class="q-pt-none">
+          Are you sure you want to save these changes?
+        </q-card-section>
 
-    <q-card-actions align="right" class="q-px-md q-pb-md">
-      <q-btn
-        label="NO"
-        icon="close"
-        unelevated
-        class="dialog-goback-btn"
-        v-close-popup
-      />
-      <q-btn
-        label="YES"
-        icon="check"
-        unelevated
-        class="dialog-cancel-btn"
-        @click="confirmSave"
-        :loading="editActionLoading"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
+          <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
+            :loading="editActionLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- PATIENT EDIT CONFIRMATION DIALOG (when patient info is edited) -->
     <q-dialog v-model="showPatientEditDialog" persistent>
@@ -196,15 +184,8 @@
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You have modified the patient information.
+            You have modified the patient information. Are you sure you want to update?
           </div>
-
-          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="info" color="orange" />
-            </template>
-            Please choose whether to update the existing patient's information or create a new patient.
-          </q-banner>
 
           <!-- Show original patient info -->
           <div class="patient-info-box q-mb-md">
@@ -217,10 +198,10 @@
                 <span v-if="originalPatientData.suffix"> {{ originalPatientData.suffix }}</span>
               </div>
               <div class="info-item">
-                <strong>Patient ID:</strong> {{ originalPatientData.patient_id }}
+                <strong>Birthdate:</strong> {{ originalPatientData.birthdate }}
               </div>
               <div class="info-item">
-                <strong>Birthdate:</strong> {{ originalPatientData.birthdate }}
+                <strong>Age:</strong> {{ calculateAgeFromDate(originalPatientData.birthdate) }}
               </div>
               <div class="info-item">
                 <strong>Sex:</strong> {{ originalPatientData.sex || 'N/A' }}
@@ -246,10 +227,10 @@
                 <span v-if="suffixValue"> {{ suffixValue }}</span>
               </div>
               <div class="info-item">
-                <strong>Patient ID:</strong> {{ originalPatientData.patient_id }}
+                <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
               </div>
               <div class="info-item">
-                <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                <strong>Age:</strong> {{ ageValue }}
               </div>
               <div class="info-item">
                 <strong>Sex:</strong> {{ sexValue || 'N/A' }}
@@ -269,14 +250,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
-          <q-btn
-  label="PROCEED"
-  icon="check"
-  unelevated
-  class="dialog-cancel-btn"
-  @click="showFinalSaveDialog = true"
-  :loading="editActionLoading"
-/>
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="showFinalSaveDialog = true"
+            :loading="editActionLoading" />
 
 
         </q-card-actions>
@@ -391,6 +366,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { toWords } from 'number-to-words'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+// Enable custom parse format for dayjs
+dayjs.extend(customParseFormat)
 
 const router = useRouter()
 const route = useRoute()
@@ -505,10 +484,14 @@ const convertToMySQLDate = (dateString) => {
 const convertFromMySQLDate = (dateString) => {
   if (!dateString) return null
 
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
+  // Split the MySQL date format YYYY-MM-DD
+  const parts = dateString.split('-')
+  if (parts.length !== 3) return null
+
+  // parts[0] = year, parts[1] = month, parts[2] = day
+  const year = parts[0]
+  const month = parts[1].padStart(2, '0')
+  const day = parts[2].padStart(2, '0')
 
   return `${day}/${month}/${year}`
 }
@@ -627,8 +610,8 @@ const handleSaveClick = () => {
   const transactionChanged = checkTransactionChanges()
 
   if (patientChanged) {
-  showPatientEditDialog.value = true
-  
+    showPatientEditDialog.value = true
+
   } else if (transactionChanged) {
     // Only transaction/client details changed
     showTransactionEditDialog.value = true
@@ -1047,6 +1030,7 @@ function getDaySuffix(day) {
 .flat-input :deep(.q-field--disabled .q-field__label) {
   color: #757575 !important;
 }
+
 /* BUTTON COLORS */
 .delete-btn {
   background: #ff3b3b;

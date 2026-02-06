@@ -5,7 +5,7 @@
       <template #top>
         <div class="row items-center full-width">
           <div class="text-h4 text-weight-bold text-green">
-            Patient's History
+            Patient's Assistance History
           </div>
           <q-space />
         </div>
@@ -14,30 +14,25 @@
       <!-- ELIGIBILITY DATE -->
       <template #body-cell-eligibilityDate="props">
         <q-td :class="props.row.eligibilityClass">
-          {{ props.row.eligibilityDate }}
+          <span>
+            {{ props.row.eligibilityDate }}
 
-          <q-tooltip anchor="top middle" self="bottom middle" class="text-subtitle2 q-pa-xs" disable-reposition>
-            <span v-if="props.row.daysRemaining > 0">
-              Eligible in {{ props.row.daysRemaining }} day<span v-if="props.row.daysRemaining > 1">s</span>
-            </span>
-            <span v-else>
-              Eligible
-            </span>
-          </q-tooltip>
+            <q-tooltip anchor="top middle" self="bottom middle" class="text-subtitle2 q-pa-xs">
+              <span v-if="props.row.daysRemaining > 0">
+                Eligible in {{ props.row.daysRemaining }} day<span v-if="props.row.daysRemaining > 1">s</span>
+              </span>
+              <span v-else>
+                Eligible
+              </span>
+            </q-tooltip>
+          </span>
         </q-td>
       </template>
 
       <!-- ACTION COLUMN -->
       <template #body-cell-action="props">
         <q-td class="action-cell">
-          <q-btn
-            icon="visibility"
-            color="primary"
-            flat
-            round
-            dense
-            @click="viewDetails(props.row.glNum)"
-          >
+          <q-btn icon="visibility" color="primary" flat round dense @click="viewDetails(props.row.glNum)">
             <q-tooltip>View Details</q-tooltip>
           </q-btn>
         </q-td>
@@ -57,8 +52,8 @@
 
         <q-card-section>
           <div class="info-section q-mb-md">
-            <div class="section-title">Transcation Details</div>
-            
+            <div class="section-title">Transaction Details</div>
+
             <!-- VIEW MODE -->
             <div v-if="!editMode">
               <div class="info-grid">
@@ -78,18 +73,20 @@
                   <span class="info-label">Issued By:</span>
                   <span class="info-value">{{ selectedRecord?.issuedBy }}</span>
                 </div>
-                
+
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
-                <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'" class="info-item">
+                <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
+                  class="info-item">
                   <span class="info-label">Issued Amount:</span>
                   <span class="info-value">₱{{ selectedRecord?.issuedAmount }}</span>
                 </div>
-                
+
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="selectedRecord?.category === 'HOSPITAL'">
                   <div class="info-item">
                     <span class="info-label">Hospital Bill:</span>
-                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + selectedRecord.hospitalBill : 'N/A' }}</span>
+                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + selectedRecord.hospitalBill : 'N/A'
+                    }}</span>
                   </div>
                   <div class="info-item">
                     <span class="info-label">Issued Amount:</span>
@@ -99,7 +96,8 @@
 
                 <!-- Patient is same as client checkbox (view mode - disabled) -->
                 <div class="info-item info-item-full">
-                  <q-checkbox :model-value="!selectedRecord?.clientName" label="Patient is same as client?" class="form-checkbox" disable />
+                  <q-checkbox :model-value="!selectedRecord?.clientName" label="Patient is same as client?"
+                    class="form-checkbox" disable />
                 </div>
               </div>
 
@@ -127,39 +125,43 @@
                   <q-input v-model="editData.glNum" dense outlined readonly class="edit-input" />
                 </div>
                 <div class="edit-item">
-                  <label class="edit-label">Category:</label>
-                  <q-select v-model="editData.category" :options="categoryOptions" dense outlined class="edit-input" @update:model-value="onCategoryChange" />
+                  <label class="edit-label">Category: <span class="required">*</span></label>
+                  <q-select v-model="editData.category" :options="categoryOptions" dense outlined class="edit-input"
+                    @update:model-value="onCategoryChange" />
                 </div>
                 <div class="edit-item">
-                  <label class="edit-label">Partner:</label>
+                  <label class="edit-label">Partner: <span class="required">*</span></label>
                   <q-select v-model="editData.partner" :options="partnerOptions" dense outlined class="edit-input" />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Issued By:</label>
                   <q-input v-model="editData.issuedBy" dense outlined readonly class="edit-input" />
                 </div>
-                
+
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
-                  <label class="edit-label">Issued Amount:</label>
+                  <label class="edit-label">Issued Amount: <span class="required">*</span></label>
                   <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱" />
                 </div>
-                
+
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:</label>
-                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input" prefix="₱" />
+                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input"
+                      prefix="₱" />
                   </div>
                   <div class="edit-item">
-                    <label class="edit-label">Issued Amount:</label>
-                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱" />
+                    <label class="edit-label">Issued Amount: <span class="required">*</span></label>
+                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input"
+                      prefix="₱" />
                   </div>
                 </template>
 
                 <!-- Patient is same as client checkbox -->
                 <div class="edit-item edit-item-full">
-                  <q-checkbox v-model="editData.isChecked" label="Patient is same as client?" class="form-checkbox" @update:model-value="onCheckboxChange" />
+                  <q-checkbox v-model="editData.isChecked" label="Patient is same as client?" class="form-checkbox"
+                    @update:model-value="onCheckboxChange" />
                 </div>
               </div>
 
@@ -167,12 +169,24 @@
               <template v-if="!editData.isChecked">
                 <div class="section-title q-mt-md q-mb-sm">Client Information</div>
                 <div class="edit-grid">
-                  <div class="edit-item edit-item-full">
-                    <label class="edit-label">Client Name:</label>
-                    <q-input v-model="editData.clientName" dense outlined class="edit-input" />
+                  <div class="edit-item">
+                    <label class="edit-label">Last Name: <span class="required">*</span></label>
+                    <q-input v-model="editData.clientLastName" dense outlined class="edit-input" />
                   </div>
                   <div class="edit-item">
-                    <label class="edit-label">Relationship:</label>
+                    <label class="edit-label">First Name: <span class="required">*</span></label>
+                    <q-input v-model="editData.clientFirstName" dense outlined class="edit-input" />
+                  </div>
+                  <div class="edit-item">
+                    <label class="edit-label">Middle Name:</label>
+                    <q-input v-model="editData.clientMiddleName" dense outlined class="edit-input" />
+                  </div>
+                  <div class="edit-item">
+                    <label class="edit-label">Suffix:</label>
+                    <q-input v-model="editData.clientSuffix" dense outlined class="edit-input" />
+                  </div>
+                  <div class="edit-item edit-item-full">
+                    <label class="edit-label">Relationship: <span class="required">*</span></label>
                     <q-input v-model="editData.relationship" dense outlined class="edit-input" />
                   </div>
                 </div>
@@ -186,24 +200,12 @@
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <!-- VIEW MODE BUTTONS -->
           <template v-if="!editMode">
-            <q-btn
-  label="CLOSE"
-  icon="close"
-  unelevated
-  class="dialog-close-btn"
-  @click="showCloseConfirmDialog = true"
-/>
-
+            <q-btn label="CLOSE" icon="close" unelevated class="dialog-close-btn"
+              @click="showCloseConfirmDialog = true" />
 
             <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
-            <q-btn
-  label="PRINT PDF"
-  icon="print"
-  unelevated
-  class="dialog-print-btn"
-  @click="showPrintConfirmDialog = true"
-  :loading="pdfLoading"
-/>
+            <q-btn label="PRINT PDF" icon="print" unelevated class="dialog-print-btn"
+              @click="showPrintConfirmDialog = true" :loading="pdfLoading" />
           </template>
 
           <!-- EDIT MODE BUTTONS -->
@@ -216,64 +218,39 @@
     </q-dialog>
 
     <q-dialog v-model="showCloseConfirmDialog">
-  <q-card style="min-width: 350px">
-    <q-card-section>
-      <div class="text-h6">Close Form?</div>
-    </q-card-section>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Close Form?</div>
+        </q-card-section>
 
-    <q-card-section class="q-pt-none">
-      Are you sure you want to close?
-    </q-card-section>
+        <q-card-section class="q-pt-none">
+          Are you sure you want to close?
+        </q-card-section>
 
-    <q-card-actions align="right" class="q-px-md q-pb-md">
-      <q-btn
-        unelevated
-        icon="close"
-        label="NO"
-        class="dialog-goback-btn"
-        v-close-popup
-      />
-      <q-btn
-        unelevated
-        icon="check"
-        label="YES"
-        class="dialog-confirm-btn"
-        @click="confirmClose"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmClose" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
+    <q-dialog v-model="showPrintConfirmDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Print PDF?</div>
+        </q-card-section>
 
-<q-dialog v-model="showPrintConfirmDialog">
-  <q-card style="min-width: 350px">
-    <q-card-section>
-      <div class="text-h6">Print PDF?</div>
-    </q-card-section>
+        <q-card-section class="q-pt-none">
+          Do you want to generate and print this PDF?
+        </q-card-section>
 
-    <q-card-section class="q-pt-none">
-      Do you want to generate and print this PDF?
-    </q-card-section>
-
-    <q-card-actions align="right">
-      <q-btn
-        unelevated
-        icon="close"
-        label="NO"
-        class="dialog-goback-btn"
-        v-close-popup
-      />
-      <q-btn
-        unelevated
-        icon="print"
-        label="YES"
-        class="dialog-confirm-btn"
-        @click="confirmPrint"
-        :loading="pdfLoading"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
+        <q-card-actions align="right">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+          <q-btn unelevated icon="print" label="YES" class="dialog-confirm-btn" @click="confirmPrint"
+            :loading="pdfLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- SAVE CONFIRMATION DIALOG -->
     <q-dialog v-model="showSaveConfirmDialog">
@@ -288,7 +265,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmSave" :loading="saveLoading" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmSave"
+            :loading="saveLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -347,7 +325,10 @@ const editData = ref({
   issuedBy: null,
   issuedAmount: null,
   hospitalBill: null,
-  clientName: null,
+  clientLastName: null,
+  clientFirstName: null,
+  clientMiddleName: null,
+  clientSuffix: null,
   relationship: null,
   isChecked: false
 })
@@ -419,6 +400,8 @@ const viewDetails = async (glNumber) => {
 }
 
 const enterEditMode = () => {
+  const data = selectedRecord.value.rawData
+
   // Copy current data to edit data
   editData.value = {
     glNum: selectedRecord.value.glNum,
@@ -427,10 +410,13 @@ const enterEditMode = () => {
     issuedBy: selectedRecord.value.issuedBy,
     issuedAmount: selectedRecord.value.issuedAmount,
     hospitalBill: selectedRecord.value.hospitalBill,
-    clientName: selectedRecord.value.clientName,
+    clientLastName: data.client_lastname || null,
+    clientFirstName: data.client_firstname || null,
+    clientMiddleName: data.client_middlename || null,
+    clientSuffix: data.client_suffix || null,
     relationship: selectedRecord.value.relationship,
-    // If clientName is null/empty, patient is same as client
-    isChecked: !selectedRecord.value.clientName
+    // If client data doesn't exist, patient is same as client
+    isChecked: !data.client_lastname
   }
   editMode.value = true
 }
@@ -454,7 +440,10 @@ const confirmCancel = () => {
     issuedBy: null,
     issuedAmount: null,
     hospitalBill: null,
-    clientName: null,
+    clientLastName: null,
+    clientFirstName: null,
+    clientMiddleName: null,
+    clientSuffix: null,
     relationship: null,
     isChecked: false
   }
@@ -472,31 +461,42 @@ const onCategoryChange = () => {
 }
 
 const onCheckboxChange = () => {
-  // If checked (patient is same as client), clear client name and relationship
+  // If checked (patient is same as client), clear client data
   if (editData.value.isChecked) {
-    editData.value.clientName = null
+    editData.value.clientLastName = null
+    editData.value.clientFirstName = null
+    editData.value.clientMiddleName = null
+    editData.value.clientSuffix = null
     editData.value.relationship = null
   }
 }
+
 const confirmClose = () => {
   showCloseConfirmDialog.value = false
   showDetailsDialog.value = false
   editMode.value = false
   selectedRecord.value = null
 }
+
 const confirmSave = async () => {
   saveLoading.value = true
   try {
     // Prepare form data for update
     const formData = new FormData()
     formData.append('glNum', editData.value.glNum)
+    formData.append('update_transaction_only', '1')
     formData.append('category', editData.value.category)
     formData.append('partner', editData.value.partner)
-    formData.append('issued_amount', editData.value.issuedAmount)
     formData.append('hospital_bill', editData.value.hospitalBill || 0)
-    formData.append('client_name', editData.value.clientName || '')
+    formData.append('issued_amount', editData.value.issuedAmount)
+    formData.append('is_checked', editData.value.isChecked ? 1 : 0)
+
+    // Send individual client fields
+    formData.append('client_lastname', editData.value.clientLastName || '')
+    formData.append('client_firstname', editData.value.clientFirstName || '')
+    formData.append('client_middlename', editData.value.clientMiddleName || '')
+    formData.append('client_suffix', editData.value.clientSuffix || '')
     formData.append('relationship', editData.value.relationship || '')
-    formData.append('update_transaction_only', '1')
 
     await axios.post('http://localhost:8000/api/patient-details/update', formData)
 
@@ -506,12 +506,11 @@ const confirmSave = async () => {
       position: 'top'
     })
 
-
     showSaveConfirmDialog.value = false
 
     // Refresh the data
     await viewDetails(editData.value.glNum)
-    
+
     // Refresh the table
     const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
     const today = dayjs().startOf('day')
@@ -896,6 +895,10 @@ onMounted(() => {
   font-weight: 600;
   color: #1f8f2e;
   font-size: 13px;
+}
+
+.required {
+  color: red;
 }
 
 .edit-input :deep(.q-field__control) {
