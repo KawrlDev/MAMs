@@ -136,15 +136,15 @@ const addSupplementaryBonus = async () => {
     formData.append('medicine_supplementary_bonus', medicineSupplementaryBudget.value)
     formData.append('laboratory_supplementary_bonus', laboratorySupplementaryBudget.value)
     formData.append('hospital_supplementary_bonus', hospitalSupplementaryBudget.value)
-    
+
     const res = await axios.post('http://localhost:8000/api/add-supplementary-bonus', formData)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Supplementary bonus added successfully',
       position: 'top'
     })
-    
+
     router.push('/budget-table')
   } catch (err) {
     console.error('Error adding supplementary bonus:', err)
@@ -177,7 +177,7 @@ const addSupplementaryBonus = async () => {
   margin: 5px;
   color: #1f8f2e;
 }
-
+x
 .content {
   padding: 0px 20px;
 }

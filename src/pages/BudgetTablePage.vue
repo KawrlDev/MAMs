@@ -1,8 +1,9 @@
 <template>
     <div class="container">
-        <SupplementaryBudgetTable />
-                <TransferBudgetTable />
-        <InitialBudgetTable />
+      <InitialBudgetTable />
+      <SupplementaryBudgetTable />
+      <TransferBudgetTable />
+
     </div>
 </template>
 
@@ -27,7 +28,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-    margin-top: 70px;
+    margin-top: 20px;
     margin-left: 50px;
     margin-right: 50px;
     border: 2px solid #b5b5b5;

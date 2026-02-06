@@ -52,7 +52,7 @@
 
         <div class="actions">
           <q-btn class="btn-cancel" icon="close" label="CANCEL" @click="showCancelDialog = true" dense />
-          <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
+          <q-btn class="btn-save" icon="swap_horiz" label="TRANSFER" @click="handleSaveClick" dense />
         </div>
 
         <!-- CANCEL CONFIRMATION DIALOG -->
@@ -73,15 +73,15 @@
           </q-card>
         </q-dialog>
 
-        <!-- SAVE CONFIRMATION DIALOG -->
+        <!-- TRANSFER CONFIRMATION DIALOG -->
         <q-dialog v-model="showSaveDialog">
           <q-card style="min-width: 350px">
             <q-card-section>
-              <div class="text-h6">Save Form?</div>
+              <div class="text-h6">Transfer Budget?</div>
             </q-card-section>
 
             <q-card-section class="q-pt-none">
-              Are you sure you want to save?
+              Are you sure you want to transfer this amount?
             </q-card-section>
 
             <q-card-actions align="right" class="q-px-md q-pb-md">
@@ -100,6 +100,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import axios from 'axios'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -125,21 +126,42 @@ const handleSaveClick = () => {
   } else {
     $q.notify({
       type: 'negative',
-      message: 'Please fill in all required fields',
+      message: 'Please complete all required fields before transferring',
       position: 'top'
     })
   }
 }
 
-const confirmSave = () => {
+const confirmSave = async () => {
   showSaveDialog.value = false
-  // TODO: Add actual transfer logic here
-  $q.notify({
-    type: 'positive',
-    message: 'Budget transferred successfully',
-    position: 'top'
-  })
-  router.push('/budget-table')
+
+  try {
+    // POST request to save the transfer record
+    await axios.post('http://localhost:8000/api/transfer-budget', {
+      year: new Date().getFullYear(),
+      from: fromSource.value,
+      to: toDestination.value,
+      amount: parseInt(transferAmount.value),
+      date_added: new Date().toISOString().split('T')[0] // yyyy-mm-dd
+    })
+
+    $q.notify({
+      type: 'positive',
+      message: 'Budget successfully transferred',
+      position: 'top'
+    })
+
+    // Redirect to TransferBudgetTable page
+    router.push('/transfer-budget-table')
+
+  } catch (err) {
+    console.log(err)
+    $q.notify({
+      type: 'negative',
+      message: 'Error transferring budget. Try again.',
+      position: 'top'
+    })
+  }
 }
 
 const handleCancel = () => {
