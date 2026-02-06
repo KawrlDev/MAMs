@@ -161,8 +161,8 @@ onMounted(async () => {
 
 /* CONTAINER */
 .dashboard-container {
-  width: 100%;
-  max-width: 500px;
+  width: 70%;
+  max-width: 90%;
   padding: 10px;
   box-sizing: border-box;
   margin: 0 auto 1%;
@@ -377,19 +377,16 @@ onMounted(async () => {
   padding: 16px;
 }
 
-/* SMALL MOBILE (up to 480px) */
+/* Extra Small Mobile (320px to 480px) */
 @media (max-width: 480px) {
   .dashboard-container {
-    width: 100%;
-    max-width: 100%;
     padding: 8px;
-    margin: 0 auto 1%;
   }
 
   .dashboard-row {
     grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 12px;
   }
 
   .enhanced-card {
@@ -397,17 +394,186 @@ onMounted(async () => {
   }
 
   .enhanced-header {
-    font-size: 14px;
+    font-size: 13px;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .card-body {
     padding: 10px;
     gap: 8px;
   }
 
-  .enhanced-header .q-icon {
+  .label {
+    font-size: 10px;
+    max-width: 160px;
+    padding: 3px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 14px;
+  }
+
+  .remaining-value {
+    font-size: 13px;
+  }
+
+  .divider {
+    margin: 2px 0;
+  }
+
+  .totals-card {
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .totals-container {
+    flex-direction: column;
+  }
+
+  .vertical-divider {
+    display: none;
+  }
+
+  .totals-header {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .total-item {
+    padding: 12px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
     font-size: 18px;
+  }
+
+  .chart-card {
+    border-radius: 10px;
+    margin-bottom: 0;
+    margin-top: 1%;
+  }
+
+  .chart-header {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .chart-container {
+    height: 180px;
+    padding: 10px;
+  }
+}
+
+/* Small Mobile (481px to 599px) */
+@media (min-width: 481px) and (max-width: 599px) {
+  .dashboard-container {
+    padding: 9px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .enhanced-card {
+    border-radius: 11px;
+  }
+
+  .enhanced-header {
+    font-size: 14px;
+    padding: 9px;
+    gap: 7px;
   }
 
   .card-body {
     padding: 12px;
+    gap: 9px;
+  }
+
+  .label {
+    font-size: 11px;
+    max-width: 170px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 16px;
+  }
+
+  .remaining-value {
+    font-size: 14px;
+  }
+
+  .totals-card {
+    border-radius: 11px;
+    margin-bottom: 14px;
+  }
+
+  .totals-container {
+    flex-direction: column;
+  }
+
+  .vertical-divider {
+    display: none;
+  }
+
+  .totals-header {
+    font-size: 13px;
+    padding: 9px;
+  }
+
+  .total-item {
+    padding: 14px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 20px;
+  }
+
+  .chart-card {
+    border-radius: 11px;
+  }
+
+  .chart-header {
+    font-size: 13px;
+    padding: 9px;
+  }
+
+  .chart-container {
+    height: 200px;
+    padding: 12px;
+  }
+}
+
+/* Tablet Portrait (600px to 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .enhanced-card {
+    border-radius: 12px;
+  }
+
+  .enhanced-header {
+    font-size: 15px;
+    padding: 9px;
+    gap: 8px;
+  }
+
+  .card-body {
+    padding: 13px;
     gap: 10px;
   }
 
@@ -418,116 +584,16 @@ onMounted(async () => {
 
   .value,
   .patient-value {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .remaining-value {
     font-size: 15px;
   }
 
-  .divider {
-    margin: 2px 0;
-  }
-
   .totals-card {
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 16px;
-  }
-
-  .totals-container {
-    flex-direction: column;
-  }
-
-  .vertical-divider {
-    display: none;
-  }
-
-  .totals-header {
-    font-size: 13px;
-    padding: 10px;
-  }
-
-  .total-item {
-    padding: 16px;
-  }
-
-  .amount-titles,
-  .amount-titles2 {
-    font-size: 22px;
-  }
-
-  .chart-card {
-    border-radius: 10px;
-    margin-bottom: 0;
-  }
-
-  .chart-header {
-    font-size: 13px;
-    padding: 10px;
-  }
-
-  .chart-container {
-    height: 200px;
-    padding: 12px;
-  }
-}
-
-/* MOBILE (481px to 600px) */
-@media (min-width: 481px) and (max-width: 600px) {
-  .dashboard-container {
-    width: 100%;
-    max-width: 100%;
-    padding: 10px;
-    margin: 0 auto 1%;
-  }
-
-  .dashboard-row {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-bottom: 18px;
-  }
-
-  .enhanced-card {
-    border-radius: 12px;
-  }
-
-  .enhanced-header {
-    font-size: 15px;
-    padding: 10px;
-  }
-
-  .enhanced-header .q-icon {
-    font-size: 20px;
-  }
-
-  .card-body {
-    padding: 14px;
-  }
-
-  .label {
-    font-size: 12px;
-  }
-
-  .value,
-  .patient-value {
-    font-size: 18px;
-  }
-
-  .remaining-value {
-    font-size: 16px;
-  }
-
-  .totals-card {
-    border-radius: 12px;
-    margin-bottom: 18px;
-  }
-
-  .totals-container {
-    flex-direction: column;
-  }
-
-  .vertical-divider {
-    display: none;
   }
 
   .totals-header {
@@ -536,7 +602,7 @@ onMounted(async () => {
   }
 
   .total-item {
-    padding: 18px;
+    padding: 16px;
   }
 
   .amount-titles,
@@ -555,39 +621,40 @@ onMounted(async () => {
 
   .chart-container {
     height: 220px;
-    padding: 14px;
+    padding: 13px;
   }
 }
 
-/* TABLET PORTRAIT (601px to 768px) */
-@media (min-width: 601px) and (max-width: 768px) {
+/* Tablet Landscape (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
   .dashboard-container {
-    width: 95%;
-    max-width: 720px;
     padding: 10px;
   }
 
   .dashboard-row {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 
   .enhanced-card {
-    border-radius: 12px;
+    border-radius: 13px;
   }
 
   .enhanced-header {
     font-size: 16px;
-    padding: 10px;
+    padding: 9px;
+    gap: 8px;
   }
 
   .card-body {
     padding: 14px;
+    gap: 10px;
   }
 
   .label {
-    font-size: 12px;
+    font-size: 11px;
+    max-width: 185px;
   }
 
   .value,
@@ -596,11 +663,86 @@ onMounted(async () => {
   }
 
   .remaining-value {
+    font-size: 16px;
+  }
+
+  .totals-card {
+    border-radius: 13px;
+    margin-bottom: 18px;
+  }
+
+  .totals-header {
+    font-size: 14px;
+    padding: 13px;
+  }
+
+  .total-item {
+    padding: 17px;
+  }
+
+  .amount-titles,
+  .amount-titles2 {
+    font-size: 26px;
+  }
+
+  .chart-card {
+    border-radius: 13px;
+  }
+
+  .chart-header {
+    font-size: 14px;
+    padding: 13px;
+  }
+
+  .chart-container {
+    height: 240px;
+    padding: 14px;
+  }
+}
+
+/* Small Desktop (1024px to 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .dashboard-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  .enhanced-card {
+    border-radius: 13px;
+  }
+
+  .enhanced-header {
+    font-size: 17px;
+    padding: 10px;
+    gap: 9px;
+  }
+
+  .card-body {
+    padding: 15px;
+    gap: 11px;
+  }
+
+  .label {
+    font-size: 12px;
+    max-width: 190px;
+  }
+
+  .value,
+  .patient-value {
+    font-size: 19px;
+  }
+
+  .remaining-value {
     font-size: 17px;
   }
 
   .totals-card {
-    border-radius: 12px;
+    border-radius: 13px;
     margin-bottom: 20px;
   }
 
@@ -615,80 +757,6 @@ onMounted(async () => {
 
   .amount-titles,
   .amount-titles2 {
-    font-size: 26px;
-  }
-
-  .chart-card {
-    border-radius: 12px;
-  }
-
-  .chart-header {
-    font-size: 15px;
-    padding: 14px;
-  }
-
-  .chart-container {
-    height: 240px;
-    padding: 14px;
-  }
-}
-
-/* TABLET LANDSCAPE (769px to 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .dashboard-container {
-    width: 90%;
-    max-width: 900px;
-    padding: 10px;
-  }
-
-  .dashboard-row {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin-bottom: 22px;
-  }
-
-  .enhanced-card {
-    border-radius: 13px;
-  }
-
-  .enhanced-header {
-    font-size: 17px;
-    padding: 10px;
-  }
-
-  .card-body {
-    padding: 15px;
-  }
-
-  .label {
-    font-size: 12px;
-  }
-
-  .value,
-  .patient-value {
-    font-size: 19px;
-  }
-
-  .remaining-value {
-    font-size: 17px;
-  }
-
-  .totals-card {
-    border-radius: 13px;
-    margin-bottom: 22px;
-  }
-
-  .totals-header {
-    font-size: 15px;
-    padding: 15px;
-  }
-
-  .total-item {
-    padding: 19px;
-  }
-
-  .amount-titles,
-  .amount-titles2 {
     font-size: 28px;
   }
 
@@ -698,7 +766,7 @@ onMounted(async () => {
 
   .chart-header {
     font-size: 15px;
-    padding: 15px;
+    padding: 14px;
   }
 
   .chart-container {
@@ -707,18 +775,16 @@ onMounted(async () => {
   }
 }
 
-/* DESKTOP SMALL (1025px to 1280px) */
-@media (min-width: 1025px) and (max-width: 1280px) {
+/* Medium Desktop (1280px to 1599px) */
+@media (min-width: 1280px) and (max-width: 1599px) {
   .dashboard-container {
-    width: 80%;
-    max-width: 1000px;
     padding: 10px;
   }
 
   .dashboard-row {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    margin-bottom: 23px;
+    margin-bottom: 22px;
   }
 
   .enhanced-card {
@@ -728,14 +794,17 @@ onMounted(async () => {
   .enhanced-header {
     font-size: 18px;
     padding: 10px;
+    gap: 10px;
   }
 
   .card-body {
     padding: 16px;
+    gap: 12px;
   }
 
   .label {
     font-size: 13px;
+    max-width: 200px;
   }
 
   .value,
@@ -749,16 +818,16 @@ onMounted(async () => {
 
   .totals-card {
     border-radius: 14px;
-    margin-bottom: 23px;
+    margin-bottom: 22px;
   }
 
   .totals-header {
     font-size: 16px;
-    padding: 16px;
+    padding: 15px;
   }
 
   .total-item {
-    padding: 20px;
+    padding: 19px;
   }
 
   .amount-titles,
@@ -772,7 +841,7 @@ onMounted(async () => {
 
   .chart-header {
     font-size: 16px;
-    padding: 16px;
+    padding: 15px;
   }
 
   .chart-container {
@@ -781,11 +850,9 @@ onMounted(async () => {
   }
 }
 
-/* DESKTOP MEDIUM (1281px to 1440px) */
-@media (min-width: 1281px) and (max-width: 1440px) {
+/* Large Desktop (1600px to 1919px) */
+@media (min-width: 1600px) and (max-width: 1919px) {
   .dashboard-container {
-    width: 75%;
-    max-width: 1100px;
     padding: 10px;
   }
 
@@ -802,14 +869,17 @@ onMounted(async () => {
   .enhanced-header {
     font-size: 18px;
     padding: 10px;
+    gap: 10px;
   }
 
   .card-body {
     padding: 16px;
+    gap: 12px;
   }
 
   .label {
     font-size: 13px;
+    max-width: 200px;
   }
 
   .value,
@@ -855,86 +925,10 @@ onMounted(async () => {
   }
 }
 
-/* DESKTOP LARGE (1441px to 1920px) */
-@media (min-width: 1441px) and (max-width: 1920px) {
+/* Extra Large Desktop (1920px and up) */
+@media (min-width: 1920px) {
   .dashboard-container {
-    width: 70%;
-    max-width: 1200px;
-    padding: 10px;
-  }
-
-  .dashboard-row {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 24px;
-  }
-
-  .enhanced-card {
-    border-radius: 14px;
-  }
-
-  .enhanced-header {
-    font-size: 18px;
-    padding: 10px;
-  }
-
-  .card-body {
-    padding: 16px;
-  }
-
-  .label {
-    font-size: 13px;
-  }
-
-  .value,
-  .patient-value {
-    font-size: 20px;
-  }
-
-  .remaining-value {
-    font-size: 18px;
-  }
-
-  .totals-card {
-    border-radius: 14px;
-    margin-bottom: 24px;
-  }
-
-  .totals-header {
-    font-size: 16px;
-    padding: 16px;
-  }
-
-  .total-item {
-    padding: 20px;
-  }
-
-  .amount-titles,
-  .amount-titles2 {
-    font-size: 32px;
-  }
-
-  .chart-card {
-    border-radius: 14px;
-  }
-
-  .chart-header {
-    font-size: 16px;
-    padding: 16px;
-  }
-
-  .chart-container {
-    height: 300px;
-    padding: 16px;
-  }
-}
-
-/* ULTRA WIDE (1921px and above) */
-@media (min-width: 1921px) {
-  .dashboard-container {
-    width: 65%;
-    max-width: 1400px;
-    padding: 10px;
+    padding: 12px;
   }
 
   .dashboard-row {
@@ -944,43 +938,46 @@ onMounted(async () => {
   }
 
   .enhanced-card {
-    border-radius: 14px;
+    border-radius: 15px;
   }
 
   .enhanced-header {
-    font-size: 18px;
-    padding: 10px;
+    font-size: 19px;
+    padding: 11px;
+    gap: 11px;
   }
 
   .card-body {
-    padding: 16px;
+    padding: 17px;
+    gap: 13px;
   }
 
   .label {
-    font-size: 13px;
+    font-size: 14px;
+    max-width: 210px;
   }
 
   .value,
   .patient-value {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .remaining-value {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .totals-card {
-    border-radius: 14px;
+    border-radius: 15px;
     margin-bottom: 26px;
   }
 
   .totals-header {
-    font-size: 16px;
-    padding: 16px;
+    font-size: 17px;
+    padding: 17px;
   }
 
   .total-item {
-    padding: 20px;
+    padding: 22px;
   }
 
   .amount-titles,
@@ -989,17 +986,17 @@ onMounted(async () => {
   }
 
   .chart-card {
-    border-radius: 14px;
+    border-radius: 15px;
   }
 
   .chart-header {
-    font-size: 16px;
-    padding: 16px;
+    font-size: 17px;
+    padding: 17px;
   }
 
   .chart-container {
     height: 320px;
-    padding: 16px;
+    padding: 17px;
   }
 }
 

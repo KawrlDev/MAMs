@@ -4,17 +4,17 @@
     
     <q-card-section class="text-center card-content">
       <div class="charts-container">
-        <div class="chart-items chart-medium">
+        <div class="chart-wrapper chart-medium">
           <p>PER CATEGORY</p>
           <canvas ref="perCategoryChart" />
         </div>
 
-        <div class="chart-itemss chart-small">
+        <div class="chart-wrapper chart-small">
           <p>PER SEX</p>
           <canvas ref="perSexChart" />
         </div>
 
-        <div class="chart-item chart-large">
+        <div class="chart-wrapper chart-large">
           <p>PER AGE BRACKET</p>
           <canvas ref="perAgeBracketChart" />
         </div>
@@ -225,90 +225,77 @@ onMounted(async () => {
   font-weight: 900;
   font-size: 22px;
   color: #2e7d32;
-  margin-top: 40px;
-  margin-bottom: 20px;
+  margin-top: 50px;
+  margin-bottom: 30px;
   text-align: center;
 }
 
 /* Charts Container */
 .charts-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 3px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
   margin-bottom: 40px;
-  padding: 0 5px;
+  padding: 0 10px;
   margin-top: 30px;
   flex-wrap: wrap;
 }
 
-.chart-item {
+.chart-wrapper {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
 }
 
-.chart-item p {
+.chart-wrapper p {
   font-size: 20px;
   font-weight: 700;
   color: #2e7d32;
   margin-bottom: 15px;
   letter-spacing: 0.3px;
+  min-height: 25px;
 }
-.chart-items p {
-  font-size: 20px;
-  font-weight: 700;
-  color: #2e7d32;
-  margin-bottom: 60px;
-  letter-spacing: 0.3px;
-  margin-top: -10%;
-}
-.chart-itemss p {
-  font-size: 20px;
-  font-weight: 700;
-  color: #2e7d32;
-  margin-bottom: 100px;
-  letter-spacing: 0.3px;
-   margin-top: -15%;
-}
-/* Chart Sizes - Original Dimensions */
+
+/* Chart Sizes - Consistent across all charts */
 .chart-small {
-  flex: 0 0 180px;
+    flex: 1 1 200px;
+    height: 190px !important;
+  max-width: 190px;
+  min-width: 200px;
 }
-
-.chart-small canvas {
-  width: 160px !important;
-  height: 190px !important;
-}
-
 .chart-medium {
-  flex: 0 0 220px;
+    flex: 1 1 200px;
+    height: 220px !important;
+  max-width: 310px;
+  min-width: 200px;
 }
-
-.chart-medium canvas {
-  width: 220px !important;
-  height: 220px !important;
-}
-
 .chart-large {
-  flex: 0 0 280px;
+  flex: 1 1 200px;
+  height: 270px !important;
+  max-width: 310px;
+  min-width: 250px;
 }
 
+.chart-small canvas,
+.chart-medium canvas,
 .chart-large canvas {
-  width: 280px !important;
-  height: 280px !important;
+  width: 100% !important;
+  height: 200px !important;
+  max-width: 280px;
 }
 
 /* Table */
 .table-container {
   width: 100%;
   border-radius: 8px;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .q-table__container {
-  overflow-x: auto !important;
+  overflow-x: hidden !important;
 }
 
 .sticky-header {
@@ -335,353 +322,453 @@ onMounted(async () => {
 
 .budget-table {
   width: 100%;
-  min-width: 800px;
+  table-layout: fixed;
 }
 
 .budget-table td {
   padding: 8px;
   font-size: 13px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Mobile - Extra Small screens (below 600px) */
-@media (max-width: 599px) {
-  .charts-container {
-    flex-direction: column;
-    gap: 25px;
-    justify-content: center;
-  }
-  
-  .card-content {
-    padding: 10px;
+/* Extra Small Mobile (320px to 480px) */
+@media (max-width: 480px) {
+  .dashboard-card {
+    margin: 5px 0;
   }
 
-  .chart-item,
-  .chart-items,
-  .chart-itemss {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 250px;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
+  .amount-title {
     font-size: 16px;
-    margin-bottom: 15px;
-    margin-top: 0;
+    padding: 8px 10px;
+  }
+
+  .card-content {
+    padding: 8px;
+  }
+
+  .charts-container {
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    padding: 0 5px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .chart-wrapper p {
+    font-size: 14px;
+    margin-bottom: 10px;
   }
 
   .chart-small canvas,
   .chart-medium canvas,
   .chart-large canvas {
-    width: 200px !important;
+    height: 180px !important;
+    max-width: 100%;
+  }
+
+  .barangay-title {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+
+  .sticky-header th {
+    padding: 6px 3px;
+    font-size: 9px;
+  }
+
+  .sticky-header.second-row {
+    top: 35px;
+  }
+
+  .budget-table td {
+    padding: 6px 3px;
+    font-size: 9px;
+  }
+}
+
+/* Small Mobile (481px to 599px) */
+@media (min-width: 481px) and (max-width: 599px) {
+  .amount-title {
+    font-size: 17px;
+    padding: 9px 12px;
+  }
+
+  .card-content {
+    padding: 10px;
+  }
+
+  .charts-container {
+    gap: 18px;
+    margin-top: 20px;
+    margin-bottom: 25px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .chart-wrapper p {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
     height: 200px !important;
   }
 
+  .barangay-title {
+    font-size: 17px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  .sticky-header th {
+    padding: 7px 4px;
+    font-size: 10px;
+  }
+
+  .sticky-header.second-row {
+    top: 37px;
+  }
+
+  .budget-table td {
+    padding: 7px 4px;
+    font-size: 10px;
+  }
+}
+
+/* Tablet Portrait (600px to 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
   .amount-title {
     font-size: 18px;
-    padding: 10px;
+    padding: 10px 15px;
+  }
+
+  .card-content {
+    padding: 12px;
+  }
+
+  .charts-container {
+    gap: 18px;
+    margin-top: 25px;
+    margin-bottom: 30px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 45%;
+    max-width: 280px;
+  }
+
+  .chart-wrapper p {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 220px !important;
   }
 
   .barangay-title {
     font-size: 18px;
+    margin-top: 30px;
+    margin-bottom: 18px;
   }
 
-  .budget-table {
-    min-width: 700px;
-  }
-}
-
-/* Mobile - Small screens (600px to 767px) */
-@media (min-width: 600px) and (max-width: 767px) {
-  .charts-container {
-    flex-direction: column;
-    gap: 30px;
-    justify-content: center;
-  }
-
-  .chart-item,
-  .chart-items,
-  .chart-itemss {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 280px;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
-    margin-bottom: 15px;
-    margin-top: 0;
-  }
-
-  .chart-small canvas,
-  .chart-medium canvas {
-    width: 220px !important;
-    height: 220px !important;
-  }
-
-  .chart-large canvas {
-    width: 250px !important;
-    height: 250px !important;
-  }
-}
-
-/* Tablet - Small (768px to 900px) */
-@media (min-width: 768px) and (max-width: 900px) {
-  .charts-container {
-    flex-direction: column;
-    gap: 30px;
-    justify-content: center;
-  }
-
-  .chart-item,
-  .chart-items,
-  .chart-itemss {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
-    margin-bottom: 15px;
-    margin-top: 0;
-  }
-
-  .chart-small canvas {
-    width: 220px !important;
-    height: 220px !important;
-  }
-
-  .chart-medium canvas {
-    width: 240px !important;
-    height: 240px !important;
-  }
-
-  .chart-large canvas {
-    width: 270px !important;
-    height: 270px !important;
-  }
-}
-
-/* Tablet - Medium (901px to 1200px) */
-@media (min-width: 901px) and (max-width: 1200px) {
-  .charts-container {
-    gap: 15px;
-    padding: 0 10px;
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
-
-  .chart-item,
-  .chart-items,
-  .chart-itemss {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
-    margin-bottom: 15px;
-    margin-top: 0;
-  }
-
-  .chart-small {
-    flex: 0 0 160px;
-  }
-
-  .chart-small canvas {
-    width: 150px !important;
-    height: 150px !important;
-  }
-
-  .chart-medium {
-    flex: 0 0 200px;
-  }
-
-  .chart-medium canvas {
-    width: 190px !important;
-    height: 190px !important;
-  }
-
-  .chart-large {
-    flex: 0 0 240px;
-  }
-
-  .chart-large canvas {
-    width: 230px !important;
-    height: 230px !important;
-  }
-}
-
-/* Desktop - Standard (1201px to 1399px) */
-@media (min-width: 1201px) and (max-width: 1399px) {
-  .charts-container {
-    gap: 3px;
-    flex-wrap: nowrap;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
-    margin-bottom: 15px;
-    margin-top: 0;
-  }
-
-  .chart-items p {
-    margin-bottom: 60px;
-    margin-top: -10%;
-  }
-
-  .chart-itemss p {
-    margin-bottom: 100px;
-    margin-top: -15%;
-  }
-
-  .chart-small {
-    flex: 0 0 180px;
-  }
-
-  .chart-small canvas {
-    width: 160px !important;
-    height: 190px !important;
-  }
-
-  .chart-medium {
-    flex: 0 0 220px;
-  }
-
-  .chart-medium canvas {
-    width: 220px !important;
-    height: 220px !important;
-  }
-
-  .chart-large {
-    flex: 0 0 280px;
-  }
-
-  .chart-large canvas {
-    width: 280px !important;
-    height: 280px !important;
-  }
-}
-
-/* Desktop - Large (1400px to 1599px) */
-@media (min-width: 1400px) and (max-width: 1599px) {
-  .card-content {
-    padding: 25px;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
-    margin-bottom: 15px;
-    margin-top: 0;
-  }
-
-  .chart-items p {
-    margin-bottom: 60px;
-    margin-top: -10%;
-  }
-
-  .chart-itemss p {
-    margin-bottom: 100px;
-    margin-top: -15%;
-  }
-
-  .chart-small {
-    flex: 0 0 200px;
-  }
-
-  .chart-small canvas {
-    width: 180px !important;
-    height: 210px !important;
-  }
-
-  .chart-medium {
-    flex: 0 0 250px;
-  }
-
-  .chart-medium canvas {
-    width: 250px !important;
-    height: 250px !important;
-  }
-
-  .chart-large {
-    flex: 0 0 320px;
-  }
-
-  .chart-large canvas {
-    width: 320px !important;
-    height: 320px !important;
-  }
-}
-
-/* Desktop - Extra Large (1600px and up) */
-@media (min-width: 1600px) {
-  .card-content {
-    padding: 30px;
-  }
-
-  .chart-item p,
-  .chart-items p,
-  .chart-itemss p {
-    margin-bottom: 15px;
-    margin-top: 0;
-  }
-
-  .chart-items p {
-    margin-bottom: 60px;
-    margin-top: -10%;
-  }
-
-  .chart-itemss p {
-    margin-bottom: 100px;
-    margin-top: -15%;
-  }
-
-  .chart-small {
-    flex: 0 0 220px;
-  }
-
-  .chart-small canvas {
-    width: 200px !important;
-    height: 230px !important;
-  }
-
-  .chart-medium {
-    flex: 0 0 280px;
-  }
-
-  .chart-medium canvas {
-    width: 280px !important;
-    height: 280px !important;
-  }
-
-  .chart-large {
-    flex: 0 0 360px;
-  }
-
-  .chart-large canvas {
-    width: 360px !important;
-    height: 360px !important;
+  .sticky-header th {
+    padding: 8px 5px;
+    font-size: 11px;
   }
 
   .sticky-header.second-row {
-    top: 42px;
+    top: 38px;
   }
 
+  .budget-table td {
+    padding: 5px 5px;
+    font-size: 11px;
+  }
+}
+
+/* Tablet Landscape (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .amount-title {
+    font-size: 19px;
+    padding: 11px 16px;
+  }
+
+  .card-content {
+    padding: 13px;
+  }
+
+  .charts-container {
+    gap: 20px;
+    margin-top: 28px;
+    margin-bottom: 35px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 280px;
+  }
+
+  .chart-wrapper p {
+    font-size: 17px;
+    margin-bottom: 13px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 230px !important;
+  }
+
+  .barangay-title {
+    font-size: 19px;
+    margin-top: 35px;
+    margin-bottom: 18px;
+  }
+
+  .sticky-header th {
+    padding: 9px 6px;
+    font-size: 11px;
+  }
+
+  .sticky-header.second-row {
+    top: 39px;
+  }
+
+  .budget-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+}
+
+/* Small Desktop (1024px to 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .amount-title {
+    font-size: 20px;
+    padding: 11px 18px;
+  }
+
+  .card-content {
+    padding: 14px;
+  }
+
+  .charts-container {
+    gap: 10px;
+    margin-top: 28px;
+    margin-bottom: 38px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 280px;
+  }
+
+  .chart-wrapper p {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 240px !important;
+  }
+
+  .barangay-title {
+    font-size: 20px;
+    margin-top: 38px;
+    margin-bottom: 19px;
+  }
+
+  .sticky-header th {
+    padding: 9px 7px;
+    font-size: 12px;
+  }
+
+  .sticky-header.second-row {
+    top: 39px;
+  }
+
+  .budget-table td {
+    padding: 8px 7px;
+    font-size: 12px;
+  }
+}
+
+/* Medium Desktop (1280px to 1599px) */
+@media (min-width: 1280px) and (max-width: 1599px) {
+  .amount-title {
+    font-size: 21px;
+    padding: 12px 19px;
+  }
+
+  .card-content {
+    padding: 15px;
+  }
+
+  .charts-container {
+    gap: 20px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 290px;
+  }
+
+  .chart-wrapper p {
+    font-size: 19px;
+    margin-bottom: 14px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 250px !important;
+  }
+
+  .barangay-title {
+    font-size: 21px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  .sticky-header th {
+    padding: 10px 7px;
+    font-size: 12px;
+  }
+
+  .sticky-header.second-row {
+    top: 40px;
+  }
+
+  .budget-table td {
+    padding: 8px 7px;
+    font-size: 12px;
+  }
+}
+
+/* Large Desktop (1600px to 1919px) */
+@media (min-width: 1600px) and (max-width: 1919px) {
+  .amount-title {
+    font-size: 22px;
+    padding: 12px 20px;
+  }
+
+  .card-content {
+    padding: 15px;
+  }
+
+  .charts-container {
+    gap: 20px;
+    margin-top: 30px;
+    margin-bottom: 40px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 300px;
+  }
+
+  .chart-wrapper p {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 250px !important;
+  }
+
+  .barangay-title {
+    font-size: 22px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  .sticky-header th {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .sticky-header.second-row {
+    top: 40px;
+  }
+
+  .budget-table td {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+/* Extra Large Desktop (1920px and up) */
+@media (min-width: 1920px) {
   .amount-title {
     font-size: 24px;
     padding: 15px 20px;
   }
 
+  .card-content {
+    padding: 20px;
+  }
+
+  .charts-container {
+    gap: 25px;
+    margin-top: 35px;
+    margin-bottom: 45px;
+  }
+
+  .chart-wrapper {
+    flex: 1 1 30%;
+    max-width: 320px;
+  }
+
+  .chart-wrapper p {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+
+  .chart-small canvas,
+  .chart-medium canvas,
+  .chart-large canvas {
+    height: 280px !important;
+  }
+
   .barangay-title {
     font-size: 24px;
+    margin-top: 45px;
+    margin-bottom: 22px;
+  }
+
+  .sticky-header th {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .sticky-header.second-row {
+    top: 44px;
+  }
+
+  .budget-table td {
+    padding: 10px;
+    font-size: 14px;
   }
 }
 </style>
