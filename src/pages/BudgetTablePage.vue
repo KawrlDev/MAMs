@@ -1,14 +1,19 @@
 <template>
     <div class="container">
         <SupplementaryBudgetTable />
+                <TransferBudgetTable />
         <InitialBudgetTable />
     </div>
 </template>
+
 <script setup>
 import SupplementaryBudgetTable from 'src/components/SupplementaryBudgetTable.vue';
+import TransferBudgetTable from 'src/components/TransferBudgetTable.vue';
 import InitialBudgetTable from 'src/components/InitialBudgetTable.vue';
+
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+
 const data = JSON.parse(localStorage.getItem('user'))
 const role = data.ROLE
 const router = useRouter()

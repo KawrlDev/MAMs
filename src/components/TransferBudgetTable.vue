@@ -1,12 +1,12 @@
 <template>
   <div class="budget-card">
     <div class="section-header">
-      <h4>SUPPLEMENTAL BUDGET</h4>
+      <h4>TRANSFER BUDGET</h4>
 
       <div class="header-buttons">
-        <!-- ADD BUDGET BUTTON -->
-        <RouterLink to="/add-supplementary-bonus">
-          <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" />
+        <!-- TRANSFER BUDGET BUTTON -->
+        <RouterLink to="/transfer-supplemental-budget">
+          <q-btn icon="edit" label="TRANSFER BUDGET" class="edit-btn" />
         </RouterLink>
       </div>
     </div>
@@ -32,22 +32,23 @@ const rows = ref([])
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'center', sortable: true },
   { name: 'year', label: 'Year', field: 'year', align: 'center', sortable: true },
-  { name: 'addedOn', label: 'Added on', field: 'date_added', align: 'center', sortable: true },
-  { name: 'medicine', label: 'Supplemental Medicine Bonus', field: 'medicine_supplementary_bonus', align: 'center', sortable: true },
-  { name: 'lab', label: 'Supplemental Laboratory Bonus', field: 'laboratory_supplementary_bonus', align: 'center', sortable: true },
-  { name: 'hospital', label: 'Supplemental Hospital Bonus', field: 'hospital_supplementary_bonus', align: 'center', sortable: true }
+  { name: 'added_on', label: 'Added on', field: 'added_on', align: 'center', sortable: true },
+  { name: 'from', label: 'From', field: 'from', align: 'center', sortable: true },
+  { name: 'to', label: 'To', field: 'to', align: 'center', sortable: true },
+  { name: 'amount', label: 'Amount', field: 'amount', align: 'center', sortable: true }
 ]
 
 onMounted(() => {
-  const getSupplementaryBudget = async () => {
+  const getTransferBudget = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/supplementary-bonus')
+      const res = await axios.get('http://localhost:8000/api/transfer-budget-history')
       rows.value = res.data
     } catch (err) {
       console.log(err)
     }
   }
-  getSupplementaryBudget()
+
+  getTransferBudget()
 })
 </script>
 
@@ -76,7 +77,7 @@ onMounted(() => {
   gap: 10px;
 }
 
-.add-btn {
+.edit-btn {
   background: #0aa64f;
   color: #ffffff;
   font-weight: 600;

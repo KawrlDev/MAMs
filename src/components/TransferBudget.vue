@@ -41,9 +41,10 @@
             v-model="transferAmount"
             dense
             outlined
-            type="number"
+            type="text"
             placeholder="AMOUNT"
             class="amount-input"
+            @input="transferAmount = transferAmount.replace(/[^0-9]/g,'')"
           />
         </div>
 

@@ -61,13 +61,23 @@ const routes = [
     ]
   },
 
-  // ✅ NEW ROUTE FOR TRANSFER BUDGET PAGE
+  // ✅ TRANSFER BUDGET FORM
   {
     path: '/transfer-supplemental-budget',
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('src/pages/TransferBudgetPage.vue') }
+    ]
+  },
+
+  // ✅ TRANSFER BUDGET TABLE / HISTORY
+  {
+    path: '/transfer-budget-table',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('src/components/TransferBudgetTable.vue') }
     ]
   },
 
