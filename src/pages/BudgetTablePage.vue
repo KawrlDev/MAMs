@@ -1,14 +1,20 @@
 <template>
     <div class="container">
-        <SupplementaryBudgetTable />
-        <InitialBudgetTable />
+      <InitialBudgetTable />
+      <SupplementaryBudgetTable />
+      <TransferBudgetTable />
+
     </div>
 </template>
+
 <script setup>
 import SupplementaryBudgetTable from 'src/components/SupplementaryBudgetTable.vue';
+import TransferBudgetTable from 'src/components/TransferBudgetTable.vue';
 import InitialBudgetTable from 'src/components/InitialBudgetTable.vue';
+
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+
 const data = JSON.parse(localStorage.getItem('user'))
 const role = data.ROLE
 const router = useRouter()
@@ -22,7 +28,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-    margin-top: 70px;
+    margin-top: 20px;
     margin-left: 50px;
     margin-right: 50px;
     border: 2px solid #b5b5b5;

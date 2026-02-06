@@ -60,14 +60,45 @@ const routes = [
       { path: '', component: () => import('src/pages/AddSupplementaryBonusPage.vue') }
     ]
   },
+
+  // ✅ TRANSFER BUDGET FORM
   {
-    path: '/test',
+    path: '/transfer-supplemental-budget',
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '', component: () => import('src/pages/TestPage.vue') }
+      { path: '', component: () => import('src/pages/TransferBudgetPage.vue') }
     ]
   },
+
+  // ✅ TRANSFER BUDGET TABLE / HISTORY
+  {
+    path: '/transfer-budget-table',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('src/components/TransferBudgetTable.vue') }
+    ]
+  },
+
+  {
+    path: '/settings',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('src/pages/SettingsPage.vue') }
+    ]
+  },
+
+    {
+    path: '/reports',
+    component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('src/pages/ReportsPage.vue') }
+    ]
+  },
+  
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorPage.vue')

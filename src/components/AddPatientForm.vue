@@ -463,7 +463,8 @@
               <template v-slot:avatar>
                 <q-icon name="info" color="blue" />
               </template>
-              Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future records.
+              Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future
+              records.
             </q-banner>
           </div>
 
@@ -639,7 +640,7 @@
                   <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
                 </div>
                 <div class="info-item">
-                  <strong>Age:</strong> {{ ageValue || 'N/A' }}
+                  <strong>Age:</strong> {{ calculateAgeFromBirthdate(birthdateValue) }}
                 </div>
                 <div class="info-item">
                   <strong>Sex:</strong> {{ sexValue || 'N/A' }}
@@ -648,7 +649,9 @@
                   <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
                 </div>
                 <div class="info-item info-item-full">
-                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{ provinceValue }}
+                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                    provinceValue
+                  }}
                 </div>
               </div>
             </div>
@@ -832,7 +835,7 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { date, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
@@ -869,14 +872,10 @@ const suffixValue = ref(null)
 const birthdateValue = ref(null)
 const ageValue = computed(() => {
   if (!birthdateValue.value) return null
-
   const birth = dayjs(birthdateValue.value, 'DD/MM/YYYY', true)
-
   if (!birth.isValid()) return null
   if (birth.isAfter(dayjs())) return null
-
   return dayjs().diff(birth, 'year')
-
 })
 
 const sexValue = ref(null)
@@ -943,7 +942,6 @@ const filteredSearchResults = computed(() => {
       const firstname = (patient.firstname || '').toLowerCase()
       const middlename = (patient.middlename || '').toLowerCase()
 
-      // Match based on which field is active
       if (searchField === 'lastname') return lastname.startsWith(query)
       if (searchField === 'firstname') return firstname.startsWith(query)
       if (searchField === 'middlename') return middlename.startsWith(query)
@@ -951,14 +949,11 @@ const filteredSearchResults = computed(() => {
       return false
     })
     .sort((a, b) => {
-      // Sort eligible patients first
       if (a.eligible && !b.eligible) return -1
       if (!a.eligible && b.eligible) return 1
-      // Then by days remaining if both ineligible
       if (!a.eligible && !b.eligible) {
         return (a.days_remaining || 0) - (b.days_remaining || 0)
       }
-      // Then alphabetically by last name
       return a.lastname.localeCompare(b.lastname)
     })
 })
@@ -977,7 +972,7 @@ const selectedExistingPatient = ref(null)
 const selectedAction = ref(null)
 const eligibilityWarningData = ref(null)
 
-// Helper functions for date formatting
+// Helper functions
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   return dayjs(dateString).format('MMMM DD, YYYY')
@@ -999,24 +994,6 @@ const formatAddress = (patient) => {
   return parts.join(', ') || 'N/A'
 }
 
-const calculateAge = (birthdate) => {
-  if (!birthdate) return null
-
-  const parts = birthdate.split('/')
-  if (parts.length !== 3) return null
-
-  const birthDate = new Date(parts[2], parts[1] - 1, parts[0])
-  const today = new Date()
-  let age = today.getFullYear() - birthDate.getFullYear()
-  const monthDiff = today.getMonth() - birthDate.getMonth()
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--
-  }
-
-  return age
-}
-
 const calculateAgeFromDate = (dateString) => {
   if (!dateString) return null
 
@@ -1032,11 +1009,9 @@ const calculateAgeFromDate = (dateString) => {
   return age
 }
 
-// Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
 
-  // Handle if already in YYYY-MM-DD format
   if (dateString.includes('-') && dateString.split('-').length === 3) {
     return dateString
   }
@@ -1044,7 +1019,6 @@ const convertToMySQLDate = (dateString) => {
   const parts = dateString.split('/')
   if (parts.length !== 3) return null
 
-  // parts[0] = day, parts[1] = month, parts[2] = year
   const day = parts[0].padStart(2, '0')
   const month = parts[1].padStart(2, '0')
   const year = parts[2]
@@ -1052,7 +1026,6 @@ const convertToMySQLDate = (dateString) => {
   return `${year}-${month}-${day}`
 }
 
-// Convert MySQL YYYY-MM-DD to DD/MM/YYYY format
 const convertFromMySQLDate = (dateString) => {
   if (!dateString) return null
 
@@ -1064,40 +1037,74 @@ const convertFromMySQLDate = (dateString) => {
   return `${day}/${month}/${year}`
 }
 
+const formatPatientName = (patient) => {
+  const parts = [
+    patient.lastname,
+    patient.firstname,
+    patient.middlename,
+    patient.suffix
+  ].filter(Boolean)
+
+  if (parts.length === 0) return 'N/A'
+
+  const lastname = parts[0]
+  const rest = parts.slice(1).join(' ')
+  return `${lastname}, ${rest}`
+}
+
+const calculateAgeFromBirthdate = (birthdateString) => {
+  if (!birthdateString) return 'N/A'
+
+  // Handle both DD/MM/YYYY and MySQL YYYY-MM-DD formats
+  let birthDate
+  if (birthdateString.includes('/')) {
+    const parts = birthdateString.split('/')
+    birthDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`)
+  } else {
+    birthDate = new Date(birthdateString)
+  }
+
+  if (isNaN(birthDate.getTime())) return 'N/A'
+
+  const today = new Date()
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const monthDiff = today.getMonth() - birthDate.getMonth()
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--
+  }
+
+  return age
+}
+
 // Unified search handler
 const handleNameSearch = (value) => {
-  // Clear previous timer
   if (searchDebounceTimer.value) {
     clearTimeout(searchDebounceTimer.value)
   }
 
-  // If less than 2 characters, hide dropdown
   if (!value || value.trim().length < 2) {
     showPatientDropdown.value = false
     patientSearchResults.value = []
     return
   }
 
-  // Debounce the search
   searchDebounceTimer.value = setTimeout(async () => {
     await searchPatients(value)
   }, 300)
 }
 
-// Auto-search when last name changes
 const onLastNameChange = (value) => {
   activeSearchField.value = 'lastname'
   handleNameSearch(value)
 }
 
-// Auto-search when first name changes
 const onFirstNameChange = (value) => {
   activeSearchField.value = 'firstname'
   handleNameSearch(value)
   checkForPatientEdits()
 }
 
-// Auto-search when middle name changes
 const onMiddleNameChange = (value) => {
   activeSearchField.value = 'middlename'
   handleNameSearch(value)
@@ -1105,10 +1112,8 @@ const onMiddleNameChange = (value) => {
 }
 
 const onLastNameBlur = () => {
-  // Delay hiding dropdown to allow click events to register
   setTimeout(() => {
     lastNameFocused.value = false
-    // Only hide if user didn't click on a patient
     if (!usedBrowserPatient.value) {
       showPatientDropdown.value = false
     }
@@ -1173,7 +1178,6 @@ const selectPatientFromDropdown = (patient) => {
   usedBrowserPatient.value = true
   browserPatientEdited.value = false
 
-  // Fill form with patient data
   lastNameValue.value = patient.lastname
   firstNameValue.value = patient.firstname
   middleNameValue.value = patient.middlename
@@ -1235,15 +1239,12 @@ const confirmAreYouSure = async () => {
 
   try {
     const shouldPrint = pendingAction.value === 'print'
-    
+
     if (selectedBrowserPatient.value) {
-      // User selected from dropdown
       await submitForm(shouldPrint, selectedBrowserPatient.value.patient_id, browserPatientEdited.value)
     } else if (selectedExistingPatient.value) {
-      // User selected from existing patients list
       await submitForm(shouldPrint, selectedExistingPatient.value.patient_id)
     } else {
-      // New patient
       await submitForm(shouldPrint, null)
     }
 
@@ -1260,38 +1261,16 @@ const confirmAreYouSure = async () => {
   }
 }
 
-// Check eligibility function
-const checkEligibility = async () => {
-  if (!lastNameValue.value || !firstNameValue.value) return { eligible: true };
-
-  try {
-    const res = await axios.post('http://localhost:8000/api/patients/check-eligibility', {
-      lastname: lastNameValue.value,
-      firstname: firstNameValue.value,
-      middlename: middleNameValue.value,
-      suffix: suffixValue.value
-    })
-
-    return res.data;
-  } catch (err) {
-    console.error('Failed checking eligibility', err)
-    return { eligible: true };
-  }
-}
-
 const checkExistingPatients = async (isPrint = false) => {
   if (!lastNameValue.value || !firstNameValue.value) return;
 
   pendingAction.value = isPrint ? 'print' : 'save'
 
-  // If user selected from dropdown, show final confirmation
   if (usedBrowserPatient.value && selectedBrowserPatient.value) {
     showFinalConfirmDialog.value = true
     return
   }
 
-  // If user did NOT select from dropdown, treat as new patient
-  // Show "are you sure" dialog directly
   showAreYouSureDialog.value = true
 }
 
@@ -1364,28 +1343,36 @@ const handleCancel = () => {
   router.push('/patient-records')
 }
 
-const handleSaveClick = () => {
-  if (patientForm.value.validate()) {
-    checkExistingPatients(false)
-  } else {
+const handleSaveClick = async () => {
+  // Use Quasar's built-in form validation
+  const isValid = await patientForm.value.validate()
+
+  if (!isValid) {
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',
       position: 'top'
     })
+    return
   }
+
+  await checkExistingPatients(false)
 }
 
-const handleSaveAndPrintClick = () => {
-  if (patientForm.value.validate()) {
-    checkExistingPatients(true)
-  } else {
+const handleSaveAndPrintClick = async () => {
+  // Use Quasar's built-in form validation
+  const isValid = await patientForm.value.validate()
+
+  if (!isValid) {
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',
       position: 'top'
     })
+    return
   }
+
+  await checkExistingPatients(true)
 }
 
 const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = false) => {
@@ -1459,22 +1446,6 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   }
 }
 
-const formatPatientName = (patient) => {
-  const parts = [
-    patient.lastname,
-    patient.firstname,
-    patient.middlename,
-    patient.suffix
-  ].filter(Boolean)
-
-  if (parts.length === 0) return 'N/A'
-
-  // Format as: LASTNAME, FIRSTNAME MIDDLENAME SUFFIX
-  const lastname = parts[0]
-  const rest = parts.slice(1).join(' ')
-  return `${lastname}, ${rest}`
-}
-
 const generatePDF = async () => {
   const pdfMap = {
     MEDICINE: '/med.pdf',
@@ -1510,7 +1481,7 @@ const generatePDF = async () => {
       (clientSuffixValue.value ? " " + clientSuffixValue.value : "") + " / " + (relationshipValue.value ? " " + relationshipValue.value : "");
   }
 
-  const age = calculateAge(birthdateValue.value)
+  const age = ageValue.value
 
   page.drawText(glNum.value + ' / ' + partnerValue.value, {
     x: 600,
@@ -1624,7 +1595,6 @@ function getDaySuffix(day) {
 </script>
 
 <style scoped>
-/* All existing styles remain the same... */
 /* =========================
    PAGE & CARD
 ========================= */
@@ -1661,7 +1631,8 @@ function getDaySuffix(day) {
 ========================= */
 
 .section-title {
-  margin: 30px 0 12px;
+  margin: 15px 0 10px;
+  /* reduced from 30px 0 12px */
   font-weight: 600;
 }
 
@@ -1670,7 +1641,7 @@ function getDaySuffix(day) {
 ========================= */
 
 div.category {
-  margin-top: 30px;
+  margin-top: 10px;
 }
 
 label {
@@ -1692,7 +1663,7 @@ label span {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 1px;
+  margin-bottom: 10px;
 }
 
 .grid-3 {

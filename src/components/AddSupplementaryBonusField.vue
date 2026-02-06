@@ -10,21 +10,21 @@
         </div>
         <div class="budget-block">
           <h3>MEDICINE</h3>
-          <label>SUPPLEMENTARY BONUS: <span>*</span></label>
+          <label>SUPPLEMENTAL BUDGET: <span>*</span></label>
           <q-input v-model="medicineSupplementaryBudget" dense outlined type="number" placeholder="AMOUNT"
             :rules="[val => !!val || 'Required']" class="amount-input" />
         </div>
 
         <div class="budget-block">
           <h3>LABORATORY</h3>
-          <label>SUPPLEMENTARY BONUS: <span>*</span></label>
+          <label>SUPPLEMENTAL BUDGET: <span>*</span></label>
           <q-input v-model="laboratorySupplementaryBudget" dense outlined type="number" placeholder="AMOUNT"
             :rules="[val => !!val || 'Required']" class="amount-input" />
         </div>
 
         <div class="budget-block">
           <h3>HOSPITAL</h3>
-          <label>SUPPLEMENTARY BONUS: <span>*</span></label>
+          <label>SUPPLEMENTAL BUDGET: <span>*</span></label>
           <q-input v-model="hospitalSupplementaryBudget" dense outlined type="number" placeholder="AMOUNT"
             :rules="[val => !!val || 'Required']" class="amount-input" />
         </div>
@@ -32,7 +32,7 @@
         <div class="divider"></div>
 
         <div class="actions">
-          <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
+          <q-btn class="btn-cancel" icon="close" label="CANCEL" @click="showCancelDialog = true" dense />
           <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
         </div>
 
@@ -136,15 +136,15 @@ const addSupplementaryBonus = async () => {
     formData.append('medicine_supplementary_bonus', medicineSupplementaryBudget.value)
     formData.append('laboratory_supplementary_bonus', laboratorySupplementaryBudget.value)
     formData.append('hospital_supplementary_bonus', hospitalSupplementaryBudget.value)
-    
+
     const res = await axios.post('http://localhost:8000/api/add-supplementary-bonus', formData)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Supplementary bonus added successfully',
       position: 'top'
     })
-    
+
     router.push('/budget-table')
   } catch (err) {
     console.error('Error adding supplementary bonus:', err)
@@ -177,7 +177,7 @@ const addSupplementaryBonus = async () => {
   margin: 5px;
   color: #1f8f2e;
 }
-
+x
 .content {
   padding: 0px 20px;
 }
@@ -226,7 +226,6 @@ label span {
   font-weight: 600;
   font-size: 14px;
   padding: 4px 12px;
-  border-radius: 20px;
   color: white;
 }
 

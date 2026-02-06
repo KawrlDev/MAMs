@@ -53,11 +53,6 @@
             @update:model-value="checkForChanges" />
         </div>
 
-        <div class="col-12">
-          <q-checkbox v-model="isChecked" label="Patient is same as client?" class="form-checkbox" :disable="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
-
         <div class="col-3">
           <label class="form-label">Birthdate <span class="required">*</span></label>
           <q-input v-model="birthdateValue" dense outlined class="flat-input"
@@ -159,35 +154,23 @@
     </q-dialog>
 
     <!-- FINAL SAVE CONFIRMATION -->
-<q-dialog v-model="showFinalSaveDialog">
-  <q-card style="min-width: 350px">
-    <q-card-section>
-      <div class="text-h6">Save Changes?</div>
-    </q-card-section>
+    <q-dialog v-model="showFinalSaveDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Save Changes?</div>
+        </q-card-section>
 
-    <q-card-section class="q-pt-none">
-      Are you sure you want to save these changes?
-    </q-card-section>
+        <q-card-section class="q-pt-none">
+          Are you sure you want to save these changes?
+        </q-card-section>
 
-    <q-card-actions align="right" class="q-px-md q-pb-md">
-      <q-btn
-        label="NO"
-        icon="close"
-        unelevated
-        class="dialog-goback-btn"
-        v-close-popup
-      />
-      <q-btn
-        label="YES"
-        icon="check"
-        unelevated
-        class="dialog-cancel-btn"
-        @click="confirmSave"
-        :loading="editActionLoading"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
+          <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
+            :loading="editActionLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- PATIENT EDIT CONFIRMATION DIALOG (when patient info is edited) -->
     <q-dialog v-model="showPatientEditDialog" persistent>
@@ -201,15 +184,8 @@
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You have modified the patient information.
+            You have modified the patient information. Are you sure you want to update?
           </div>
-
-          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="info" color="orange" />
-            </template>
-            Please choose whether to update the existing patient's information or create a new patient.
-          </q-banner>
 
           <!-- Show original patient info -->
           <div class="patient-info-box q-mb-md">
@@ -222,10 +198,10 @@
                 <span v-if="originalPatientData.suffix"> {{ originalPatientData.suffix }}</span>
               </div>
               <div class="info-item">
-                <strong>Patient ID:</strong> {{ originalPatientData.patient_id }}
+                <strong>Birthdate:</strong> {{ originalPatientData.birthdate }}
               </div>
               <div class="info-item">
-                <strong>Birthdate:</strong> {{ originalPatientData.birthdate }}
+                <strong>Age:</strong> {{ calculateAgeFromDate(originalPatientData.birthdate) }}
               </div>
               <div class="info-item">
                 <strong>Sex:</strong> {{ originalPatientData.sex || 'N/A' }}
@@ -251,10 +227,10 @@
                 <span v-if="suffixValue"> {{ suffixValue }}</span>
               </div>
               <div class="info-item">
-                <strong>Patient ID:</strong> {{ originalPatientData.patient_id }}
+                <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
               </div>
               <div class="info-item">
-                <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                <strong>Age:</strong> {{ ageValue }}
               </div>
               <div class="info-item">
                 <strong>Sex:</strong> {{ sexValue || 'N/A' }}
@@ -274,14 +250,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
-          <q-btn
-  label="PROCEED"
-  icon="check"
-  unelevated
-  class="dialog-cancel-btn"
-  @click="showFinalSaveDialog = true"
-  :loading="editActionLoading"
-/>
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="showFinalSaveDialog = true"
+            :loading="editActionLoading" />
 
 
         </q-card-actions>
@@ -396,6 +366,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { toWords } from 'number-to-words'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+// Enable custom parse format for dayjs
+dayjs.extend(customParseFormat)
 
 const router = useRouter()
 const route = useRoute()
@@ -510,10 +484,14 @@ const convertToMySQLDate = (dateString) => {
 const convertFromMySQLDate = (dateString) => {
   if (!dateString) return null
 
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
+  // Split the MySQL date format YYYY-MM-DD
+  const parts = dateString.split('-')
+  if (parts.length !== 3) return null
+
+  // parts[0] = year, parts[1] = month, parts[2] = day
+  const year = parts[0]
+  const month = parts[1].padStart(2, '0')
+  const day = parts[2].padStart(2, '0')
 
   return `${day}/${month}/${year}`
 }
@@ -617,8 +595,38 @@ const handleCancel = async () => {
   await getPatientDetails(glNum.value)
 }
 
-const handleSaveClick = () => {
-  if (!patientForm.value.validate()) {
+const validateRequiredFields = () => {
+  const errors = []
+
+  // Basic patient info
+  if (!lastNameValue.value?.trim()) errors.push('Last Name is required')
+  if (!firstNameValue.value?.trim()) errors.push('First Name is required')
+  if (!birthdateValue.value) errors.push('Birthdate is required')
+  if (!sexValue.value) errors.push('Sex is required')
+  if (!barangayValue.value) errors.push('Barangay is required')
+  if (!houseAddressValue.value?.trim()) errors.push('House Address is required')
+
+  return errors
+}
+
+const handleSaveClick = async () => {
+  const errors = validateRequiredFields()
+  
+  if (errors.length > 0) {
+    $q.notify({
+      type: 'negative',
+      message: errors.join('<br>'),
+      html: true,
+      position: 'top',
+      timeout: 4000
+    })
+    return
+  }
+
+  // Then use Quasar's form validation
+  const isValid = await patientForm.value.validate()
+  
+  if (!isValid) {
     $q.notify({
       type: 'negative',
       message: 'Please fill in all required fields',
@@ -632,10 +640,8 @@ const handleSaveClick = () => {
   const transactionChanged = checkTransactionChanges()
 
   if (patientChanged) {
-  showPatientEditDialog.value = true
-  
+    showPatientEditDialog.value = true
   } else if (transactionChanged) {
-    // Only transaction/client details changed
     showTransactionEditDialog.value = true
   } else {
     $q.notify({
@@ -649,7 +655,6 @@ const handleSaveClick = () => {
 
 const cancelPatientEdit = () => {
   showPatientEditDialog.value = false
-  editDialogAction.value = null
 }
 
 const cancelTransactionEdit = () => {
@@ -716,47 +721,6 @@ const updatePatientInfo = async () => {
   $q.notify({
     type: 'positive',
     message: 'Patient information updated successfully',
-    position: 'top'
-  })
-}
-
-const createNewPatient = async () => {
-  const formData = new FormData()
-  formData.append('glNum', glNum.value)
-  formData.append('force_new_patient', '1')
-  formData.append('category', categoryValue.value)
-  formData.append('lastname', lastNameValue.value)
-  formData.append('firstname', firstNameValue.value)
-  formData.append('middlename', middleNameValue.value || '')
-  formData.append('suffix', suffixValue.value || '')
-
-  // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
-  const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
-  formData.append('birthdate', mysqlBirthdate)
-
-  formData.append('sex', sexValue.value)
-  formData.append('preference', preferenceValue.value || '')
-  formData.append('is_checked', isChecked.value ? 1 : 0)
-  formData.append('province', provinceValue.value)
-  formData.append('city', cityValue.value)
-  formData.append('barangay', barangayValue.value)
-  formData.append('house_address', houseAddressValue.value)
-  formData.append('partner', partnerValue.value)
-  formData.append('hospital_bill', hospitalBillValue.value || 0)
-  formData.append('issued_amount', issuedAmountValue.value)
-  const user = JSON.parse(localStorage.getItem('user'))
-  formData.append('issued_by', user.USERNAME)
-  formData.append('client_lastname', clientLastNameValue.value || '')
-  formData.append('client_firstname', clientFirstNameValue.value || '')
-  formData.append('client_middlename', clientMiddleNameValue.value || '')
-  formData.append('client_suffix', clientSuffixValue.value || '')
-  formData.append('relationship', relationshipValue.value || '')
-
-  await axios.post('http://localhost:8000/api/patient-details/update', formData)
-
-  $q.notify({
-    type: 'positive',
-    message: 'New patient created successfully',
     position: 'top'
   })
 }
@@ -1051,22 +1015,6 @@ function getDaySuffix(day) {
 .flat-input :deep(.q-field--disabled input),
 .flat-input :deep(.q-field--disabled .q-field__label) {
   color: #757575 !important;
-}
-
-/* =========================
-   CHECKBOX
-========================= */
-.form-checkbox :deep(.q-checkbox__bg) {
-  border: 2px solid #000;
-  border-radius: 2px;
-}
-
-.form-checkbox :deep(.q-checkbox__label) {
-  font-weight: 600;
-}
-
-.form-checkbox :deep(.q-checkbox--disabled .q-checkbox__label) {
-  color: #757575;
 }
 
 /* BUTTON COLORS */
