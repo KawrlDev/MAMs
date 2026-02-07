@@ -58,6 +58,9 @@
                       <div class="detail-row-dropdown">
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
                       </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Phone:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                      </div>
                       <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                         <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
                         <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
@@ -130,6 +133,9 @@
                       <div class="detail-row-dropdown">
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
                       </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Phone:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                      </div>
                       <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                         <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
                         <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
@@ -200,6 +206,9 @@
                       </div>
                       <div class="detail-row-dropdown">
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                      </div>
+                      <div class="detail-row-dropdown">
+                        <span><strong>Phone:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
                       </div>
                       <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                         <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
@@ -273,7 +282,7 @@
         </div>
       </div>
 
-      <div class="grid-4">
+      <div class="grid-5">
         <div class="field">
           <label>Province</label>
           <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
@@ -294,6 +303,13 @@
           <label>House Address <span>*</span></label>
           <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
             @update:model-value="checkForPatientEdits" />
+        </div>
+
+        <div class="field">
+          <label>Phone Number <span>*</span></label>
+          <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
+            @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
+            :persistent-hint="true" />
         </div>
       </div>
       <q-separator color="grey-5" size="2px" class="q-my-lg" />
@@ -419,6 +435,9 @@
                   <div class="info-item info-item-full">
                     <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
                   </div>
+                  <div class="info-item">
+                    <strong>Phone:</strong> {{ formatPhoneNumber(selectedBrowserPatient.phone_number) }}
+                  </div>
                 </div>
               </div>
 
@@ -494,6 +513,9 @@
                 </div>
                 <div class="info-item info-item-full">
                   <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
+                </div>
+                <div class="info-item">
+                  <strong>Phone:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                 </div>
               </div>
             </div>
@@ -652,6 +674,9 @@
                   <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
                     provinceValue
                   }}
+                </div>
+                <div class="info-item">
+                  <strong>Phone:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                 </div>
               </div>
             </div>
@@ -885,6 +910,7 @@ const provinceValue = ref('Davao del Norte')
 const cityValue = ref("Tagum City")
 const barangayValue = ref(null)
 const houseAddressValue = ref(null)
+const phoneNumberValue = ref(null)
 const partnerValue = ref(null)
 const hospitalBillValue = ref(null)
 const issuedAmountValue = ref(null)
@@ -921,6 +947,55 @@ const partnerOptions = computed(() => {
   if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
   return []
 })
+
+const normalizePhoneNumber = (value) => {
+  if (!value) return null
+
+  // Remove all non-digit characters
+  let cleaned = value.replace(/\D/g, '')
+
+  // Ensure it starts with 09
+  if (!cleaned.startsWith('09')) {
+    return null // Invalid format
+  }
+
+  // Check if it's the correct length (should be 11 digits: 09XXXXXXXXX)
+  if (cleaned.length !== 11) {
+    return null // Invalid length
+  }
+
+  return cleaned
+}
+
+const validatePhoneNumber = (value) => {
+  if (!value) return 'Phone number is required'
+
+  const normalized = normalizePhoneNumber(value)
+  if (!normalized) {
+    return 'Invalid phone number. Must be 11 digits starting with 09'
+  }
+
+  return true
+}
+
+const onPhoneNumberChange = (value) => {
+  if (value) {
+    const normalized = normalizePhoneNumber(value)
+    if (normalized) {
+      phoneNumberValue.value = normalized
+    }
+  }
+  checkForPatientEdits()
+}
+
+const formatPhoneNumber = (phone) => {
+  if (!phone) return 'N/A'
+  // Format as 0917 123 4567
+  if (phone.length === 11) {
+    return `${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`
+  }
+  return phone
+}
 
 const filteredSearchResults = computed(() => {
   const searchField = activeSearchField.value
@@ -1189,6 +1264,7 @@ const selectPatientFromDropdown = (patient) => {
   cityValue.value = patient.city || 'Tagum City'
   barangayValue.value = patient.barangay
   houseAddressValue.value = patient.house_address
+  phoneNumberValue.value = patient.phone_number  // ADD THIS LINE
 
   $q.notify({
     type: 'positive',
@@ -1404,6 +1480,7 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   formData.append('city', cityValue.value)
   formData.append('barangay', barangayValue.value)
   formData.append('house_address', houseAddressValue.value)
+  formData.append('phone_number', phoneNumberValue.value || '')  // ADD THIS LINE
   formData.append('partner', partnerValue.value)
   formData.append('hospital_bill', hospitalBillValue.value || 0)
   formData.append('issued_amount', issuedAmountValue.value)
@@ -1438,11 +1515,22 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
     router.push('/patient-records')
   } catch (err) {
     console.error("Failed to save patient:", err)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to save patient record',
-      position: 'top'
-    })
+
+    // Check if the error is a phone number validation error
+    if (err.response && err.response.status === 422 && err.response.data.error) {
+      $q.notify({
+        type: 'negative',
+        message: err.response.data.error,
+        position: 'top',
+        timeout: 5000
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'Failed to save patient record',
+        position: 'top'
+      })
+    }
   }
 }
 
@@ -1663,7 +1751,14 @@ label span {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: -20px;
+  margin-bottom: -14px;
+}
+
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: -14px;
 }
 
 .grid-3 {

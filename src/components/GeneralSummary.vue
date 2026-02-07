@@ -1,56 +1,56 @@
 <template>
-    <q-card flat bordered class="filter-card" style="margin-top: 20px; width: 85%; margin-left: 90px;">
-        <q-card-section>
-            <div class="row items-center" style="gap: 16px;">
-                <!-- DATE SEARCH -->
-                <div class="row items-center" style="gap: 8px;">
-                    <span class="text-body2 text-weight-medium" style="white-space: nowrap; margin-left: 20px;">
-                        Filter by Period:
-                    </span>
+  <q-card flat bordered class="filter-card" style="margin-top: 20px; width: 85%; margin-left: 90px;">
+    <q-card-section>
+      <div class="row items-center" style="gap: 16px;">
+        <!-- DATE SEARCH -->
+        <div class="row items-center" style="gap: 8px;">
+          <span class="text-body2 text-weight-medium" style="white-space: nowrap; margin-left: 20px;">
+            Filter by Period:
+          </span>
 
-                    <q-input style="width: 250px;" :model-value="formattedDate" outlined dense
-                        placeholder="dd/mm/yyyy - dd/mm/yyyy" @clear="onClearDate" readonly>
-                        <template #append>
-                            <q-icon name="event" class="cursor-pointer">
-                                <q-popup-proxy cover>
-                                    <q-date v-model="dateRange" range emit-immediately mask="DD/MM/YYYY">
-                                        <div class="row items-center justify-end q-pa-sm">
-                                            <q-btn label="Close" color="primary" flat v-close-popup />
-                                        </div>
-                                    </q-date>
-                                </q-popup-proxy>
-                            </q-icon>
-                        </template>
-                    </q-input>
-                </div>
-
-                <!-- CATEGORY -->
-                <div style="width: 200px;">
-                    <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category"
-                        dense outlined @clear="onClearCategory" />
-                </div>
-
-                <!-- PARTNER -->
-                <div style="width: 200px;">
-                    <q-select v-model="partnerValue" dense outlined :options="partnerOptions" label="Partner"
-                        placeholder="Partner" @clear="onClearPartner" :disable="categoryValue == null" />
-                </div>
-
-                <!-- BARANGAY -->
-                <div style="width: 200px;">
-                    <q-select v-model="barangayValue" :options="barangayOptions" label="Barangay" placeholder="Barangay"
-                        dense outlined @clear="onClearBarangay" />
-                </div>
-            </div>
-        </q-card-section>
-    </q-card>
-    <div class="budget-table table-scroll">
-        <q-table :rows="filteredRows" :columns="columns" row-key="glNum" :loading="loading" flat bordered>
-            <template #body-cell-action="props">
-                <ActionBtn :row="props.row" />
+          <q-input style="width: 250px;" :model-value="formattedDate" outlined dense
+            placeholder="dd/mm/yyyy - dd/mm/yyyy" @clear="onClearDate" readonly>
+            <template #append>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover>
+                  <q-date v-model="dateRange" range emit-immediately mask="DD/MM/YYYY">
+                    <div class="row items-center justify-end q-pa-sm">
+                      <q-btn label="Close" color="primary" flat v-close-popup />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
             </template>
-        </q-table>
-    </div>
+          </q-input>
+        </div>
+
+        <!-- CATEGORY -->
+        <div style="width: 200px;">
+          <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category" dense
+            outlined @clear="onClearCategory" />
+        </div>
+
+        <!-- PARTNER -->
+        <div style="width: 200px;">
+          <q-select v-model="partnerValue" dense outlined :options="partnerOptions" label="Partner"
+            placeholder="Partner" @clear="onClearPartner" :disable="categoryValue == null" />
+        </div>
+
+        <!-- BARANGAY -->
+        <div style="width: 200px;">
+          <q-select v-model="barangayValue" :options="barangayOptions" label="Barangay" placeholder="Barangay" dense
+            outlined @clear="onClearBarangay" />
+        </div>
+      </div>
+    </q-card-section>
+  </q-card>
+  <div class="budget-table table-scroll">
+    <q-table :rows="filteredRows" :columns="columns" row-key="glNum" :loading="loading" flat bordered>
+      <template #body-cell-action="props">
+        <ActionBtn :row="props.row" />
+      </template>
+    </q-table>
+  </div>
 </template>
 
 <script setup>
@@ -78,14 +78,16 @@ const barangayValue = ref(null)
 const columns = [
   { name: 'date', label: "Date", field: 'date', align: 'center', sortable: true },
   { name: 'glNo', label: 'Gl No.', field: 'glNo', align: 'center', sortable: true },
-  { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
   { name: 'patient', label: "Patient's Name", field: 'patient', align: 'center', sortable: true },
   { name: 'client', label: "Client's Name", field: 'client', align: 'center', sortable: true },
   { name: 'address', label: 'Address', field: 'address', align: 'center' },
+  { name: 'phoneNumber', label: 'Phone Number', field: 'phoneNumber', align: 'center' },
   { name: 'age', label: 'Age', field: 'age', align: 'center' },
   { name: 'sex', label: 'Sex', field: 'sex', align: 'center' },
+  { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
   { name: 'bill', label: 'Bill', field: 'bill', align: 'center' },
-  { name: 'issuedAmount', label: 'Issued Amount', field: 'issuedAmount', align: 'center' }
+  { name: 'issuedAmount', label: 'Issued Amount', field: 'issuedAmount', align: 'center' },
+  { name: 'issuedBy', label: 'Issued By', field: 'issuedBy', align: 'center' }
 ]
 
 // Computed rows - filters by category, partner, and barangay on frontend
@@ -172,7 +174,7 @@ const fetchPatients = async (dateFilter = null) => {
   loading.value = true
   try {
     let params = {}
-    
+
     if (dateFilter) {
       if (typeof dateFilter === 'string') {
         params.date = dateFilter
@@ -186,7 +188,7 @@ const fetchPatients = async (dateFilter = null) => {
         }
       }
     }
-    
+
     const res = await axios.get('http://localhost:8000/api/patient-records', { params })
     allPatients.value = mapPatientsToRows(res.data)
   } catch (err) {
@@ -243,9 +245,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 .budget-table {
-    margin-left: 90px;
+  margin-left: 90px;
   width: 85%;
   overflow-x: auto;
 }

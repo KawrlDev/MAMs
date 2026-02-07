@@ -107,11 +107,17 @@
             dense outlined class="flat-input" :disable="!edit" @update:model-value="checkForChanges" />
         </div>
 
-        <div class="col-12">
+        <div class="col-6">
           <label class="form-label">House Address <span class="required">*</span></label>
           <q-input v-model="houseAddressValue" dense outlined class="flat-input"
             :rules="[val => !!val || 'This field is required']" :readonly="!edit"
             @update:model-value="checkForChanges" />
+        </div>
+        <div class="col-6">
+          <label class="form-label">Phone Number <span class="required">*</span></label>
+          <q-input v-model="phoneNumberValue" dense outlined class="flat-input" placeholder="09XXXXXXXXX"
+            :rules="[validatePhoneNumber]" :readonly="!edit" maxlength="11" @update:model-value="onPhoneNumberChange"
+            hint="Format: 09XXXXXXXXX (11 digits)" :persistent-hint="true" />
         </div>
       </div>
     </q-form>
@@ -213,6 +219,10 @@
                 <strong>Address:</strong> {{ originalPatientData.house_address }}, {{ originalPatientData.barangay }},
                 {{ originalPatientData.city }}, {{ originalPatientData.province }}
               </div>
+              <div class="info-item">
+                <strong>Phone:</strong> {{ formatPhoneNumber(originalPatientData.phone_number) }}
+              </div>
+
             </div>
           </div>
 
@@ -241,6 +251,9 @@
               <div class="info-item info-item-full">
                 <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
                   provinceValue }}
+              </div>
+              <div class="info-item">
+                <strong>Phone:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
               </div>
             </div>
           </div>
@@ -437,6 +450,13 @@ const editActionLoading = ref(false)
 const hasPatientChanges = ref(false)
 const hasTransactionChanges = ref(false)
 
+const partnerOptions = computed(() => {
+  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
+  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
+  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
+  return []
+})
+
 const originalPatientData = ref({
   lastname: null,
   firstname: null,
@@ -448,6 +468,7 @@ const originalPatientData = ref({
   preference: null,
   barangay: null,
   house_address: null,
+  phone_number: null,
   province: null,
   city: null,
   category: null,
@@ -461,14 +482,57 @@ const originalPatientData = ref({
   client_suffix: null,
   relationship: null
 })
+const phoneNumberValue = ref(null)
 
-const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
-})
+// Add validation functions before the computed properties
+const normalizePhoneNumber = (value) => {
+  if (!value) return null
 
+  // Remove all non-digit characters
+  let cleaned = value.replace(/\D/g, '')
+
+  // Ensure it starts with 09
+  if (!cleaned.startsWith('09')) {
+    return null // Invalid format
+  }
+
+  // Check if it's the correct length (should be 11 digits: 09XXXXXXXXX)
+  if (cleaned.length !== 11) {
+    return null // Invalid length
+  }
+
+  return cleaned
+}
+
+const validatePhoneNumber = (value) => {
+  if (!value) return 'Phone number is required'
+
+  const normalized = normalizePhoneNumber(value)
+  if (!normalized) {
+    return 'Invalid phone number. Must be 11 digits starting with 09'
+  }
+
+  return true
+}
+
+const onPhoneNumberChange = (value) => {
+  if (value) {
+    const normalized = normalizePhoneNumber(value)
+    if (normalized) {
+      phoneNumberValue.value = normalized
+    }
+  }
+  checkForChanges()
+}
+
+const formatPhoneNumber = (phone) => {
+  if (!phone) return 'N/A'
+  // Format as 0917 123 4567
+  if (phone.length === 11) {
+    return `${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`
+  }
+  return phone
+}
 // Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
@@ -512,7 +576,8 @@ const checkPatientChanges = () => {
     sexValue.value !== originalPatientData.value.sex ||
     (preferenceValue.value || null) !== (originalPatientData.value.preference || null) ||
     barangayValue.value !== originalPatientData.value.barangay ||
-    houseAddressValue.value !== originalPatientData.value.house_address
+    houseAddressValue.value !== originalPatientData.value.house_address ||
+    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null)  // ADD THIS LINE
 }
 
 // Check for transaction/client details changes
@@ -611,7 +676,7 @@ const validateRequiredFields = () => {
 
 const handleSaveClick = async () => {
   const errors = validateRequiredFields()
-  
+
   if (errors.length > 0) {
     $q.notify({
       type: 'negative',
@@ -625,7 +690,7 @@ const handleSaveClick = async () => {
 
   // Then use Quasar's form validation
   const isValid = await patientForm.value.validate()
-  
+
   if (!isValid) {
     $q.notify({
       type: 'negative',
@@ -705,6 +770,7 @@ const updatePatientInfo = async () => {
   formData.append('city', cityValue.value)
   formData.append('barangay', barangayValue.value)
   formData.append('house_address', houseAddressValue.value)
+  formData.append('phone_number', phoneNumberValue.value || '')  // ADD THIS LINE
   formData.append('partner', partnerValue.value)
   formData.append('hospital_bill', hospitalBillValue.value || 0)
   formData.append('issued_amount', issuedAmountValue.value)
@@ -822,6 +888,7 @@ const getPatientDetails = async (id) => {
   cityValue.value = patientDetails.city
   barangayValue.value = patientDetails.barangay
   houseAddressValue.value = patientDetails.house_address
+  phoneNumberValue.value = patientDetails.phone_number
 
   // Store original data for comparison
   originalPatientData.value = {
@@ -835,6 +902,7 @@ const getPatientDetails = async (id) => {
     preference: patientDetails.preference,
     barangay: patientDetails.barangay,
     house_address: patientDetails.house_address,
+    phone_number: patientDetails.phone_number,
     province: patientDetails.province,
     city: patientDetails.city,
     category: patientDetails.category,

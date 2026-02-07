@@ -100,15 +100,6 @@ const routes = [
   },
 
   {
-    path: '/drmc',
-    component: () => import('layouts/MainLayout.vue'),
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('src/components/DRMC.vue') }
-    ]
-  },
-
-  {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorPage.vue')
   }
