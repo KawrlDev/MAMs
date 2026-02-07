@@ -6,7 +6,7 @@
       <div class="header-buttons">
         <!-- TRANSFER BUDGET BUTTON -->
         <RouterLink to="/transfer-supplemental-budget">
-          <q-btn icon="edit" label="TRANSFER BUDGET" class="edit-btn" />
+          <q-btn icon="swap_horiz" label="TRANSFER BUDGET" class="add-btn" @click="handleSaveClick" />
         </RouterLink>
       </div>
     </div>
@@ -77,7 +77,7 @@ onMounted(() => {
   gap: 10px;
 }
 
-.edit-btn {
+.add-btn {
   background: #0aa64f;
   color: #ffffff;
   font-weight: 600;
