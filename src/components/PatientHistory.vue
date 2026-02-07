@@ -18,12 +18,12 @@
             {{ props.row.eligibilityDate }}
 
             <q-tooltip anchor="top middle" self="bottom middle" class="text-subtitle2 q-pa-xs">
-              <span v-if="props.row.daysRemaining > 0">
+              <template v-if="props.row.daysRemaining > 0">
                 Eligible in {{ props.row.daysRemaining }} day<span v-if="props.row.daysRemaining > 1">s</span>
-              </span>
-              <span v-else>
+              </template>
+              <template v-else>
                 Eligible
-              </span>
+              </template>
             </q-tooltip>
           </span>
         </q-td>
@@ -379,6 +379,7 @@ const showSaveConfirmDialog = ref(false)
 const showCancelConfirmDialog = ref(false)
 const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
+const eligibilityCooldownDays = ref(90) // Default to 90, will be fetched from backend
 
 const editData = ref({
   glNum: null,
@@ -490,6 +491,31 @@ const validateForm = () => {
   }
 
   return isValid
+}
+
+// Fetch eligibility cooldown from backend
+const fetchEligibilityCooldown = async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/get-eligibility-cooldown')
+    eligibilityCooldownDays.value = res.data.days
+  } catch (err) {
+    console.error('Error fetching eligibility cooldown:', err)
+    // Keep default value of 90 if fetch fails
+  }
+}
+
+// Calculate eligibility info based on date issued and cooldown
+const calculateEligibility = (dateIssued) => {
+  const today = dayjs().startOf('day')
+  const eligibilityDate = dayjs(dateIssued).add(eligibilityCooldownDays.value, 'day')
+  const diff = eligibilityDate.diff(today, 'day')
+  const isEligible = diff <= 0
+
+  return {
+    eligibilityDate: eligibilityDate.format('YYYY-MM-DD'),
+    eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
+    daysRemaining: diff > 0 ? diff : 0
+  }
 }
 
 const viewDetails = async (glNumber) => {
@@ -636,6 +662,34 @@ const handleSaveClick = () => {
   showSaveConfirmDialog.value = true
 }
 
+const loadPatientHistory = async () => {
+  try {
+    const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
+    const today = dayjs().startOf('day')
+    
+    rows.value = res.data.history.map(item => {
+      const eligibility = calculateEligibility(item.date_issued)
+      
+      return {
+        glNum: item.gl_no,
+        category: item.category,
+        issuedAt: item.date_issued,
+        eligibilityDate: eligibility.eligibilityDate,
+        eligibilityClass: eligibility.eligibilityClass,
+        daysRemaining: eligibility.daysRemaining,
+        issuedBy: item.issued_by
+      }
+    })
+  } catch (err) {
+    console.error('Error loading patient history:', err)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load patient history',
+      position: 'top'
+    })
+  }
+}
+
 const confirmSave = async () => {
   saveLoading.value = true
   try {
@@ -670,23 +724,7 @@ const confirmSave = async () => {
     await viewDetails(editData.value.glNum)
 
     // Refresh the table
-    const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
-    const today = dayjs().startOf('day')
-    rows.value = res.data.history.map(item => {
-      const eligibilityDate = dayjs(item.date_issued).add(3, 'month')
-      const diff = eligibilityDate.diff(today, 'day')
-      const isEligible = diff <= 0
-
-      return {
-        glNum: item.gl_no,
-        category: item.category,
-        issuedAt: item.date_issued,
-        eligibilityDate: eligibilityDate.format('YYYY-MM-DD'),
-        eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
-        daysRemaining: diff > 0 ? diff : 0,
-        issuedBy: item.issued_by
-      }
-    })
+    await loadPatientHistory()
 
     editMode.value = false
     resetValidationErrors()
@@ -876,31 +914,12 @@ function getDaySuffix(day) {
   }
 }
 
-onMounted(() => {
-  const getPatientHistory = async () => {
-    try {
-      const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
-      const today = dayjs().startOf('day')
-      rows.value = res.data.history.map(item => {
-        const eligibilityDate = dayjs(item.date_issued).add(3, 'month')
-        const diff = eligibilityDate.diff(today, 'day')
-        const isEligible = diff <= 0
-
-        return {
-          glNum: item.gl_no,
-          category: item.category,
-          issuedAt: item.date_issued,
-          eligibilityDate: eligibilityDate.format('YYYY-MM-DD'),
-          eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
-          daysRemaining: diff > 0 ? diff : 0,
-          issuedBy: item.issued_by
-        }
-      })
-    } catch (err) {
-      console.log(err)
-    }
-  }
-  getPatientHistory()
+onMounted(async () => {
+  // Fetch eligibility cooldown first
+  await fetchEligibilityCooldown()
+  
+  // Then load patient history with the correct cooldown
+  await loadPatientHistory()
 })
 </script>
 

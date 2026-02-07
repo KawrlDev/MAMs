@@ -1,7 +1,7 @@
 <template>
   <div class="budget-card">
     <div class="section-header">
-      <h4>ANNUAL BUDGET</h4>
+      <h4>Annual Budget</h4>
 
       <q-btn icon="add" label="ADD BUDGET" class="add-btn" @click="checkBeforeCreate" />
     </div>

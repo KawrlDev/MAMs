@@ -59,7 +59,7 @@
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
                       </div>
                       <div class="detail-row-dropdown">
-                        <span><strong>Phone:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
                       </div>
                       <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                         <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
@@ -134,7 +134,7 @@
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
                       </div>
                       <div class="detail-row-dropdown">
-                        <span><strong>Phone:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
                       </div>
                       <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                         <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
@@ -208,7 +208,7 @@
                         <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
                       </div>
                       <div class="detail-row-dropdown">
-                        <span><strong>Phone:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
                       </div>
                       <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                         <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
@@ -313,7 +313,7 @@
         </div>
       </div>
       <q-separator color="grey-5" size="2px" class="q-my-lg" />
-      <h4 class="q-mb-md">Transaction Details</h4>
+      <div class="patient-info-pill">Transaction Details.</div>
       <div class="grid-3">
         <div class="field">
           <label>Partner <span>*</span></label>
@@ -341,7 +341,7 @@
 
       <div v-if="!isChecked">
         <q-separator color="grey-5" size="2px" class="q-my-lg" />
-        <h4 class="q-mb-md">Client's Name</h4>
+        <div class="patient-info-pill">Client's Name</div>
 
         <div class="grid-4">
           <div class="field">
@@ -436,7 +436,7 @@
                     <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
                   </div>
                   <div class="info-item">
-                    <strong>Phone:</strong> {{ formatPhoneNumber(selectedBrowserPatient.phone_number) }}
+                    <strong>Phone Number:</strong> {{ formatPhoneNumber(selectedBrowserPatient.phone_number) }}
                   </div>
                 </div>
               </div>
@@ -515,7 +515,7 @@
                   <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
                 </div>
                 <div class="info-item">
-                  <strong>Phone:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
+                  <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                 </div>
               </div>
             </div>
@@ -676,7 +676,7 @@
                   }}
                 </div>
                 <div class="info-item">
-                  <strong>Phone:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
+                  <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                 </div>
               </div>
             </div>
@@ -1712,6 +1712,7 @@ function getDaySuffix(day) {
   margin: 0;
   line-height: 0.5;
   margin-top: 15px;
+  margin-bottom: 20px;
 }
 
 /* =========================

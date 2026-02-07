@@ -1,7 +1,7 @@
 <template>
   <div class="budget-card">
     <div class="section-header">
-      <h4>SUPPLEMENTAL BUDGET</h4>
+      <h4>Supplemental Budget</h4>
 
       <div class="header-buttons">
         <!-- ADD BUDGET BUTTON -->

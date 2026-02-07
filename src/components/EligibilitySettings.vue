@@ -1,113 +1,108 @@
 <template>
   <div class="page-bg">
-    <div class="form-container settings-block">
-      <h4>ELIGIBILITY PERIOD</h4>
+    <div class="form-container">
+      <q-form ref="eligibilityForm">
+        <!-- HEADER ROW -->
+        <div class="fieldset-header">
+          <div class="fieldset-title">Eligibility Cooldown</div>
 
-      <!-- DEFAULT VIEW -->
-      <div v-if="!isEditing">
-        <div class="q-mb-sm">
-          Current Eligibility Period:
-          <strong>{{ currentDays }} days</strong>
+          <div class="actions">
+            <!-- View Mode Buttons -->
+            <template v-if="!edit">
+              <q-btn label="EDIT" icon="edit" class="action-btn edit-btn" dense @click="edit = true" />
+            </template>
+
+            <!-- Edit Mode Buttons -->
+            <template v-if="edit">
+              <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="showCancelDialog = true" dense />
+              <q-btn label="Save" icon="save" class="action-btn save-btn" @click="handleSaveClick" dense />
+            </template>
+          </div>
         </div>
 
-        <div class="actions">
-          <q-btn
-            label="EDIT"
-            icon="edit"
-            unelevated
-            class="btn-save"
-            @click="startEdit"
-          />
+        <!-- ================= COOLDOWN SETTINGS ================= -->
+        <div class="row q-col-gutter-md">
+          <div class="col-12">
+            <label class="form-label">Current Eligibility Cooldown (Days) <span class="required">*</span></label>
+            <q-input 
+              v-model="daysValue" 
+              type="text" 
+              dense 
+              outlined 
+              class="flat-input"
+              placeholder="Enter number of days"
+              :rules="[val => !!val || 'This field is required', val => val > 0 || 'Must be greater than 0']"
+              :readonly="!edit"
+              @input="daysValue = daysValue.replace(/[^0-9]/g, '')"
+              hint="Note: This will affect ALL eligibility cooldowns for each category"
+              :persistent-hint="true"
+            />
+          </div>
         </div>
-      </div>
-
-      <!-- EDIT MODE -->
-      <div v-else>
-        <q-input
-          v-model="days"
-          type="text"
-          outlined
-          dense
-          class="q-mb-sm"
-          placeholder="Enter number of days"
-          @input="days = days.replace(/[^0-9]/g, '')"
-        />
-
-        <div class="actions">
-          <q-btn
-            label="CANCEL"
-            icon="close"
-            unelevated
-            class="btn-cancel"
-            @click="showCancelDialog = true"
-          />
-          <q-btn
-            label="SAVE"
-            icon="save"
-            unelevated
-            class="btn-save"
-            @click="showSaveDialog = true"
-          />
-        </div>
-      </div>
-
-      <!-- CANCEL CONFIRMATION -->
-      <q-dialog v-model="showCancelDialog">
-        <q-card style="min-width: 360px; border-radius: 8px;">
-          <q-card-section>
-            <div class="text-h6">Cancel Changes?</div>
-          </q-card-section>
-          <q-card-section class="q-pt-none q-pb-md">
-            Are you sure you want to cancel? All unsaved changes will be lost.
-          </q-card-section>
-          <q-card-actions align="right" class="q-px-md q-pb-md">
-            <q-btn
-              unelevated
-              icon="close"
-              label="NO"
-              class="dialog-goback-btn"
-              v-close-popup
-            />
-            <q-btn
-              unelevated
-              icon="check"
-              label="YES"
-              class="dialog-cancel-btn"
-              @click="handleCancelConfirm"
-            />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-
-      <!-- SAVE CONFIRMATION -->
-      <q-dialog v-model="showSaveDialog">
-        <q-card style="min-width: 360px; border-radius: 8px;">
-          <q-card-section>
-            <div class="text-h6">Save Changes?</div>
-          </q-card-section>
-          <q-card-section class="q-pt-none q-pb-md">
-            Are you sure you want to save the eligibility period?
-          </q-card-section>
-          <q-card-actions align="right" class="q-px-md q-pb-md">
-            <q-btn
-              unelevated
-              icon="close"
-              label="NO"
-              class="dialog-goback-btn"
-              v-close-popup
-            />
-            <q-btn
-              unelevated
-              icon="check"
-              label="YES"
-              class="dialog-cancel-btn"
-              @click="updatePeriod"
-            />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-
+      </q-form>
     </div>
+
+    <!-- CANCEL CONFIRMATION DIALOG -->
+    <q-dialog v-model="showCancelDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Cancel Editing?</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          Are you sure you want to cancel? All unsaved changes will be lost.
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-px-md q-pb-md">
+          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- SAVE CONFIRMATION DIALOG -->
+    <q-dialog v-model="showSaveDialog" persistent>
+      <q-card style="min-width: 600px; max-width: 700px;">
+        <q-card-section class="bg-orange-6 text-white">
+          <div class="text-h6">
+            <q-icon name="warning" size="sm" class="q-mr-sm" />
+            Update Eligibility Cooldown?
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-subtitle1 q-mb-md">
+            You are about to change the eligibility cooldown period.
+          </div>
+
+          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+            <template v-slot:avatar>
+              <q-icon name="schedule" color="orange" />
+            </template>
+            <div>
+              <div class="text-weight-bold">This will affect ALL patients system-wide</div>
+              <div class="q-mt-sm">
+                <strong>Current:</strong> {{ originalDays }} days
+                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
+                <strong>New:</strong> {{ daysValue }} days
+              </div>
+            </div>
+          </q-banner>
+
+          <div class="text-body2 text-grey-8">
+            All patients will need to wait {{ daysValue }} days between guarantee letters after this change.
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="showSaveDialog = false" />
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
+            :loading="saveLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -118,63 +113,91 @@ import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
 
-const days = ref('')
-const currentDays = ref(0)
-const isEditing = ref(false)
-
+const eligibilityForm = ref(null)
+const edit = ref(false)
+const daysValue = ref('')
+const originalDays = ref(0)
 const showCancelDialog = ref(false)
 const showSaveDialog = ref(false)
+const saveLoading = ref(false)
 
-const startEdit = () => {
-  days.value = currentDays.value.toString()
-  isEditing.value = true
-}
-
-const handleCancelConfirm = () => {
-  isEditing.value = false
+const handleCancel = () => {
   showCancelDialog.value = false
+  edit.value = false
+  daysValue.value = originalDays.value.toString()
 }
 
-const updatePeriod = async () => {
-  showSaveDialog.value = false
+const handleSaveClick = async () => {
+  const isValid = await eligibilityForm.value.validate()
 
-  if (!days.value) {
-    $q.notify({ type: 'negative', message: 'Please enter a value' })
+  if (!isValid) {
+    $q.notify({
+      type: 'negative',
+      message: 'Please fill in all required fields',
+      position: 'top'
+    })
     return
   }
 
+  if (parseInt(daysValue.value) === originalDays.value) {
+    $q.notify({
+      type: 'info',
+      message: 'No changes detected',
+      position: 'top'
+    })
+    edit.value = false
+    return
+  }
+
+  showSaveDialog.value = true
+}
+
+const confirmSave = async () => {
+  saveLoading.value = true
+
   try {
-    await axios.post('http://localhost:8000/api/update-eligibility', {
-      days: parseInt(days.value)
+    await axios.post('http://localhost:8000/api/update-eligibility-cooldown', {
+      days: parseInt(daysValue.value)
     })
 
-    currentDays.value = parseInt(days.value)
-    isEditing.value = false
+    originalDays.value = parseInt(daysValue.value)
+    edit.value = false
+    showSaveDialog.value = false
 
     $q.notify({
       type: 'positive',
-      message: 'Eligibility Updated Successfully'
+      message: 'Eligibility cooldown updated successfully',
+      position: 'top'
     })
-
-  } catch {
+  } catch (error) {
+    console.error('Failed to update eligibility:', error)
     $q.notify({
       type: 'negative',
-      message: 'Error updating eligibility'
+      message: 'Failed to update eligibility cooldown',
+      position: 'top'
     })
+  } finally {
+    saveLoading.value = false
   }
 }
 
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8000/api/get-eligibility')
-    currentDays.value = res.data.days
-  } catch {
-    currentDays.value = 0
+    const res = await axios.get('http://localhost:8000/api/get-eligibility-cooldown')
+    originalDays.value = res.data.days
+    daysValue.value = res.data.days.toString()
+  } catch (error) {
+    console.error('Failed to load eligibility settings:', error)
+    originalDays.value = 0
+    daysValue.value = '0'
   }
 })
 </script>
 
 <style scoped>
+/* =========================
+   PAGE & CARD
+========================= */
 .page-bg {
   background: #ffffff;
   padding: 30px;
@@ -188,39 +211,116 @@ onMounted(async () => {
   padding: 25px 30px 35px;
 }
 
-.form-container h4 {
+/* TITLE */
+.fieldset-title {
+  font-size: 40px;
   font-weight: 700;
-  margin: 5px 0 20px 0;
   color: #1f8f2e;
+  margin: 0;
+  line-height: 0.5;
+  margin-top: 15px;
 }
 
-.q-mb-sm {
-  margin-bottom: 12px;
+.fieldset-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .actions {
   display: flex;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 8px;
+  align-items: center;
 }
 
-.actions .q-btn {
+/* BUTTON BASE */
+.action-btn {
   font-weight: 600;
   font-size: 14px;
   padding: 4px 12px;
+  border-radius: 20px;
   color: white;
 }
 
-.actions .q-btn:hover {
-  filter: brightness(110%);
+/* =========================
+   FORM LAYOUT
+========================= */
+.form-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
 }
 
-.btn-cancel {
+.required {
+  color: red;
+}
+
+/* =========================
+   INPUTS & SELECTS (FIXED)
+========================= */
+.flat-input :deep(.q-field__control) {
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  box-shadow: none !important;
+}
+
+.flat-input :deep(.q-field__control:before),
+.flat-input :deep(.q-field__control:after) {
+  display: none !important;
+}
+
+.flat-input :deep(.q-field__native),
+.flat-input :deep(.q-field__input),
+.flat-input :deep(input) {
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 6px 10px;
+  font-weight: 500;
+}
+
+.flat-input :deep(.q-field--focused .q-field__control) {
+  border-color: #9e9e9e !important;
+  box-shadow: none !important;
+}
+
+.flat-input :deep(input[readonly]),
+.flat-input :deep(input:read-only) {
+  color: #757575 !important;
+}
+
+.flat-input :deep(.q-field--readonly .q-field__control) {
+  background-color: #ededed;
+  border-color: #cfcfcf;
+}
+
+.flat-input :deep(.q-field--readonly .q-field__native),
+.flat-input :deep(.q-field--readonly .q-field__input) {
+  color: #757575 !important;
+}
+
+/* BUTTON COLORS */
+.cancel-btn {
   background: #ff3b3b;
+  color: white;
+  font-weight: bold;
+  border-radius: 5%;
 }
 
-.btn-save {
+.edit-btn {
   background: #0aa64f;
+  color: white;
+  font-weight: bold;
+  border-radius: 5%;
+}
+
+.save-btn {
+  background: #0aa64f;
+  color: white;
+  font-weight: bold;
+  border-radius: 5%;
 }
 
 .dialog-cancel-btn {
@@ -229,7 +329,6 @@ onMounted(async () => {
   font-weight: 600;
   padding: 8px 20px;
   border-radius: 4px;
-  min-width: 80px;
 }
 
 .dialog-goback-btn {
@@ -238,7 +337,6 @@ onMounted(async () => {
   font-weight: 600;
   padding: 8px 20px;
   border-radius: 4px;
-  min-width: 80px;
 }
 
 .dialog-cancel-btn .q-icon,
