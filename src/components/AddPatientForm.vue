@@ -1054,8 +1054,8 @@ const formatDate = (dateString) => {
 }
 
 const calculateDaysRemaining = (eligibilityDate) => {
-  const today = dayjs()
-  const eligible = dayjs(eligibilityDate)
+  const today = dayjs().startOf('day')
+  const eligible = dayjs(eligibilityDate).startOf('day')
   return eligible.diff(today, 'days')
 }
 

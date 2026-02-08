@@ -51,7 +51,7 @@
 
           <!-- DOWNLOAD CSV BUTTON -->
           <div class="col-auto">
-            <q-btn icon="download" label="Download CSV" color="green" @click="downloadCSV"
+            <q-btn icon="download" label="Export as CSV" color="green" @click="downloadCSV"
               :disable="filteredRows.length === 0" />
           </div>
         </div>
@@ -65,7 +65,8 @@
         <div class="left-section" :style="{ width: sectionWidths.left + '%' }">
           <table class="data-table">
             <thead>
-              <tr v-if="!categoryValue" class="month-headers-spacer">
+              <!-- Spacer row when no category - matches month header height -->
+              <tr v-if="!categoryValue" class="month-headers">
                 <th colspan="7" class="category-header">&nbsp;</th>
               </tr>
               <!-- Category header row - only show if category filter is applied -->
@@ -112,18 +113,39 @@
               </tr>
             </tbody>
             <tbody v-else>
-              <tr v-for="(row, index) in filteredRows" :key="row.glNum">
-                <td class="sticky-col">{{ index + 1 }}</td>
-                <td class="name-cell"
-                  :style="{ width: columnWidths.name + 'px', minWidth: columnWidths.name + 'px', maxWidth: columnWidths.name + 'px' }">
-                  {{ row.name }}</td>
-                <td class="address-cell"
-                  :style="{ width: columnWidths.address + 'px', minWidth: columnWidths.address + 'px', maxWidth: columnWidths.address + 'px' }">
-                  {{ row.address }}</td>
-                <td>{{ row.phoneNumber || 'N/A' }}</td>
-                <td>{{ row.age !== null ? row.age : 'N/A' }}</td>
-                <td>{{ row.sex || 'N/A' }}</td>
-                <td>{{ row.preference || 'N/A' }}</td>
+              <tr v-for="row in filteredRows" :key="row.rowId">
+
+                <!-- FIRST ROW IN MONTH: render merged patient cells -->
+                <template v-if="row.isFirstInMonth">
+                  <td class="sticky-col" :rowspan="row.recordsInThisMonth">
+                    {{ getPatientNumber(row.patientId) }}
+                  </td>
+
+                  <td class="name-cell" :rowspan="row.recordsInThisMonth">
+                    {{ row.name }}
+                  </td>
+
+                  <td class="address-cell" :rowspan="row.recordsInThisMonth">
+                    {{ row.address }}
+                  </td>
+
+                  <td :rowspan="row.recordsInThisMonth">{{ row.phoneNumber || 'N/A' }}</td>
+                  <td :rowspan="row.recordsInThisMonth">{{ row.age ?? 'N/A' }}</td>
+                  <td :rowspan="row.recordsInThisMonth">{{ row.sex || 'N/A' }}</td>
+                  <td :rowspan="row.recordsInThisMonth">{{ row.preference || 'N/A' }}</td>
+                </template>
+
+                <!-- FOLLOWING ROWS IN SAME MONTH: PLACEHOLDER CELLS -->
+                <template v-else>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </template>
+
               </tr>
             </tbody>
           </table>
@@ -175,17 +197,19 @@
                 </tr>
               </tbody>
               <tbody v-else>
-                <tr v-for="row in filteredRows" :key="row.glNum">
+                <tr v-for="row in filteredRows" :key="row.rowId">
                   <template v-for="monthYear in visibleMonths" :key="`${row.glNum}-${monthYear}`">
-                    <template v-if="row.monthlyRecords[monthYear]">
-                      <td>{{ row.monthlyRecords[monthYear].glNo }}</td>
-                      <td v-if="!categoryValue && !partnerValue">{{ row.monthlyRecords[monthYear].category }}</td>
-                      <td v-if="!partnerValue">{{ row.monthlyRecords[monthYear].partner }}</td>
-                      <td>{{ row.monthlyRecords[monthYear].clientName }}</td>
-                      <td>{{ row.monthlyRecords[monthYear].dateIssued }}</td>
-                      <td v-if="showHospitalBill">{{ formatCurrency(row.monthlyRecords[monthYear].hospitalBill) }}</td>
-                      <td>{{ formatCurrency(row.monthlyRecords[monthYear].issuedAmount) }}</td>
-                      <td>{{ row.monthlyRecords[monthYear].issuedBy }}</td>
+                    <template v-if="row.monthlyRecords[monthMapping.get(monthYear)]">
+                      <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].glNo }}</td>
+                      <td v-if="!categoryValue && !partnerValue">{{
+                        row.monthlyRecords[monthMapping.get(monthYear)].category }}</td>
+                      <td v-if="!partnerValue">{{ row.monthlyRecords[monthMapping.get(monthYear)].partner }}</td>
+                      <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].clientName }}</td>
+                      <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].dateIssued }}</td>
+                      <td v-if="showHospitalBill">{{
+                        formatCurrency(row.monthlyRecords[monthMapping.get(monthYear)].hospitalBill) }}</td>
+                      <td>{{ formatCurrency(row.monthlyRecords[monthMapping.get(monthYear)].issuedAmount) }}</td>
+                      <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].issuedBy }}</td>
                     </template>
                     <template v-else>
                       <td>-</td>
@@ -262,7 +286,7 @@ const sectionResizeState = ref({
 })
 
 const visibleMonths = computed(() => {
-  // If date filter is applied, show only those months
+  // If date filter is applied, show the date range in header
   if (dateRange.value) {
     let fromDate, toDate
 
@@ -289,8 +313,29 @@ const visibleMonths = computed(() => {
     const end = toDate.clone().endOf('month')
 
     while (current.isBefore(end) || current.isSame(end, 'month')) {
-      const monthYear = `${current.format('MMMM').toUpperCase()} ${current.format('YYYY')}`
-      monthYears.push(monthYear)
+      // Check if this is the first month or last month in the range
+      const isFirstMonth = current.isSame(fromDate, 'month')
+      const isLastMonth = current.isSame(toDate, 'month')
+      
+      let monthDisplay = ''
+      
+      if (isFirstMonth && isLastMonth) {
+        // Single month with date range
+        monthDisplay = `${fromDate.format('MMM DD, YYYY')} - ${toDate.format('MMM DD, YYYY')}`
+      } else if (isFirstMonth) {
+        // First month in range - show from date to end of month
+        const endOfMonth = current.clone().endOf('month')
+        monthDisplay = `${fromDate.format('MMM DD, YYYY')} - ${endOfMonth.format('MMM DD, YYYY')}`
+      } else if (isLastMonth) {
+        // Last month in range - show start of month to end date
+        const startOfMonth = current.clone().startOf('month')
+        monthDisplay = `${startOfMonth.format('MMM DD, YYYY')} - ${toDate.format('MMM DD, YYYY')}`
+      } else {
+        // Middle months - show full month
+        monthDisplay = `${current.format('MMMM YYYY').toUpperCase()}`
+      }
+      
+      monthYears.push(monthDisplay)
       current = current.add(1, 'month')
     }
 
@@ -306,7 +351,64 @@ const visibleMonths = computed(() => {
     `OCTOBER ${currentYear}`, `NOVEMBER ${currentYear}`, `DECEMBER ${currentYear}`
   ]
 })
+// Add this computed property for month mapping
+const monthMapping = computed(() => {
+  const mapping = new Map()
+  
+  if (dateRange.value) {
+    let fromDate, toDate
 
+    if (typeof dateRange.value === 'string') {
+      fromDate = toDate = dayjs(dateRange.value, 'DD/MM/YYYY')
+    } else {
+      const { from, to } = dateRange.value
+      fromDate = dayjs(from, 'DD/MM/YYYY')
+      toDate = to ? dayjs(to, 'DD/MM/YYYY') : fromDate
+    }
+
+    if (fromDate.isValid()) {
+      let current = fromDate.clone().startOf('month')
+      const end = toDate.clone().endOf('month')
+
+      while (current.isBefore(end) || current.isSame(end, 'month')) {
+        const isFirstMonth = current.isSame(fromDate, 'month')
+        const isLastMonth = current.isSame(toDate, 'month')
+        
+        let monthDisplay = ''
+        
+        if (isFirstMonth && isLastMonth) {
+          monthDisplay = `${fromDate.format('MMM DD, YYYY')} - ${toDate.format('MMM DD, YYYY')}`
+        } else if (isFirstMonth) {
+          monthDisplay = `${fromDate.format('MMM DD, YYYY')} - ${current.endOf('month').format('MMM DD, YYYY')}`
+        } else if (isLastMonth) {
+          monthDisplay = `${current.startOf('month').format('MMM DD, YYYY')} - ${toDate.format('MMM DD, YYYY')}`
+        } else {
+          monthDisplay = `${current.format('MMMM YYYY').toUpperCase()}`
+        }
+        
+        // Map the display format to the data storage format
+        const dataKey = `${current.format('MMMM').toUpperCase()} ${current.format('YYYY')}`
+        mapping.set(monthDisplay, dataKey)
+        
+        current = current.add(1, 'month')
+      }
+    }
+  } else {
+    // No date filter - map display to same format
+    const currentYear = dayjs().format('YYYY')
+    const months = [
+      'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+      'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+    ]
+    
+    months.forEach(month => {
+      const key = `${month} ${currentYear}`
+      mapping.set(key, key)
+    })
+  }
+  
+  return mapping
+})
 // Computed: Partner options based on category
 const partnerOptions = computed(() => {
   if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
@@ -403,93 +505,151 @@ const formatClientName = (clientData, patientName) => {
   return parts.join(' ')
 }
 
-// Process raw data into grouped structure
 const processPatientData = (rawData) => {
-  const patientMap = new Map()
+  const patientGroups = new Map()
 
+  // 1. Group by patient
   rawData.forEach(record => {
-    const patientKey = record.patient_id
+    const key = record.patient_id
 
-    if (!patientMap.has(patientKey)) {
-      const name = [
-        record.lastname ? record.lastname + ',' : '',
-        record.firstname,
-        record.middlename,
-        record.suffix
-      ].filter(Boolean).join(' ')
-
-      const address = [
-        record.house_address,
-        record.barangay,
-        record.city,
-        record.province
-      ].filter(Boolean).join(', ')
-
-      patientMap.set(patientKey, {
-        patientId: record.patient_id,
-        glNum: record.gl_no,
-        name: name,
-        address: address,
-        phoneNumber: record.phone_number,
-        age: calculateAge(record.birthdate),
-        sex: record.sex,
-        preference: record.preference,
-        barangay: record.barangay,
-        category: record.category,
-        partner: record.partner,
-        monthlyRecords: {}
+    if (!patientGroups.has(key)) {
+      patientGroups.set(key, {
+        patientInfo: {
+          patientId: record.patient_id,
+          name: [
+            record.lastname ? record.lastname + ',' : '',
+            record.firstname,
+            record.middlename,
+            record.suffix
+          ].filter(Boolean).join(' '),
+          address: [
+            record.house_address,
+            record.barangay,
+            record.city,
+            record.province
+          ].filter(Boolean).join(', '),
+          phoneNumber: record.phone_number,
+          age: calculateAge(record.birthdate),
+          sex: record.sex,
+          preference: record.preference,
+          barangay: record.barangay
+        },
+        recordsByMonth: new Map()
       })
     }
 
-    // Add record to appropriate month WITH YEAR
-    const recordDate = dayjs(record.date_issued)
-    const year = recordDate.format('YYYY')
-    const month = recordDate.format('MMMM').toUpperCase()
-    const monthYear = `${month} ${year}`
-    const patient = patientMap.get(patientKey)
+    const d = dayjs(record.date_issued)
+    const monthYear = `${d.format('MMMM').toUpperCase()} ${d.format('YYYY')}`
 
-    const patientName = patient.name
+    if (!patientGroups.get(key).recordsByMonth.has(monthYear)) {
+      patientGroups.get(key).recordsByMonth.set(monthYear, [])
+    }
 
-    if (!patient.monthlyRecords[monthYear] || recordDate.isAfter(dayjs(patient.monthlyRecords[monthYear].dateIssued))) {
-      patient.monthlyRecords[monthYear] = {
-        glNo: record.gl_no,
-        category: record.category,
-        partner: record.partner,
-        clientName: formatClientName({
-          lastname: record.client_lastname,
-          firstname: record.client_firstname,
-          middlename: record.client_middlename,
-          suffix: record.client_suffix
-        }, patientName),
-        dateIssued: recordDate.format('YYYY-MM-DD'),
-        hospitalBill: record.hospital_bill,
-        issuedAmount: record.issued_amount,
-        issuedBy: record.issued_by
-      }
+    patientGroups.get(key).recordsByMonth.get(monthYear).push(record)
+  })
+
+  const allRows = []
+
+  // 2. Sort patient groups by patient ID (ascending)
+  const sortedPatients = Array.from(patientGroups.entries()).sort(
+    (a, b) => a[1].patientInfo.patientId - b[1].patientInfo.patientId
+  )
+
+  // 3. Process each patient
+  sortedPatients.forEach(([key, group]) => {
+    // Sort months chronologically
+    const sortedMonths = Array.from(group.recordsByMonth.keys()).sort(
+      (a, b) => dayjs(a, 'MMMM YYYY') - dayjs(b, 'MMMM YYYY')
+    )
+
+    // Build a structure: for each month, get all records
+    const monthRecordsMap = new Map()
+
+    sortedMonths.forEach(monthYear => {
+      const recordsInMonth = group.recordsByMonth.get(monthYear)
+      // Sort records in this month by GL number (ascending)
+      recordsInMonth.sort((a, b) => a.gl_no - b.gl_no)
+      monthRecordsMap.set(monthYear, recordsInMonth)
+    })
+
+    // Find the maximum number of records in any single month for this patient
+    let maxRecordsInAnyMonth = 0
+    monthRecordsMap.forEach(records => {
+      maxRecordsInAnyMonth = Math.max(maxRecordsInAnyMonth, records.length)
+    })
+
+    // Create rows equal to maxRecordsInAnyMonth
+    for (let rowIndex = 0; rowIndex < maxRecordsInAnyMonth; rowIndex++) {
+      const monthlyRecords = {}
+
+      // For each month, get the record at rowIndex (if exists)
+      sortedMonths.forEach(monthYear => {
+        const recordsInMonth = monthRecordsMap.get(monthYear)
+
+        if (rowIndex < recordsInMonth.length) {
+          const record = recordsInMonth[rowIndex]
+
+          monthlyRecords[monthYear] = {
+            glNo: record.gl_no,
+            category: record.category,
+            partner: record.partner,
+            clientName: formatClientName({
+              lastname: record.client_lastname,
+              firstname: record.client_firstname,
+              middlename: record.client_middlename,
+              suffix: record.client_suffix
+            }),
+            dateIssued: dayjs(record.date_issued).format('YYYY-MM-DD'),
+            hospitalBill: record.category === 'HOSPITAL' ? record.hospital_bill : null,
+            issuedAmount: record.issued_amount,
+            issuedBy: record.issued_by
+          }
+        }
+      })
+
+      // Create a row - each row is a complete clone of patient info
+      allRows.push({
+        ...group.patientInfo,
+        rowId: `patient-${group.patientInfo.patientId}-row-${rowIndex}`,
+        monthlyRecords: monthlyRecords,
+        isFirstInMonth: true, // Each row shows full patient info
+        recordsInThisMonth: 1 // No rowspan needed
+      })
     }
   })
 
-  return Array.from(patientMap.values())
+  return allRows
 }
+
+
 
 // Computed: Filtered rows
 const filteredRows = computed(() => {
   let filtered = allPatients.value
 
+  // Apply category filter
   if (categoryValue.value) {
-    filtered = filtered.filter(patient => {
-      return Object.values(patient.monthlyRecords).some(record => record.category === categoryValue.value)
+    filtered = filtered.filter(row => {
+      // Check if patient has ANY record matching the category
+      return Object.values(row.monthlyRecords).some(
+        record => record.category === categoryValue.value
+      )
     })
   }
 
+  // Apply partner filter
   if (partnerValue.value) {
-    filtered = filtered.filter(patient => {
-      return Object.values(patient.monthlyRecords).some(record => record.partner === partnerValue.value)
+    filtered = filtered.filter(row => {
+      // Check if patient has ANY record matching the partner
+      return Object.values(row.monthlyRecords).some(
+        record => record.partner === partnerValue.value
+      )
     })
   }
 
+  // Apply barangay filter
   if (barangayValue.value) {
-    filtered = filtered.filter(patient => patient.barangay === barangayValue.value)
+    filtered = filtered.filter(row => row.barangay === barangayValue.value)
   }
 
   return filtered
@@ -703,7 +863,8 @@ const downloadCSV = () => {
     ]
 
     visibleMonths.value.forEach(monthYear => {
-      const record = row.monthlyRecords[monthYear]
+      const dataKey = monthMapping.value.get(monthYear)
+      const record = row.monthlyRecords[dataKey]
       if (record) {
         dataRow.push(record.glNo)
         if (!categoryValue.value && !partnerValue.value) {
@@ -790,6 +951,21 @@ const downloadCSV = () => {
 onMounted(() => {
   fetchPatients()
 })
+
+const getPatientNumber = (patientId) => {
+  // Get unique patient IDs in the order they appear
+  const seen = new Set()
+  const uniquePatients = []
+
+  for (const row of filteredRows.value) {
+    if (!seen.has(row.patientId)) {
+      seen.add(row.patientId)
+      uniquePatients.push(row.patientId)
+    }
+  }
+
+  return uniquePatients.indexOf(patientId) + 1
+}
 </script>
 
 <style scoped>
@@ -881,12 +1057,16 @@ onMounted(() => {
 .data-table th {
   background-color: #1f8f2e;
   color: #ffffff;
-  padding: 12px 16px;
   text-align: center;
   font-weight: 600;
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   white-space: nowrap;
+}
+
+/* Column headers (not month or category headers) */
+.data-table thead tr:last-child th {
+  padding: 12px 16px;
   font-size: 12px;
   letter-spacing: 0.01em;
 }
@@ -916,14 +1096,13 @@ onMounted(() => {
 
 /* Category header row */
 .category-header-row th {
-  height: auto !important;
-  padding: 12px 16px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
 }
 
 .category-header {
   background-color: #ff9800 !important;
-  font-size: 14px;
-  font-weight: 700;
   color: white;
 }
 
@@ -933,6 +1112,11 @@ onMounted(() => {
   font-weight: 700;
   padding: 10px 12px;
   color: white;
+}
+
+.month-spacer {
+  background-color: #1f8f2e !important;
+  color: transparent !important;
 }
 
 .month-january {
@@ -991,6 +1175,12 @@ onMounted(() => {
   background-color: white;
   z-index: 5;
   box-shadow: 2px 0 3px rgba(0, 0, 0, 0.08);
+  /* Ensure rowspan cells expand properly */
+  vertical-align: middle !important;
+}
+
+.sticky-col[rowspan] {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12) !important;
 }
 
 .data-table tbody tr:nth-child(even) .sticky-col {
@@ -1040,11 +1230,21 @@ onMounted(() => {
   white-space: nowrap;
 }
 
+.name-cell[rowspan] {
+  vertical-align: middle !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12) !important;
+}
+
 .address-cell {
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.address-cell[rowspan] {
+  vertical-align: middle !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Scrollbar styling */

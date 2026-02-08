@@ -1,7 +1,7 @@
 <template>
   <div class="page-bg">
     <q-form ref="transferForm" class="form-container">
-      <h4>TRANSFER BUDGET</h4>
+      <h4>TRANSFER SUPPLEMENTAL BUDGET</h4>
 
       <div class="content">
 
@@ -9,31 +9,93 @@
         <div class="budget-block">
           <h3>FROM</h3>
           <label>SELECT SOURCE: <span>*</span></label>
-          <q-select v-model="fromSource" dense outlined :options="categories" placeholder="SELECT SOURCE"
-            class="amount-input" />
+          <q-select 
+            v-model="transferData.from" 
+            dense 
+            outlined 
+            :options="categories" 
+            placeholder="SELECT SOURCE"
+            class="amount-input" 
+            @update:model-value="validateTransfer"
+          />
         </div>
 
         <!-- TO -->
         <div class="budget-block">
           <h3>TO</h3>
           <label>SELECT DESTINATION: <span>*</span></label>
-          <q-select v-model="toDestination" dense outlined :options="filteredCategories"
-            placeholder="SELECT DESTINATION" class="amount-input" />
+          <q-select 
+            v-model="transferData.to" 
+            dense 
+            outlined 
+            :options="filteredCategories"
+            placeholder="SELECT DESTINATION" 
+            class="amount-input"
+            @update:model-value="validateTransfer"
+          />
         </div>
 
         <!-- AMOUNT -->
         <div class="budget-block">
           <h3>AMOUNT</h3>
           <label>TRANSFER AMOUNT: <span>*</span></label>
-          <q-input v-model="transferAmount" dense outlined type="text" placeholder="AMOUNT" class="amount-input"
-            @input="transferAmount = transferAmount.replace(/[^0-9]/g, '')" />
+          <q-input 
+            v-model="transferData.amount" 
+            dense 
+            outlined 
+            type="text" 
+            placeholder="AMOUNT" 
+            class="amount-input"
+            @input="transferData.amount = transferData.amount.replace(/[^0-9]/g, '')"
+            @update:model-value="validateTransfer"
+          />
+        </div>
+
+        <!-- VALIDATION MESSAGE -->
+        <div v-if="validationMessage" class="validation-message" :class="validationClass">
+          <q-icon :name="validationIcon" size="20px" class="q-mr-sm" />
+          {{ validationMessage }}
+        </div>
+
+        <!-- BUDGET BREAKDOWN (shown when validation successful) -->
+        <div v-if="isValid && budgetBreakdown" class="budget-breakdown">
+          <h6>Budget Breakdown for {{ transferData.from }}</h6>
+          <div class="breakdown-row">
+            <span>Annual Budget:</span>
+            <span>₱{{ formatCurrency(budgetBreakdown.annual) }}</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Total Supplemental:</span>
+            <span>₱{{ formatCurrency(budgetBreakdown.supplemental) }}</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Amount Given:</span>
+            <span class="negative">-₱{{ formatCurrency(budgetBreakdown.given) }}</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Transfer Amount:</span>
+            <span class="negative">-₱{{ formatCurrency(transferData.amount) }}</span>
+          </div>
+          <div class="breakdown-row total">
+            <span>Remaining Balance:</span>
+            <span :class="budgetBreakdown.remaining >= 0 ? 'positive' : 'negative'">
+              ₱{{ formatCurrency(budgetBreakdown.remaining) }}
+            </span>
+          </div>
         </div>
 
         <div class="divider"></div>
 
         <div class="actions">
           <q-btn class="btn-cancel" icon="close" label="CANCEL" @click="showCancelDialog = true" dense />
-          <q-btn class="btn-save" icon="swap_horiz" label="TRANSFER" @click="handleSaveClick" dense />
+          <q-btn 
+            class="btn-save" 
+            icon="swap_horiz" 
+            label="TRANSFER" 
+            @click="handleTransferClick" 
+            :disable="!isValid"
+            dense 
+          />
         </div>
 
         <!-- CANCEL CONFIRMATION DIALOG -->
@@ -55,19 +117,27 @@
         </q-dialog>
 
         <!-- TRANSFER CONFIRMATION DIALOG -->
-        <q-dialog v-model="showSaveDialog">
-          <q-card style="min-width: 350px">
+        <q-dialog v-model="showTransferDialog">
+          <q-card style="min-width: 400px">
             <q-card-section>
-              <div class="text-h6">Transfer Budget?</div>
+              <div class="text-h6">Confirm Budget Transfer</div>
             </q-card-section>
 
             <q-card-section class="q-pt-none">
-              Are you sure you want to transfer this amount?
+              <p>Are you sure you want to transfer <strong>₱{{ formatCurrency(transferData.amount) }}</strong> from <strong>{{ transferData.from }}</strong> to <strong>{{ transferData.to }}</strong>?</p>
+              <p class="text-caption text-grey-7">This action will create a supplemental budget entry.</p>
             </q-card-section>
 
             <q-card-actions align="right" class="q-px-md q-pb-md">
               <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-              <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmSave" />
+              <q-btn 
+                unelevated 
+                icon="swap_horiz" 
+                label="YES, TRANSFER" 
+                class="dialog-cancel-btn" 
+                @click="confirmTransfer"
+                :loading="transferLoading"
+              />
             </q-card-actions>
           </q-card>
         </q-dialog>
@@ -87,61 +157,143 @@ const router = useRouter()
 const $q = useQuasar()
 
 const transferForm = ref(null)
-const fromSource = ref(null)
-const toDestination = ref(null)
-const transferAmount = ref(null)
 const showCancelDialog = ref(false)
-const showSaveDialog = ref(false)
+const showTransferDialog = ref(false)
+const transferLoading = ref(false)
+const validationMessage = ref('')
+const isValid = ref(false)
+const budgetBreakdown = ref(null)
 
-// The categories we can transfer between
-const categories = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
-
-// Filtered TO options, disabling the same as FROM
-const filteredCategories = computed(() => {
-  return categories.filter(cat => cat !== fromSource.value)
+const transferData = ref({
+  year: new Date().getFullYear(),
+  from: null,
+  to: null,
+  amount: ''
 })
 
-const handleSaveClick = () => {
-  if (fromSource.value && toDestination.value && transferAmount.value) {
-    showSaveDialog.value = true
-  } else {
-    $q.notify({
-      type: 'negative',
-      message: 'Please complete all required fields before transferring',
-      position: 'top'
+const categories = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
+
+// Filtered TO options, excluding the FROM selection
+const filteredCategories = computed(() => {
+  return categories.filter(cat => cat !== transferData.value.from)
+})
+
+// Validation class for styling
+const validationClass = computed(() => {
+  return isValid.value ? 'success' : 'error'
+})
+
+// Validation icon
+const validationIcon = computed(() => {
+  return isValid.value ? 'check_circle' : 'error'
+})
+
+// Format currency helper
+const formatCurrency = (value) => {
+  if (value === null || value === undefined) return '0.00'
+  return parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+// Validate transfer
+const validateTransfer = async () => {
+  // Reset validation
+  validationMessage.value = ''
+  isValid.value = false
+  budgetBreakdown.value = null
+
+  // Check if all fields are filled
+  if (!transferData.value.from || !transferData.value.to || !transferData.value.amount) {
+    validationMessage.value = 'Please complete all required fields'
+    return
+  }
+
+  const amount = parseInt(transferData.value.amount)
+  if (amount <= 0) {
+    validationMessage.value = 'Transfer amount must be greater than zero'
+    return
+  }
+
+  try {
+    // Fetch budget data for validation
+    const response = await axios.post('http://localhost:8000/api/validate-transfer', {
+      year: transferData.value.year,
+      category: transferData.value.from,
+      amount: amount
     })
+
+    const data = response.data
+
+    if (data.success) {
+      isValid.value = true
+      budgetBreakdown.value = data.breakdown
+      validationMessage.value = 'Transfer is valid. Budget will remain positive.'
+    } else {
+      isValid.value = false
+      budgetBreakdown.value = data.breakdown
+      validationMessage.value = data.message
+    }
+  } catch (err) {
+    console.error('Validation error:', err)
+    validationMessage.value = 'Error validating transfer. Please try again.'
+    isValid.value = false
   }
 }
 
-const confirmSave = async () => {
-  showSaveDialog.value = false
+const handleTransferClick = () => {
+  if (!isValid.value) {
+    $q.notify({
+      type: 'negative',
+      message: 'Cannot transfer. Budget validation failed.',
+      position: 'top'
+    })
+    return
+  }
+  showTransferDialog.value = true
+}
+
+// Confirm transfer
+const confirmTransfer = async () => {
+  transferLoading.value = true
 
   try {
-    // POST request to save the transfer record
-    await axios.post('http://localhost:8000/api/transfer-budget', {
-      year: new Date().getFullYear(),
-      from: fromSource.value,
-      to: toDestination.value,
-      amount: parseInt(transferAmount.value),
-      date_added: new Date().toISOString().split('T')[0] // yyyy-mm-dd
+    // Create supplemental budget entry for transfer
+    const fromAmount = transferData.value.from === 'MEDICINE' ? -parseInt(transferData.value.amount) :
+                       transferData.value.from === 'LABORATORY' ? 0 : 0
+    const toAmount = transferData.value.to === 'MEDICINE' ? parseInt(transferData.value.amount) : 0
+    
+    const labFrom = transferData.value.from === 'LABORATORY' ? -parseInt(transferData.value.amount) : 0
+    const labTo = transferData.value.to === 'LABORATORY' ? parseInt(transferData.value.amount) : 0
+    
+    const hospFrom = transferData.value.from === 'HOSPITAL' ? -parseInt(transferData.value.amount) : 0
+    const hospTo = transferData.value.to === 'HOSPITAL' ? parseInt(transferData.value.amount) : 0
+
+    await axios.post('http://localhost:8000/api/add-supplementary-bonus', {
+      year: transferData.value.year,
+      date_added: new Date().toISOString().split('T')[0],
+      medicine_supplementary_bonus: fromAmount + toAmount,
+      laboratory_supplementary_bonus: labFrom + labTo,
+      hospital_supplementary_bonus: hospFrom + hospTo
     })
 
     $q.notify({
       type: 'positive',
-      message: 'Budget successfully transferred',
+      message: `Successfully transferred ₱${formatCurrency(transferData.value.amount)} from ${transferData.value.from} to ${transferData.value.to}`,
       position: 'top'
     })
 
-    // Redirect to TransferBudgetTable page
-    router.push('/transfer-budget-table')
-
+    showTransferDialog.value = false
+    
+    // Redirect to budget table
+    router.push('/budget-table')
   } catch (err) {
-    console.log(err)
+    console.error('Transfer error:', err)
     $q.notify({
       type: 'negative',
-      message: 'Error transferring budget. Try again.',
+      message: 'Error transferring budget. Please try again.',
       position: 'top'
     })
+  } finally {
+    transferLoading.value = false
   }
 }
 
@@ -197,6 +349,72 @@ label span {
   background: #f0f0f0;
 }
 
+.validation-message {
+  padding: 12px;
+  border-radius: 4px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.validation-message.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.validation-message.error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.budget-breakdown {
+  background: #f5f5f5;
+  border: 2px solid #1f8f2e;
+  border-radius: 6px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.budget-breakdown h6 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f8f2e;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.breakdown-row:last-child {
+  border-bottom: none;
+}
+
+.breakdown-row.total {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 2px solid #1f8f2e;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.breakdown-row .negative {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.breakdown-row .positive {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
 .divider {
   height: 2px;
   background: #dcdcdc;
@@ -223,6 +441,11 @@ label span {
 
 .btn-save {
   background: #0aa64f;
+}
+
+.btn-save:disabled {
+  background: #ccc !important;
+  cursor: not-allowed;
 }
 
 /* Dialog Button Styling */

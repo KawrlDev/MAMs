@@ -36,7 +36,11 @@
       <q-table title="Accounts" :rows="accountRows" :columns="accountColumns" row-key="id">
         <template #body-cell-action="props">
           <q-td :props="props">
-            <q-btn icon="delete" label="DELETE" color="red" size="sm" unelevated @click="showDeleteDialog(props.row)" />
+            <div class="action-buttons">
+              <q-btn icon="edit" label="EDIT" color="orange" size="sm" unelevated @click="showEditDialog(props.row)" />
+              <q-btn icon="delete" label="DELETE" color="red" size="sm" unelevated
+                @click="showDeleteDialog(props.row)" />
+            </div>
           </q-td>
         </template>
       </q-table>
@@ -68,6 +72,68 @@
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
           <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="createAccount"
             :loading="createLoading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- EDIT ACCOUNT DIALOG -->
+    <q-dialog v-model="editDialogVisible" persistent>
+      <q-card style="min-width: 500px">
+        <q-card-section class="bg-orange-6 text-white">
+          <div class="text-h6">
+            <q-icon name="edit" size="sm" class="q-mr-sm" />
+            Edit Account
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-form ref="editForm">
+            <div class="edit-field">
+              <label>Name / Username <span class="required">*</span></label>
+              <q-input v-model="editData.username" outlined dense :rules="[val => !!val || 'This field is required']" />
+            </div>
+
+            <div class="edit-field">
+              <label>Role <span class="required">*</span></label>
+              <q-select v-model="editData.role" :options="roles" outlined dense
+                :rules="[val => !!val || 'This field is required']" />
+            </div>
+
+            <q-separator class="q-my-md" />
+
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Change Password (Optional)</div>
+            <div class="text-caption text-grey-7 q-mb-md">Leave blank to keep current password</div>
+
+            <div class="edit-field">
+              <label>New Password</label>
+              <q-input v-model="editData.password" :type="showPassword ? 'text' : 'password'" outlined dense
+                :rules="passwordRules">
+                <template v-slot:append>
+                  <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                    @click="showPassword = !showPassword" />
+                </template>
+              </q-input>
+            </div>
+
+            <div class="edit-field">
+              <label>Confirm New Password</label>
+              <q-input v-model="editData.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" outlined
+                dense :rules="confirmPasswordRules">
+                <template v-slot:append>
+                  <q-icon :name="showConfirmPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                    @click="showConfirmPassword = !showConfirmPassword" />
+                </template>
+              </q-input>
+            </div>
+          </q-form>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn unelevated icon="close" label="CANCEL" class="dialog-goback-btn" @click="closeEditDialog" />
+          <q-btn unelevated icon="check" label="SAVE CHANGES" class="dialog-cancel-btn" @click="confirmEdit"
+            :loading="editLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -115,13 +181,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
 
 const accountForm = ref(null)
+const editForm = ref(null)
 
 const name = ref('')
 const password = ref('')
@@ -129,10 +196,22 @@ const role = ref(null)
 const roles = ['ADMIN', 'EMPLOYEE']
 
 const createDialogVisible = ref(false)
+const editDialogVisible = ref(false)
 const deleteDialogVisible = ref(false)
 const createLoading = ref(false)
+const editLoading = ref(false)
 const deleteLoading = ref(false)
 const accountToDelete = ref(null)
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const editData = ref({
+  id: null,
+  username: '',
+  role: null,
+  password: '',
+  confirmPassword: ''
+})
 
 const accountRows = ref([])
 const accountColumns = [
@@ -141,6 +220,25 @@ const accountColumns = [
   { name: 'role', label: 'Role', field: 'ROLE', align: 'center', sortable: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
+
+// Password validation rules
+const passwordRules = computed(() => {
+  return [
+    // No validation - allow any password
+    val => true
+  ]
+})
+
+const confirmPasswordRules = computed(() => {
+  return [
+    // Only check if passwords match when both are provided
+    val => {
+      if (!editData.value.password && !val) return true // Both empty is ok
+      if (val !== editData.value.password) return 'Passwords do not match'
+      return true
+    }
+  ]
+})
 
 const showCreateDialog = async () => {
   // Use Quasar's built-in form validation
@@ -156,6 +254,82 @@ const showCreateDialog = async () => {
   }
 
   createDialogVisible.value = true
+}
+
+const showEditDialog = (account) => {
+  editData.value = {
+    id: account.ID,
+    username: account.USERNAME,
+    role: account.ROLE,
+    password: '',
+    confirmPassword: ''
+  }
+  showPassword.value = false
+  showConfirmPassword.value = false
+  editDialogVisible.value = true
+}
+
+const closeEditDialog = () => {
+  editDialogVisible.value = false
+  editData.value = {
+    id: null,
+    username: '',
+    role: null,
+    password: '',
+    confirmPassword: ''
+  }
+  showPassword.value = false
+  showConfirmPassword.value = false
+}
+
+const confirmEdit = async () => {
+  // Validate form
+  const isValid = await editForm.value.validate()
+
+  if (!isValid) {
+    $q.notify({
+      type: 'negative',
+      message: 'Please fix validation errors',
+      position: 'top'
+    })
+    return
+  }
+
+  editLoading.value = true
+
+  try {
+    const payload = {
+      id: editData.value.id,
+      username: editData.value.username,
+      role: editData.value.role
+    }
+
+    // Only include password if it's been filled in
+    if (editData.value.password && editData.value.password.trim() !== '') {
+      payload.password = editData.value.password
+    }
+
+    await axios.post('http://localhost:8000/api/update-account', payload)
+
+    $q.notify({
+      type: 'positive',
+      message: 'Account Updated Successfully',
+      position: 'top'
+    })
+
+    closeEditDialog()
+    await fetchAccounts()
+
+  } catch (error) {
+    console.error('Error updating account:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Error updating account',
+      position: 'top'
+    })
+  } finally {
+    editLoading.value = false
+  }
 }
 
 const showDeleteDialog = (account) => {
@@ -175,7 +349,8 @@ const createAccount = async () => {
 
     $q.notify({
       type: 'positive',
-      message: 'Account Created Successfully'
+      message: 'Account Created Successfully',
+      position: 'top'
     })
 
     // reset form
@@ -191,7 +366,8 @@ const createAccount = async () => {
     console.error('Error creating account:', error)
     $q.notify({
       type: 'negative',
-      message: 'Error creating account'
+      message: 'Error creating account',
+      position: 'top'
     })
   } finally {
     createLoading.value = false
@@ -205,12 +381,13 @@ const deleteAccount = async () => {
 
   try {
     await axios.post('http://localhost:8000/api/delete-account', {
-      id: accountToDelete.value.id
+      id: accountToDelete.value.ID
     })
 
     $q.notify({
       type: 'positive',
-      message: 'Account Deleted Successfully'
+      message: 'Account Deleted Successfully',
+      position: 'top'
     })
 
     deleteDialogVisible.value = false
@@ -223,7 +400,8 @@ const deleteAccount = async () => {
     console.error('Error deleting account:', error)
     $q.notify({
       type: 'negative',
-      message: 'Error deleting account'
+      message: 'Error deleting account',
+      position: 'top'
     })
   } finally {
     deleteLoading.value = false
@@ -238,7 +416,8 @@ const fetchAccounts = async () => {
     console.error('Failed to fetch accounts:', error)
     $q.notify({
       type: 'negative',
-      message: 'Failed to load accounts'
+      message: 'Failed to load accounts',
+      position: 'top'
     })
   }
 }
@@ -285,6 +464,22 @@ onMounted(() => {
 }
 
 .field label span {
+  color: red;
+}
+
+/* Edit Field Styles */
+.edit-field {
+  margin-bottom: 16px;
+}
+
+.edit-field label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  color: #333;
+}
+
+.required {
   color: red;
 }
 
@@ -356,6 +551,14 @@ onMounted(() => {
 
 .btn-save {
   background: #0aa64f;
+}
+
+/* Action Buttons in Table */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Table Styles */
