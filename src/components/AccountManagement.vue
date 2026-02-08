@@ -86,13 +86,13 @@
 
           <div class="account-info-box" v-if="accountToDelete">
             <div class="info-item">
-              <strong>ID:</strong> {{ accountToDelete.id }}
+              <strong>ID:</strong> {{ accountToDelete.ID }}
             </div>
             <div class="info-item">
-              <strong>Username:</strong> {{ accountToDelete.username }}
+              <strong>Username:</strong> {{ accountToDelete.USERNAME }}
             </div>
             <div class="info-item">
-              <strong>Role:</strong> {{ accountToDelete.role }}
+              <strong>Role:</strong> {{ accountToDelete.ROLE }}
             </div>
           </div>
 

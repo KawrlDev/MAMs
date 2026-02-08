@@ -126,28 +126,14 @@
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Category: <span class="required">*</span></label>
-                  <q-select 
-                    v-model="editData.category" 
-                    :options="categoryOptions" 
-                    dense 
-                    outlined 
-                    class="edit-input"
-                    :error="validationErrors.category"
-                    error-message="Category is required"
-                    @update:model-value="onCategoryChange" 
-                  />
+                  <q-select v-model="editData.category" :options="categoryOptions" dense outlined class="edit-input"
+                    :error="validationErrors.category" error-message="Category is required"
+                    @update:model-value="onCategoryChange" />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Partner: <span class="required">*</span></label>
-                  <q-select 
-                    v-model="editData.partner" 
-                    :options="partnerOptions" 
-                    dense 
-                    outlined 
-                    class="edit-input"
-                    :error="validationErrors.partner"
-                    error-message="Partner is required"
-                  />
+                  <q-select v-model="editData.partner" :options="partnerOptions" dense outlined class="edit-input"
+                    :error="validationErrors.partner" error-message="Partner is required" />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Issued By:</label>
@@ -157,45 +143,24 @@
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                  <q-input 
-                    v-model="editData.issuedAmount" 
-                    type="number" 
-                    dense 
-                    outlined 
-                    class="edit-input" 
-                    prefix="₱"
+                  <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱"
                     :error="validationErrors.issuedAmount"
-                    error-message="Issued Amount is required and must be greater than 0"
-                  />
+                    error-message="Issued Amount is required and must be greater than 0" />
                 </div>
 
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
-                    <q-input 
-                      v-model="editData.hospitalBill" 
-                      type="number" 
-                      dense 
-                      outlined 
-                      class="edit-input"
-                      prefix="₱"
+                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input" prefix="₱"
                       :error="validationErrors.hospitalBill"
-                      error-message="Hospital Bill is required and must be greater than 0"
-                    />
+                      error-message="Hospital Bill is required and must be greater than 0" />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                    <q-input 
-                      v-model="editData.issuedAmount" 
-                      type="number" 
-                      dense 
-                      outlined 
-                      class="edit-input"
-                      prefix="₱"
+                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱"
                       :error="validationErrors.issuedAmount"
-                      error-message="Issued Amount is required and must be greater than 0"
-                    />
+                      error-message="Issued Amount is required and must be greater than 0" />
                   </div>
                 </template>
 
@@ -212,25 +177,13 @@
                 <div class="edit-grid">
                   <div class="edit-item">
                     <label class="edit-label">Last Name: <span class="required">*</span></label>
-                    <q-input 
-                      v-model="editData.clientLastName" 
-                      dense 
-                      outlined 
-                      class="edit-input"
-                      :error="validationErrors.clientLastName"
-                      error-message="Last Name is required"
-                    />
+                    <q-input v-model="editData.clientLastName" dense outlined class="edit-input"
+                      :error="validationErrors.clientLastName" error-message="Last Name is required" />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">First Name: <span class="required">*</span></label>
-                    <q-input 
-                      v-model="editData.clientFirstName" 
-                      dense 
-                      outlined 
-                      class="edit-input"
-                      :error="validationErrors.clientFirstName"
-                      error-message="First Name is required"
-                    />
+                    <q-input v-model="editData.clientFirstName" dense outlined class="edit-input"
+                      :error="validationErrors.clientFirstName" error-message="First Name is required" />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Middle Name:</label>
@@ -242,14 +195,8 @@
                   </div>
                   <div class="edit-item edit-item-full">
                     <label class="edit-label">Relationship: <span class="required">*</span></label>
-                    <q-input 
-                      v-model="editData.relationship" 
-                      dense 
-                      outlined 
-                      class="edit-input"
-                      :error="validationErrors.relationship"
-                      error-message="Relationship is required"
-                    />
+                    <q-input v-model="editData.relationship" dense outlined class="edit-input"
+                      :error="validationErrors.relationship" error-message="Relationship is required" />
                   </div>
                 </div>
               </template>
@@ -421,6 +368,7 @@ const columns = [
   { name: 'Issued At', label: 'Date Issued', field: 'issuedAt' },
   { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate' },
   { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
+  { name: 'Issued Amount', label: 'Issued Amount', field: 'issuedAmount' },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 
@@ -577,7 +525,7 @@ const enterEditMode = () => {
     // If client data doesn't exist, patient is same as client
     isChecked: !data.client_lastname
   }
-  
+
   resetValidationErrors()
   editMode.value = true
 }
@@ -636,7 +584,7 @@ const onCheckboxChange = () => {
     editData.value.clientMiddleName = null
     editData.value.clientSuffix = null
     editData.value.relationship = null
-    
+
     // Clear client validation errors
     validationErrors.value.clientLastName = false
     validationErrors.value.clientFirstName = false
@@ -657,7 +605,7 @@ const handleSaveClick = () => {
   if (!validateForm()) {
     return
   }
-  
+
   // If validation passes, show confirmation dialog
   showSaveConfirmDialog.value = true
 }
@@ -666,14 +614,15 @@ const loadPatientHistory = async () => {
   try {
     const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
     const today = dayjs().startOf('day')
-    
+
     rows.value = res.data.history.map(item => {
       const eligibility = calculateEligibility(item.date_issued)
-      
+
       return {
         glNum: item.gl_no,
         category: item.category,
         issuedAt: item.date_issued,
+        issuedAmount: item.issued_amount,
         eligibilityDate: eligibility.eligibilityDate,
         eligibilityClass: eligibility.eligibilityClass,
         daysRemaining: eligibility.daysRemaining,
@@ -917,7 +866,7 @@ function getDaySuffix(day) {
 onMounted(async () => {
   // Fetch eligibility cooldown first
   await fetchEligibilityCooldown()
-  
+
   // Then load patient history with the correct cooldown
   await loadPatientHistory()
 })
