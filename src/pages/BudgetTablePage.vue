@@ -2,7 +2,6 @@
     <div class="container">
       <InitialBudgetTable />
       <SupplementaryBudgetTable />
-      <TransferBudgetTable />
 
     </div>
 </template>

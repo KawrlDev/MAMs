@@ -313,7 +313,7 @@
         </div>
       </div>
       <q-separator color="grey-5" size="2px" class="q-my-lg" />
-      <div class="patient-info-pill">Transaction Details.</div>
+      <div class="patient-info-pill">Transaction Details</div>
       <div class="grid-3">
         <div class="field">
           <label>Partner <span>*</span></label>

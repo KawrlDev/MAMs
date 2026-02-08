@@ -51,13 +51,8 @@
 
           <!-- DOWNLOAD CSV BUTTON -->
           <div class="col-auto">
-            <q-btn 
-              icon="download" 
-              label="Download CSV" 
-              color="green" 
-              @click="downloadCSV"
-              :disable="filteredRows.length === 0"
-            />
+            <q-btn icon="download" label="Download CSV" color="green" @click="downloadCSV"
+              :disable="filteredRows.length === 0" />
           </div>
         </div>
       </q-card-section>
@@ -70,15 +65,14 @@
         <div class="left-section" :style="{ width: sectionWidths.left + '%' }">
           <table class="data-table">
             <thead>
+              <tr v-if="!categoryValue" class="month-headers-spacer">
+                <th colspan="7" class="category-header">&nbsp;</th>
+              </tr>
               <!-- Category header row - only show if category filter is applied -->
               <tr v-if="categoryValue" class="category-header-row">
                 <th colspan="7" class="category-header">
                   {{ categoryValue }}
                 </th>
-              </tr>
-              <!-- Empty row to match right section's month headers if no category -->
-              <tr v-else class="spacer-row">
-                <th colspan="7"></th>
               </tr>
               <!-- Column headers -->
               <tr>
@@ -86,7 +80,7 @@
                 <th class="resizable-col"
                   :style="{ width: columnWidths.name + 'px', minWidth: columnWidths.name + 'px', maxWidth: columnWidths.name + 'px' }">
                   <div class="resizable-header">
-                    <span>NAME OF BENEFICIARIES</span>
+                    <span>PATIENT'S NAME</span>
                     <div class="resize-handle" @mousedown="startResize($event, 'name')"></div>
                   </div>
                 </th>
@@ -135,7 +129,7 @@
           </table>
         </div>
 
-        <!-- DIVIDER RESIZE HANDLE -->
+        <!-- DIVIDER (resizable) -->
         <div class="section-divider" @mousedown="startSectionResize">
           <div class="divider-line"></div>
         </div>
@@ -158,6 +152,7 @@
                     <th>GL NO.</th>
                     <th v-if="!categoryValue && !partnerValue">CATEGORY</th>
                     <th v-if="!partnerValue">PARTNER</th>
+                    <th>CLIENT'S NAME</th>
                     <th>DATE ISSUED</th>
                     <th v-if="showHospitalBill">HOSPITAL BILL</th>
                     <th>AMOUNT</th>
@@ -186,6 +181,7 @@
                       <td>{{ row.monthlyRecords[monthYear].glNo }}</td>
                       <td v-if="!categoryValue && !partnerValue">{{ row.monthlyRecords[monthYear].category }}</td>
                       <td v-if="!partnerValue">{{ row.monthlyRecords[monthYear].partner }}</td>
+                      <td>{{ row.monthlyRecords[monthYear].clientName }}</td>
                       <td>{{ row.monthlyRecords[monthYear].dateIssued }}</td>
                       <td v-if="showHospitalBill">{{ formatCurrency(row.monthlyRecords[monthYear].hospitalBill) }}</td>
                       <td>{{ formatCurrency(row.monthlyRecords[monthYear].issuedAmount) }}</td>
@@ -195,6 +191,7 @@
                       <td>-</td>
                       <td v-if="!categoryValue && !partnerValue">-</td>
                       <td v-if="!partnerValue">-</td>
+                      <td>-</td>
                       <td>-</td>
                       <td v-if="showHospitalBill">-</td>
                       <td>-</td>
@@ -243,7 +240,7 @@ const columnWidths = ref({
   address: 350
 })
 
-// Section widths (percentages)
+// Section widths (percentages) - resizable
 const sectionWidths = ref({
   left: 50,
   right: 50
@@ -270,21 +267,14 @@ const visibleMonths = computed(() => {
     let fromDate, toDate
 
     if (typeof dateRange.value === 'string') {
-      // Single date
-      console.log('Parsing single date:', dateRange.value)
       fromDate = toDate = dayjs(dateRange.value, 'DD/MM/YYYY')
-      console.log('Parsed as:', fromDate.format('YYYY-MM-DD'))
     } else {
-      // Date range
       const { from, to } = dateRange.value
-      console.log('Parsing date range:', from, 'to', to)
       fromDate = dayjs(from, 'DD/MM/YYYY')
       toDate = to ? dayjs(to, 'DD/MM/YYYY') : fromDate
-      console.log('Parsed from:', fromDate.format('YYYY-MM-DD'), 'to:', toDate.format('YYYY-MM-DD'))
     }
 
     if (!fromDate.isValid()) {
-      // Invalid date, show all months for current year
       const currentYear = dayjs().format('YYYY')
       return [
         `JANUARY ${currentYear}`, `FEBRUARY ${currentYear}`, `MARCH ${currentYear}`,
@@ -294,21 +284,16 @@ const visibleMonths = computed(() => {
       ]
     }
 
-    // Get unique month-years in the date range
     const monthYears = []
     let current = fromDate.clone().startOf('month')
     const end = toDate.clone().endOf('month')
 
-    console.log('Generating months from:', current.format('YYYY-MM-DD'), 'to:', end.format('YYYY-MM-DD'))
-
     while (current.isBefore(end) || current.isSame(end, 'month')) {
       const monthYear = `${current.format('MMMM').toUpperCase()} ${current.format('YYYY')}`
-      console.log('Adding month:', monthYear)
       monthYears.push(monthYear)
       current = current.add(1, 'month')
     }
 
-    console.log('Final visible months:', monthYears)
     return monthYears
   }
 
@@ -337,7 +322,7 @@ const showHospitalBill = computed(() => {
 
 // Computed: Get colspan for each month header
 const getMonthColspan = (monthYear) => {
-  let cols = 4 // GL NO., DATE ISSUED, AMOUNT, ISSUED BY
+  let cols = 5 // GL NO., CLIENT'S NAME, DATE ISSUED, AMOUNT, ISSUED BY
 
   if (!categoryValue.value && !partnerValue.value) {
     cols += 1 // CATEGORY
@@ -393,7 +378,7 @@ const calculateAge = (birthdate) => {
   if (!birth.isValid()) return null
   if (birth.isAfter(dayjs())) return null
   const age = dayjs().diff(birth, 'year')
-  return age // Return 0 if birthdate is this year, instead of null
+  return age
 }
 
 // Format currency
@@ -402,11 +387,24 @@ const formatCurrency = (amount) => {
   return '₱' + parseFloat(amount).toFixed(2)
 }
 
+// Format client name
+const formatClientName = (clientData, patientName) => {
+  if (!clientData || !clientData.firstname) {
+    return 'SAME' // Same as patient
+  }
+
+  const parts = [
+    clientData.lastname ? clientData.lastname + ',' : '',
+    clientData.firstname,
+    clientData.middlename,
+    clientData.suffix
+  ].filter(Boolean)
+
+  return parts.join(' ')
+}
+
 // Process raw data into grouped structure
 const processPatientData = (rawData) => {
-  console.log('Raw data received:', rawData.length, 'records')
-
-  // Group by patient
   const patientMap = new Map()
 
   rawData.forEach(record => {
@@ -447,55 +445,49 @@ const processPatientData = (rawData) => {
     const recordDate = dayjs(record.date_issued)
     const year = recordDate.format('YYYY')
     const month = recordDate.format('MMMM').toUpperCase()
-    const monthYear = `${month} ${year}` // Key format: "FEBRUARY 2025", "FEBRUARY 2026"
+    const monthYear = `${month} ${year}`
     const patient = patientMap.get(patientKey)
 
-    console.log(`Processing record: ${record.gl_no}, Date: ${record.date_issued}, Month-Year: ${monthYear}`)
+    const patientName = patient.name
 
-    // Add the record (backend already filtered by date)
-    // If there's already a record for this month-year, keep the most recent one
     if (!patient.monthlyRecords[monthYear] || recordDate.isAfter(dayjs(patient.monthlyRecords[monthYear].dateIssued))) {
       patient.monthlyRecords[monthYear] = {
         glNo: record.gl_no,
         category: record.category,
         partner: record.partner,
+        clientName: formatClientName({
+          lastname: record.client_lastname,
+          firstname: record.client_firstname,
+          middlename: record.client_middlename,
+          suffix: record.client_suffix
+        }, patientName),
         dateIssued: recordDate.format('YYYY-MM-DD'),
         hospitalBill: record.hospital_bill,
         issuedAmount: record.issued_amount,
         issuedBy: record.issued_by
       }
-      console.log(`Added to ${monthYear}:`, patient.monthlyRecords[monthYear])
     }
   })
 
-  const result = Array.from(patientMap.values())
-  console.log('Processed patients:', result.length)
-  console.log('First patient monthly records:', result[0]?.monthlyRecords)
-
-  return result
+  return Array.from(patientMap.values())
 }
 
 // Computed: Filtered rows
 const filteredRows = computed(() => {
   let filtered = allPatients.value
 
-  // Filter by category
   if (categoryValue.value) {
     filtered = filtered.filter(patient => {
-      // Check if patient has any record matching the category
       return Object.values(patient.monthlyRecords).some(record => record.category === categoryValue.value)
     })
   }
 
-  // Filter by partner
   if (partnerValue.value) {
     filtered = filtered.filter(patient => {
-      // Check if patient has any record matching the partner
       return Object.values(patient.monthlyRecords).some(record => record.partner === partnerValue.value)
     })
   }
 
-  // Filter by barangay
   if (barangayValue.value) {
     filtered = filtered.filter(patient => patient.barangay === barangayValue.value)
   }
@@ -522,7 +514,6 @@ const fetchPatients = async (dateFilter = null) => {
         }
       }
     } else {
-      // Default to current year when no date filter
       const currentYear = dayjs().format('YYYY')
       params.from = `01/01/${currentYear}`
       params.to = `31/12/${currentYear}`
@@ -539,28 +530,18 @@ const fetchPatients = async (dateFilter = null) => {
 
 // Watch for date range changes
 watch(dateRange, async (newVal) => {
-  console.log('=== DATE RANGE CHANGED ===')
-  console.log('Raw dateRange.value:', newVal)
-  console.log('Type:', typeof newVal)
-  if (newVal && typeof newVal === 'object') {
-    console.log('from:', newVal.from, 'to:', newVal.to)
-  }
-  
   if (!newVal) {
     fetchPatients()
     return
   }
 
   if (typeof newVal === 'string') {
-    console.log('Fetching with single date:', newVal)
     fetchPatients(newVal)
   } else {
     const { from, to } = newVal
     if (from && to) {
-      console.log('Fetching with range:', from, 'to', to)
       fetchPatients({ from, to })
     } else if (from) {
-      console.log('Fetching with single date from range:', from)
       fetchPatients(from)
     }
   }
@@ -604,7 +585,7 @@ const onResize = (event) => {
   if (!resizeState.value.isResizing) return
 
   const diff = event.pageX - resizeState.value.startX
-  const newWidth = Math.max(150, resizeState.value.startWidth + diff) // Minimum width of 150px
+  const newWidth = Math.max(150, resizeState.value.startWidth + diff)
 
   columnWidths.value[resizeState.value.column] = newWidth
 }
@@ -664,39 +645,33 @@ const stopSectionResize = () => {
 
 // Download CSV function
 const downloadCSV = () => {
-  // Build CSV content
   const rows = []
-  
-  // Add category header row if category filter is applied
+
   if (categoryValue.value) {
     const categoryRow = [categoryValue.value]
     rows.push(categoryRow)
   }
-  
-  // Build month header row
-  const monthHeaders = ['', '', '', '', '', '', ''] // Empty cells for patient info columns
+
+  const monthHeaders = ['', '', '', '', '', '', '']
   visibleMonths.value.forEach(monthYear => {
     const colspan = getMonthColspan(monthYear)
     monthHeaders.push(monthYear)
-    // Add empty cells for remaining columns in this month
     for (let i = 1; i < colspan; i++) {
       monthHeaders.push('')
     }
   })
   rows.push(monthHeaders)
-  
-  // Build column header row
+
   const columnHeaders = [
     'NO.',
-    'NAME OF BENEFICIARIES',
+    'PATIENT\'S NAME',
     'ADDRESS',
     'CONTACT NO.',
     'AGE',
     'SEX',
     'PREFERENCE'
   ]
-  
-  // Add column headers for each visible month
+
   visibleMonths.value.forEach(monthYear => {
     columnHeaders.push('GL NO.')
     if (!categoryValue.value && !partnerValue.value) {
@@ -705,6 +680,7 @@ const downloadCSV = () => {
     if (!partnerValue.value) {
       columnHeaders.push('PARTNER')
     }
+    columnHeaders.push('CLIENT\'S NAME')
     columnHeaders.push('DATE ISSUED')
     if (showHospitalBill.value) {
       columnHeaders.push('HOSPITAL BILL')
@@ -712,23 +688,20 @@ const downloadCSV = () => {
     columnHeaders.push('AMOUNT')
     columnHeaders.push('ISSUED BY')
   })
-  
+
   rows.push(columnHeaders)
-  
-  // Add data rows
+
   filteredRows.value.forEach((row, index) => {
     const dataRow = [
       index + 1,
       row.name,
       row.address,
-      // Prefix contact number with tab to force text format and prevent scientific notation
       row.phoneNumber ? `\t${row.phoneNumber}` : 'N/A',
       row.age !== null ? row.age : 'N/A',
       row.sex || 'N/A',
       row.preference || 'N/A'
     ]
-    
-    // Add monthly record data
+
     visibleMonths.value.forEach(monthYear => {
       const record = row.monthlyRecords[monthYear]
       if (record) {
@@ -739,19 +712,16 @@ const downloadCSV = () => {
         if (!partnerValue.value) {
           dataRow.push(record.partner)
         }
-        // Prefix date with tab to force text format
+        dataRow.push(record.clientName)
         dataRow.push(`\t${record.dateIssued}`)
         if (showHospitalBill.value) {
-          // Prefix number with tab to force text format and prevent hashtags
           const hospitalBill = record.hospitalBill ? parseFloat(record.hospitalBill).toFixed(2) : '0.00'
           dataRow.push(`\t${hospitalBill}`)
         }
-        // Prefix number with tab to force text format and prevent hashtags
         const amount = record.issuedAmount ? parseFloat(record.issuedAmount).toFixed(2) : '0.00'
         dataRow.push(`\t${amount}`)
         dataRow.push(record.issuedBy)
       } else {
-        // Empty cells for months without records
         dataRow.push('-')
         if (!categoryValue.value && !partnerValue.value) {
           dataRow.push('-')
@@ -760,6 +730,7 @@ const downloadCSV = () => {
           dataRow.push('-')
         }
         dataRow.push('-')
+        dataRow.push('-')
         if (showHospitalBill.value) {
           dataRow.push('-')
         }
@@ -767,14 +738,12 @@ const downloadCSV = () => {
         dataRow.push('-')
       }
     })
-    
+
     rows.push(dataRow)
   })
-  
-  // Convert to CSV string with UTF-8 BOM for proper encoding
-  const csvContent = '\uFEFF' + rows.map(row => 
+
+  const csvContent = '\uFEFF' + rows.map(row =>
     row.map(cell => {
-      // Escape quotes and wrap in quotes if contains comma, quote, or newline
       const cellStr = String(cell)
       if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
         return '"' + cellStr.replace(/"/g, '""') + '"'
@@ -782,16 +751,14 @@ const downloadCSV = () => {
       return cellStr
     }).join(',')
   ).join('\n')
-  
-  // Create blob and download with UTF-8 encoding
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)
-  
-  // Generate filename with current date and filters
+
   const today = dayjs().format('YYYY-MM-DD')
   let filename = `general-summary-${today}`
-  
+
   if (categoryValue.value) {
     filename += `-${categoryValue.value.toLowerCase()}`
   }
@@ -808,9 +775,9 @@ const downloadCSV = () => {
       filename += `-${dateRange.value.from.replace(/\//g, '-')}_to_${dateRange.value.to.replace(/\//g, '-')}`
     }
   }
-  
+
   filename += '.csv'
-  
+
   link.setAttribute('href', url)
   link.setAttribute('download', filename)
   link.style.visibility = 'hidden'
@@ -820,7 +787,6 @@ const downloadCSV = () => {
   URL.revokeObjectURL(url)
 }
 
-// Initial fetch on mount
 onMounted(() => {
   fetchPatients()
 })
@@ -946,15 +912,6 @@ onMounted(() => {
 
 .data-table tbody tr:hover {
   background-color: #f5f5f5;
-}
-
-/* Spacer row for alignment when no category header */
-.spacer-row th {
-  background-color: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  height: 0 !important;
-  line-height: 0 !important;
 }
 
 /* Category header row */

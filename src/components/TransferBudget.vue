@@ -9,43 +9,24 @@
         <div class="budget-block">
           <h3>FROM</h3>
           <label>SELECT SOURCE: <span>*</span></label>
-          <q-select
-            v-model="fromSource"
-            dense
-            outlined
-            :options="categories"
-            placeholder="SELECT SOURCE"
-            class="amount-input"
-          />
+          <q-select v-model="fromSource" dense outlined :options="categories" placeholder="SELECT SOURCE"
+            class="amount-input" />
         </div>
 
         <!-- TO -->
         <div class="budget-block">
           <h3>TO</h3>
           <label>SELECT DESTINATION: <span>*</span></label>
-          <q-select
-            v-model="toDestination"
-            dense
-            outlined
-            :options="filteredCategories"
-            placeholder="SELECT DESTINATION"
-            class="amount-input"
-          />
+          <q-select v-model="toDestination" dense outlined :options="filteredCategories"
+            placeholder="SELECT DESTINATION" class="amount-input" />
         </div>
 
         <!-- AMOUNT -->
         <div class="budget-block">
           <h3>AMOUNT</h3>
           <label>TRANSFER AMOUNT: <span>*</span></label>
-          <q-input
-            v-model="transferAmount"
-            dense
-            outlined
-            type="text"
-            placeholder="AMOUNT"
-            class="amount-input"
-            @input="transferAmount = transferAmount.replace(/[^0-9]/g,'')"
-          />
+          <q-input v-model="transferAmount" dense outlined type="text" placeholder="AMOUNT" class="amount-input"
+            @input="transferAmount = transferAmount.replace(/[^0-9]/g, '')" />
         </div>
 
         <div class="divider"></div>
@@ -113,7 +94,7 @@ const showCancelDialog = ref(false)
 const showSaveDialog = ref(false)
 
 // The categories we can transfer between
-const categories = ['MEDICINE','LABORATORY','HOSPITAL']
+const categories = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
 
 // Filtered TO options, disabling the same as FROM
 const filteredCategories = computed(() => {
@@ -178,7 +159,7 @@ const handleCancel = () => {
 
 .form-container {
   border: 2px solid #b5b5b5;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12), 0 6px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   background: #ffffff;
   padding: 25px 30px 35px;
