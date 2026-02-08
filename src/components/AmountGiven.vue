@@ -1,7 +1,7 @@
 <template>
   <q-card class="dashboard-card">
     <div class="amount-title">DISTRIBUTION SUMMARY</div>
-    
+
     <q-card-section class="text-center card-content">
       <div class="charts-container">
         <div class="chart-wrapper chart-medium">
@@ -23,13 +23,13 @@
       <div class="barangay-title">PER BARANGAY</div>
 
       <div class="table-container">
-        <q-table 
-          class="budget-table" 
-          :rows="rows" 
-          row-key="num" 
-          flat 
-          bordered 
-          dense 
+        <q-table
+          class="budget-table"
+          :rows="rows"
+          row-key="num"
+          flat
+          bordered
+          dense
           :pagination="pagination"
           @update:pagination="updatePagination"
           :rows-per-page-options="[5, 10, 15, 20]"

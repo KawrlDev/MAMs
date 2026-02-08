@@ -1,93 +1,14 @@
 <template>
-  <q-card
-    flat
-    bordered
-    class="filter-card"
-    style="margin-top: 20px; width: 85%; margin-left: 90px"
-  >
-    <q-card-section>
-      <div class="row items-center" style="gap: 16px">
-        <!-- DATE SEARCH -->
-        <div class="row items-center" style="gap: 8px">
-          <span
-            class="text-body2 text-weight-medium"
-            style="white-space: nowrap; margin-left: 20px"
-          >
-            Filter by Period:
-          </span>
-
-          <q-input
-            style="width: 250px"
-            :model-value="formattedDate"
-            outlined
-            dense
-            placeholder="dd/mm/yyyy - dd/mm/yyyy"
-            @clear="onClearDate"
-            readonly
-          >
-            <template #append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover>
-                  <q-date
-                    v-model="dateRange"
-                    range
-                    emit-immediately
-                    mask="DD/MM/YYYY"
-                  >
-                    <div class="row items-center justify-end q-pa-sm">
-                      <q-btn label="Close" color="primary" flat v-close-popup />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-
-        <!-- CATEGORY -->
-        <div style="width: 200px">
-          <q-select
-            v-model="categoryValue"
-            :options="categoryOptions"
-            label="Category"
-            placeholder="Category"
-            dense
-            outlined
-            @clear="onClearCategory"
-          />
-        </div>
-
-        <!-- PARTNER -->
-        <div style="width: 200px">
-          <q-select
-            v-model="partnerValue"
-            dense
-            outlined
-            :options="partnerOptions"
-            label="Partner"
-            placeholder="Partner"
-            @clear="onClearPartner"
-            :disable="categoryValue == null"
-          />
-        </div>
-
-        <!-- BARANGAY -->
-        <div style="width: 200px">
-          <q-select
-            v-model="barangayValue"
-            :options="barangayOptions"
-            label="Barangay"
-            placeholder="Barangay"
-            dense
-            outlined
-            @clear="onClearBarangay"
-          />
-        </div>
-      </div>
-    </q-card-section>
-  </q-card>
+  <br />
 
   <div class="budget-table table-scroll">
+    <q-btn
+      label="Export as CSV"
+      color="green"
+      class="q-mb-md"
+      style="margin-left: 960px"
+      @click="exportSummaryCSV"
+    />
     <q-table
       :rows="summaryRows"
       :columns="columns"
@@ -105,6 +26,13 @@
     </q-table>
 
     <br />
+    <q-btn
+      label="Export as CSV"
+      color="green"
+      class="q-mb-md"
+      style="margin-left: 960px"
+      @click="exportTabangCSV"
+    />
 
     <q-table
       :rows="tabangRows"
@@ -125,38 +53,123 @@
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
 
+function exportSummaryCSV() {
+  // Grab the headers you want from columns array (label or name)
+  const headers = columns.map((col) => col.label || col.name);
+
+  // Grab the rows to export (summaryRows is computed, so get its value)
+  const rows = summaryRows.value;
+
+  // Create CSV string
+  // First line: headers joined by comma
+  // Then each row's fields, in order of columns' 'name' field
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      columns
+        .map((col) => {
+          // Escape commas and quotes inside fields
+          let cell = row[col.name];
+          if (cell === null || cell === undefined) cell = "";
+          else cell = cell.toString().replace(/"/g, '""'); // escape quotes
+          // wrap in quotes if contains comma or quotes
+          if (cell.includes(",") || cell.includes('"')) {
+            cell = `"${cell}"`;
+          }
+          return cell;
+        })
+        .join(","),
+    ),
+  ].join("\n");
+
+  // Create a blob and download it
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "summary-table.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function exportTabangCSV() {
+  const headers = columns2.map((col) => col.label || col.name);
+  const rows = tabangRows.value;
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      columns2
+        .map((col) => {
+          let cell = row[col.name];
+          if (cell === null || cell === undefined) cell = "";
+          else cell = cell.toString().replace(/"/g, '""');
+
+          if (cell.includes(",") || cell.includes('"')) {
+            cell = `"${cell}"`;
+          }
+          return cell;
+        })
+        .join(","),
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "tabang-table.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 6, // default rows per page
 });
 
-const dateRange = ref(null);
-
 const allPatients = ref([]);
+const issuedAmounts = ref([]);
+const yearlyBudgets = ref([]);
+const supplementaryBonuses = ref([]);
 
-const issuedAmounts = ref([])
+const currentYear = new Date().getFullYear().toString();
 
 onMounted(async () => {
   try {
-    // Fetch all patients (for Total Bene)
+    const year = currentYear;
+
+    // Fetch all patients
     const resPatients = await axios.get("http://localhost:8000/api/patients");
     allPatients.value = resPatients.data;
 
-    // Fetch aggregated issued amounts per category/month (for Amount rows)
-    const year = '2026'; // or from your date picker/filter
-    const resIssued = await axios.get("http://localhost:8000/api/issued-amounts-by-year", {
-      params: { year }
-    });
-
-    // Store the aggregated issued amounts
+    // Fetch issued amounts
+    const resIssued = await axios.get(
+      "http://localhost:8000/api/issued-amounts-by-year",
+      { params: { year } },
+    );
     issuedAmounts.value = resIssued.data;
 
+    // Fetch yearly budgets
+    const resBudget = await axios.get(
+      "http://localhost:8000/api/yearly-budget",
+    );
+    yearlyBudgets.value = resBudget.data;
+
+    // Fetch supplementary bonuses
+    const resSB = await axios.get(
+      "http://localhost:8000/api/supplementary-bonus",
+    );
+    supplementaryBonuses.value = resSB.data;
   } catch (err) {
     console.error("Error fetching data:", err);
   }
 });
-
-
 
 const columns = [
   { name: "category", label: "CATEGORY", field: "category", align: "left" },
@@ -177,9 +190,9 @@ const columns = [
 ];
 
 const columns2 = [
-  { name: "title", label: "TABANG MEDICAL", field: "category", align: "left" },
+  { name: "category", label: "TABANG MEDICAL", field: "category", align: "left" },
 
-  { name: "budget", label: "2025 BUDGET", field: "budget", align: "center" },
+  { name: "budget", label: "2026 BUDGET", field: "budget", align: "center" },
   { name: "sb", label: "SB#2", field: "sb", align: "center" },
   { name: "totRel", label: "TOTAL RELEASED", field: "totRel", align: "center" },
   { name: "remBal", label: "REMAINING BAL.", field: "remBal", align: "center" },
@@ -210,7 +223,12 @@ const summaryRows = computed(() => {
   };
 
   // Count beneficiaries from allPatients
+  const year = currentYear;
+
   allPatients.value.forEach((p) => {
+    const issuedYear = new Date(p.date_issued).getFullYear();
+    if (issuedYear != year) return;
+
     const month = new Date(p.date_issued)
       .toLocaleString("en-US", { month: "short" })
       .toLowerCase();
@@ -222,7 +240,7 @@ const summaryRows = computed(() => {
   });
 
   // Fill amounts from issuedAmounts API data
-  for (const cat of ['MEDICINE', 'LABORATORY', 'HOSPITAL']) {
+  for (const cat of ["MEDICINE", "LABORATORY", "HOSPITAL"]) {
     if (!issuedAmounts.value[cat]) continue;
     for (const month in issuedAmounts.value[cat]) {
       summary[cat].amount[month] = issuedAmounts.value[cat][month];
@@ -241,33 +259,72 @@ const summaryRows = computed(() => {
   ];
 });
 
+const tabangRows = computed(() => {
+  const year = currentYear;
 
-const tabangRows = ref([
-  {
-    category: "Medicine",
-    budget: 100000,
-    sb: 2,
-    totRel: 50000,
-    remBal: 50000,
-    pax: 120,
-  },
-  {
-    category: "Laboratory",
-    budget: 50000,
-    sb: 1,
-    totRel: 20000,
-    remBal: 30000,
-    pax: 80,
-  },
-  {
-    category: "Hospital Bill",
-    budget: 150000,
-    sb: 3,
-    totRel: 90000,
-    remBal: 60000,
-    pax: 200,
-  },
-]);
+  const budget = yearlyBudgets.value.find((b) => b.year == year) || {};
+
+  // Sum all supplementary bonuses for the year
+  const sb = supplementaryBonuses.value
+    .filter((s) => s.year == year)
+    .reduce(
+      (acc, s) => {
+        acc.medicine += Number(s.medicine_supplementary_bonus || 0);
+        acc.laboratory += Number(s.laboratory_supplementary_bonus || 0);
+        acc.hospital += Number(s.hospital_supplementary_bonus || 0);
+        return acc;
+      },
+      { medicine: 0, laboratory: 0, hospital: 0 },
+    );
+
+  // Helper: total released from issuedAmounts
+  const getTotalReleased = (cat) => {
+    const data = issuedAmounts.value[cat];
+    if (!data) return 0;
+    return Object.values(data).reduce((a, b) => a + Number(b), 0);
+  };
+
+  // Helper: pax count
+  const getPax = (cat) => {
+    return allPatients.value.filter(
+      (p) =>
+        (p.category || "").toUpperCase() === cat &&
+        new Date(p.date_issued).getFullYear() == year,
+    ).length;
+  };
+
+  const medReleased = getTotalReleased("MEDICINE");
+  const labReleased = getTotalReleased("LABORATORY");
+  const hosReleased = getTotalReleased("HOSPITAL");
+
+  return [
+    {
+      category: "Medicine",
+      budget: Number(budget.medicine_budget || 0),
+      sb: sb.medicine,
+      totRel: medReleased,
+      remBal: Number(budget.medicine_budget || 0) + sb.medicine - medReleased,
+      pax: getPax("MEDICINE"),
+    },
+    {
+      category: "Laboratory",
+      budget: Number(budget.laboratory_budget || 0),
+      sb: sb.laboratory,
+      totRel: labReleased,
+      remBal:
+        Number(budget.laboratory_budget || 0) + sb.laboratory - labReleased,
+      pax: getPax("LABORATORY"),
+    },
+    {
+      category: "Hospital Bill",
+      budget: Number(budget.hospital_budget || 0),
+      sb: sb.hospital,
+      totRel: hosReleased,
+      remBal: Number(budget.hospital_budget || 0) + sb.hospital - hosReleased,
+      pax: getPax("HOSPITAL"),
+    },
+  ];
+});
 </script>
 
 <style scoped>

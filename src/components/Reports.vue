@@ -6,8 +6,6 @@
             <div class="tabs">
                 <q-btn label="GENERAL SUMMARY" color="green" style="margin-left: 500px;"
                     @click="setView(GeneralSummary, 'General Summary')" />
-                <q-btn label="DRMC FILES" color="green" style="margin-left: 10px;"
-                    @click="setView(DrmcFiles, 'DRMC Files')" />
                 <q-btn label="BUDGET SUMMARY" color="green" style="margin-left: 10px;"
                     @click="setView(BudgetSummary, 'Budget Summary')" />
             </div>
