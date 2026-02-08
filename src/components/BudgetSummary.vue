@@ -7,7 +7,7 @@
       color="green"
       class="q-mb-md"
       style="margin-left: 960px"
-      @click="exportSummaryCSV"
+      @click="exportCombinedCSV"
     />
     <q-table
       :rows="summaryRows"
@@ -26,13 +26,6 @@
     </q-table>
 
     <br />
-    <q-btn
-      label="Export as CSV"
-      color="green"
-      class="q-mb-md"
-      style="margin-left: 960px"
-      @click="exportTabangCSV"
-    />
 
     <q-table
       :rows="tabangRows"
@@ -53,74 +46,57 @@
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
 
-function exportSummaryCSV() {
-  // Grab the headers you want from columns array (label or name)
-  const headers = columns.map((col) => col.label || col.name);
-
-  // Grab the rows to export (summaryRows is computed, so get its value)
-  const rows = summaryRows.value;
-
-  // Create CSV string
-  // First line: headers joined by comma
-  // Then each row's fields, in order of columns' 'name' field
-  const csvContent = [
-    headers.join(","),
-    ...rows.map((row) =>
+function exportCombinedCSV() {
+  // Prepare summary table CSV part
+  const headers1 = columns.map((col) => col.label || col.name);
+  const rows1 = summaryRows.value;
+  const csvSummary = [
+    headers1.join(","),
+    ...rows1.map((row) =>
       columns
         .map((col) => {
-          // Escape commas and quotes inside fields
           let cell = row[col.name];
           if (cell === null || cell === undefined) cell = "";
-          else cell = cell.toString().replace(/"/g, '""'); // escape quotes
-          // wrap in quotes if contains comma or quotes
+          else cell = cell.toString().replace(/"/g, '""');
           if (cell.includes(",") || cell.includes('"')) {
             cell = `"${cell}"`;
           }
           return cell;
         })
-        .join(","),
+        .join(",")
     ),
   ].join("\n");
 
-  // Create a blob and download it
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "summary-table.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-function exportTabangCSV() {
-  const headers = columns2.map((col) => col.label || col.name);
-  const rows = tabangRows.value;
-
-  const csvContent = [
-    headers.join(","),
-    ...rows.map((row) =>
+  // Prepare tabang table CSV part
+  const headers2 = columns2.map((col) => col.label || col.name);
+  const rows2 = tabangRows.value;
+  const csvTabang = [
+    "\n", // Add blank line for separation
+    headers2.join(","),
+    ...rows2.map((row) =>
       columns2
         .map((col) => {
           let cell = row[col.name];
           if (cell === null || cell === undefined) cell = "";
           else cell = cell.toString().replace(/"/g, '""');
-
           if (cell.includes(",") || cell.includes('"')) {
             cell = `"${cell}"`;
           }
           return cell;
         })
-        .join(","),
+        .join(",")
     ),
   ].join("\n");
 
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  // Combine both CSV parts
+  const combinedCSV = csvSummary + csvTabang;
+
+  // Trigger download
+  const blob = new Blob([combinedCSV], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", "tabang-table.csv");
+  link.setAttribute("download", "combined-budget-tables.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
