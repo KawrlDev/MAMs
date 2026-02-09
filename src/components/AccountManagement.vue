@@ -126,6 +126,14 @@
               </q-input>
             </div>
           </q-form>
+          
+          <!-- Warning if editing own account -->
+          <q-banner v-if="isEditingOwnAccount" class="bg-orange-1 text-orange-9 q-mt-md">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="orange" />
+            </template>
+            You are editing your own account. You will be logged out after saving changes.
+          </q-banner>
         </q-card-section>
 
         <q-separator />
@@ -168,6 +176,14 @@
             </template>
             This action cannot be undone.
           </q-banner>
+          
+          <!-- Warning if deleting own account -->
+          <q-banner v-if="isDeletingOwnAccount" class="bg-orange-1 text-orange-9 q-mt-md">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="orange" />
+            </template>
+            You are deleting your own account. You will be logged out immediately.
+          </q-banner>
         </q-card-section>
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
@@ -182,10 +198,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
+const router = useRouter()
 
 const accountForm = ref(null)
 const editForm = ref(null)
@@ -205,6 +223,9 @@ const accountToDelete = ref(null)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
+// Get current user ID from localStorage or session
+const currentUserId = ref(null)
+
 const editData = ref({
   id: null,
   username: '',
@@ -220,6 +241,16 @@ const accountColumns = [
   { name: 'role', label: 'Role', field: 'ROLE', align: 'center', sortable: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
+
+// Check if editing own account
+const isEditingOwnAccount = computed(() => {
+  return currentUserId.value && editData.value.id === currentUserId.value
+})
+
+// Check if deleting own account
+const isDeletingOwnAccount = computed(() => {
+  return currentUserId.value && accountToDelete.value && accountToDelete.value.ID === currentUserId.value
+})
 
 // Password validation rules
 const passwordRules = computed(() => {
@@ -295,6 +326,9 @@ const confirmEdit = async () => {
     return
   }
 
+  // Store if editing own account before making the API call
+  const editingOwnAccount = isEditingOwnAccount.value
+
   editLoading.value = true
 
   try {
@@ -311,14 +345,23 @@ const confirmEdit = async () => {
 
     await axios.post('http://localhost:8000/api/update-account', payload)
 
+    closeEditDialog()
+
     $q.notify({
       type: 'positive',
       message: 'Account Updated Successfully',
       position: 'top'
     })
-
-    closeEditDialog()
-    await fetchAccounts()
+    
+    // If editing own account, logout immediately
+    if (editingOwnAccount) {
+      // Small delay to show the success message
+      setTimeout(() => {
+        logout()
+      }, 1000)
+    } else {
+      await fetchAccounts()
+    }
 
   } catch (error) {
     console.error('Error updating account:', error)
@@ -327,7 +370,6 @@ const confirmEdit = async () => {
       message: 'Error updating account',
       position: 'top'
     })
-  } finally {
     editLoading.value = false
   }
 }
@@ -377,6 +419,9 @@ const createAccount = async () => {
 const deleteAccount = async () => {
   if (!accountToDelete.value) return
 
+  // Store if deleting own account before making the API call
+  const deletingOwnAccount = isDeletingOwnAccount.value
+
   deleteLoading.value = true
 
   try {
@@ -384,17 +429,24 @@ const deleteAccount = async () => {
       id: accountToDelete.value.ID
     })
 
+    deleteDialogVisible.value = false
+
     $q.notify({
       type: 'positive',
       message: 'Account Deleted Successfully',
       position: 'top'
     })
-
-    deleteDialogVisible.value = false
-    accountToDelete.value = null
-
-    // refresh accounts list
-    await fetchAccounts()
+    
+    // If deleting own account, logout immediately
+    if (deletingOwnAccount) {
+      // Small delay to show the success message
+      setTimeout(() => {
+        logout()
+      }, 1000)
+    } else {
+      accountToDelete.value = null
+      await fetchAccounts()
+    }
 
   } catch (error) {
     console.error('Error deleting account:', error)
@@ -403,9 +455,24 @@ const deleteAccount = async () => {
       message: 'Error deleting account',
       position: 'top'
     })
-  } finally {
     deleteLoading.value = false
   }
+}
+
+const logout = () => {
+  // Clear all session/token data
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  sessionStorage.clear()
+  
+  $q.notify({
+    type: 'info',
+    message: 'You have been logged out',
+    position: 'top'
+  })
+  
+  // Redirect to login page
+  router.push('/login')
 }
 
 const fetchAccounts = async () => {
@@ -422,7 +489,14 @@ const fetchAccounts = async () => {
   }
 }
 
+const getCurrentUser = () => {
+  // Get current user ID from localStorage, sessionStorage, or Vuex store
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  currentUserId.value = user.id || user.ID || null
+}
+
 onMounted(() => {
+  getCurrentUser()
   fetchAccounts()
 })
 </script>
