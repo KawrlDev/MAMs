@@ -33,7 +33,7 @@
                 ₱{{ formatCurrency(budgetBreakdown.availableBalance) }}
               </span>
             </div>
-            <div v-if="transferData.amount && parseInt(transferData.amount) > 0" class="breakdown-row remaining">
+            <div v-if="amountValue && parseFloat(amountValue) > 0" class="breakdown-row remaining">
               <span>Remaining After Transfer:</span>
               <span :class="remainingAfterTransfer >= 0 ? 'positive' : 'negative'">
                 ₱{{ formatCurrency(remainingAfterTransfer) }}
@@ -42,9 +42,16 @@
           </div>
 
           <label>TRANSFER AMOUNT: <span>*</span></label>
-          <q-input v-model="transferData.amount" dense outlined type="text" placeholder="AMOUNT" class="amount-input"
-            @input="transferData.amount = transferData.amount.replace(/[^0-9]/g, '')"
-            @update:model-value="validateTransfer" />
+          <q-input 
+            v-model="amountDisplay" 
+            dense 
+            outlined 
+            type="text" 
+            placeholder="0.00" 
+            class="amount-input"
+            @update:model-value="onAmountInput"
+            @blur="finalizeAmount"
+          />
         </div>
 
         <!-- VALIDATION MESSAGE -->
@@ -87,7 +94,7 @@
             </q-card-section>
 
             <q-card-section class="q-pt-none">
-              <p>Are you sure you want to transfer <strong>₱{{ formatCurrency(transferData.amount) }}</strong> from
+              <p>Are you sure you want to transfer <strong>₱{{ formatCurrency(amountValue) }}</strong> from
                 <strong>{{ transferData.from }}</strong> to <strong>{{ transferData.to }}</strong>?
               </p>
               <p class="text-caption text-grey-7">This action will create a supplemental budget entry.</p>
@@ -126,9 +133,12 @@ const budgetBreakdown = ref(null)
 const transferData = ref({
   year: new Date().getFullYear(),
   from: null,
-  to: null,
-  amount: ''
+  to: null
 })
+
+// Amount handling
+const amountValue = ref(null)
+const amountDisplay = ref('')
 
 const categories = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
 
@@ -144,8 +154,8 @@ const filteredToCategories = computed(() => {
 
 // Calculate remaining balance after transfer
 const remainingAfterTransfer = computed(() => {
-  if (!budgetBreakdown.value || !transferData.value.amount) return 0
-  const amount = parseInt(transferData.value.amount) || 0
+  if (!budgetBreakdown.value || !amountValue.value) return 0
+  const amount = parseFloat(amountValue.value) || 0
   return budgetBreakdown.value.availableBalance - amount
 })
 
@@ -165,9 +175,42 @@ const formatCurrency = (value) => {
   return parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+// Amount Input Handler
+const onAmountInput = (value) => {
+  let cleaned = value.replace(/,/g, '')
+  cleaned = cleaned.replace(/[^\d.]/g, '')
+
+  const parts = cleaned.split('.')
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('')
+  }
+
+  let integer = parts[0] || ''
+  let decimal = parts[1] ?? null
+
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  amountDisplay.value = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer
+  amountValue.value = parseFloat(cleaned)
+  
+  // Trigger validation after input
+  validateTransfer()
+}
+
+const finalizeAmount = () => {
+  if (!amountDisplay.value) return
+  const num = parseFloat(amountDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  amountDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+  amountValue.value = num
+}
+
 // Fetch available balance when source is selected
 const onSourceChange = async () => {
-  // Reset amount and validation only
+  // Reset validation only
   validationMessage.value = ''
   isValid.value = false
   budgetBreakdown.value = null
@@ -190,7 +233,7 @@ const onSourceChange = async () => {
       budgetBreakdown.value = {
         availableBalance: availableBalance
       }
-      if (transferData.value.amount) {
+      if (amountValue.value) {
         await validateTransfer()
       }
     }
@@ -201,7 +244,7 @@ const onSourceChange = async () => {
 
 // Handle destination change - validate without resetting amount
 const onDestinationChange = () => {
-  if (transferData.value.amount) {
+  if (amountValue.value) {
     validateTransfer()
   }
 }
@@ -213,12 +256,12 @@ const validateTransfer = async () => {
   isValid.value = false
 
   // Check if all fields are filled
-  if (!transferData.value.from || !transferData.value.to || !transferData.value.amount) {
+  if (!transferData.value.from || !transferData.value.to || !amountValue.value) {
     validationMessage.value = 'Please complete all required fields'
     return
   }
 
-  const amount = parseInt(transferData.value.amount)
+  const amount = parseFloat(amountValue.value)
   if (amount <= 0) {
     validationMessage.value = 'Transfer amount must be greater than zero'
     return
@@ -265,16 +308,18 @@ const confirmTransfer = async () => {
   transferLoading.value = true
 
   try {
+    const amount = parseFloat(amountValue.value)
+    
     // Create supplemental budget entry for transfer
-    const fromAmount = transferData.value.from === 'MEDICINE' ? -parseInt(transferData.value.amount) :
+    const fromAmount = transferData.value.from === 'MEDICINE' ? -amount :
       transferData.value.from === 'LABORATORY' ? 0 : 0
-    const toAmount = transferData.value.to === 'MEDICINE' ? parseInt(transferData.value.amount) : 0
+    const toAmount = transferData.value.to === 'MEDICINE' ? amount : 0
 
-    const labFrom = transferData.value.from === 'LABORATORY' ? -parseInt(transferData.value.amount) : 0
-    const labTo = transferData.value.to === 'LABORATORY' ? parseInt(transferData.value.amount) : 0
+    const labFrom = transferData.value.from === 'LABORATORY' ? -amount : 0
+    const labTo = transferData.value.to === 'LABORATORY' ? amount : 0
 
-    const hospFrom = transferData.value.from === 'HOSPITAL' ? -parseInt(transferData.value.amount) : 0
-    const hospTo = transferData.value.to === 'HOSPITAL' ? parseInt(transferData.value.amount) : 0
+    const hospFrom = transferData.value.from === 'HOSPITAL' ? -amount : 0
+    const hospTo = transferData.value.to === 'HOSPITAL' ? amount : 0
 
     await axios.post('http://localhost:8000/api/add-supplementary-bonus', {
       year: transferData.value.year,
@@ -286,7 +331,7 @@ const confirmTransfer = async () => {
 
     $q.notify({
       type: 'positive',
-      message: `Successfully transferred ₱${formatCurrency(transferData.value.amount)} from ${transferData.value.from} to ${transferData.value.to}`,
+      message: `Successfully transferred ₱${formatCurrency(amount)} from ${transferData.value.from} to ${transferData.value.to}`,
       position: 'top'
     })
 

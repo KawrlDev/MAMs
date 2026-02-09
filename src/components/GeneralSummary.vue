@@ -531,7 +531,12 @@ const calculateAge = (birthdate) => {
 // Format currency
 const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) return 'N/A'
-  return '₱' + parseFloat(amount).toFixed(2)
+  const num = parseFloat(amount)
+  if (isNaN(num)) return 'N/A'
+  return '₱' + num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 }
 
 // Format client name

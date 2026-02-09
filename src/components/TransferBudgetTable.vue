@@ -19,7 +19,13 @@
       row-key="id"
       class="budget-table"
       :rows-per-page-options="[5, 10, 15, 20, 0]"
-    />
+    >
+      <template v-slot:body-cell-amount="props">
+        <q-td :props="props">
+          {{ formatCurrency(props.row.amount) }}
+        </q-td>
+      </template>
+    </q-table>
   </div>
 </template>
 
@@ -37,6 +43,16 @@ const columns = [
   { name: 'to', label: 'To', field: 'to', align: 'center', sortable: true },
   { name: 'amount', label: 'Amount', field: 'amount', align: 'center', sortable: true }
 ]
+
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return '0.00'
+  const num = parseFloat(value)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
 
 onMounted(() => {
   const getTransferBudget = async () => {
