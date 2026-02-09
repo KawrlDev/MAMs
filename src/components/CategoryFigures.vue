@@ -278,7 +278,7 @@ onMounted(async () => {
 }
 
 .negative .remaining-value {
-  color: #d32f2f;
+  color: #2e7d32;
 }
 
 /* TOTAL CARD */
