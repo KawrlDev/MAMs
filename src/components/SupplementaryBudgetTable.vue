@@ -28,7 +28,23 @@
       row-key="id"
       class="budget-table"
       :rows-per-page-options="[5, 10, 15, 20, 0]"
-    />
+    >
+      <template v-slot:body-cell-medicine="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.medicine_supplementary_bonus) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-lab="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.laboratory_supplementary_bonus) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-hospital="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.hospital_supplementary_bonus) }}
+        </q-td>
+      </template>
+    </q-table>
   </div>
 </template>
 
@@ -42,15 +58,17 @@ const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'center', sortable: true },
   { name: 'year', label: 'Year', field: 'year', align: 'center', sortable: true },
   { name: 'addedOn', label: 'Added on', field: 'date_added', align: 'center', sortable: true },
-  { name: 'medicine', label: 'Supplemental Medicine Bonus', field: 'medicine_supplementary_bonus', align: 'center', sortable: true, format: val => formatCurrency(val) },
-  { name: 'lab', label: 'Supplemental Laboratory Bonus', field: 'laboratory_supplementary_bonus', align: 'center', sortable: true, format: val => formatCurrency(val) },
-  { name: 'hospital', label: 'Supplemental Hospital Bonus', field: 'hospital_supplementary_bonus', align: 'center', sortable: true, format: val => formatCurrency(val) }
+  { name: 'medicine', label: 'Supplemental Medicine Bonus', field: 'medicine_supplementary_bonus', align: 'center', sortable: true },
+  { name: 'lab', label: 'Supplemental Laboratory Bonus', field: 'laboratory_supplementary_bonus', align: 'center', sortable: true },
+  { name: 'hospital', label: 'Supplemental Hospital Bonus', field: 'hospital_supplementary_bonus', align: 'center', sortable: true }
 ]
 
 // Format currency helper
 const formatCurrency = (value) => {
   if (value === null || value === undefined) return '0.00'
-  return parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const num = parseFloat(value)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 // Fetch supplementary budget

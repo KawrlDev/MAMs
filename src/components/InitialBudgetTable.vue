@@ -10,17 +10,17 @@
       :rows-per-page-options="[5, 10, 15, 20, 0]">
       <template v-slot:body-cell-medicine="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.medicine_budget) }}
+          ₱{{ formatCurrency(props.row.medicine_budget) }}
         </q-td>
       </template>
       <template v-slot:body-cell-lab="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.laboratory_budget) }}
+          ₱{{ formatCurrency(props.row.laboratory_budget) }}
         </q-td>
       </template>
       <template v-slot:body-cell-hospital="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.hospital_budget) }}
+          ₱{{ formatCurrency(props.row.hospital_budget) }}
         </q-td>
       </template>
     </q-table>

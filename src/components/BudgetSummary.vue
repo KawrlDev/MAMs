@@ -27,62 +27,62 @@
       <!-- Format all month columns -->
       <template v-slot:body-cell-jan="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.jan) : props.row.jan }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.jan) : props.row.jan }}
         </q-td>
       </template>
       <template v-slot:body-cell-feb="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.feb) : props.row.feb }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.feb) : props.row.feb }}
         </q-td>
       </template>
       <template v-slot:body-cell-mar="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.mar) : props.row.mar }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.mar) : props.row.mar }}
         </q-td>
       </template>
       <template v-slot:body-cell-apr="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.apr) : props.row.apr }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.apr) : props.row.apr }}
         </q-td>
       </template>
       <template v-slot:body-cell-may="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.may) : props.row.may }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.may) : props.row.may }}
         </q-td>
       </template>
       <template v-slot:body-cell-jun="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.jun) : props.row.jun }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.jun) : props.row.jun }}
         </q-td>
       </template>
       <template v-slot:body-cell-jul="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.jul) : props.row.jul }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.jul) : props.row.jul }}
         </q-td>
       </template>
       <template v-slot:body-cell-aug="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.aug) : props.row.aug }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.aug) : props.row.aug }}
         </q-td>
       </template>
       <template v-slot:body-cell-sep="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.sep) : props.row.sep }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.sep) : props.row.sep }}
         </q-td>
       </template>
       <template v-slot:body-cell-oct="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.oct) : props.row.oct }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.oct) : props.row.oct }}
         </q-td>
       </template>
       <template v-slot:body-cell-nov="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.nov) : props.row.nov }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.nov) : props.row.nov }}
         </q-td>
       </template>
       <template v-slot:body-cell-dec="props">
         <q-td :props="props">
-          {{ props.row.type === 'Amount' ? formatCurrency(props.row.dec) : props.row.dec }}
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.dec) : props.row.dec }}
         </q-td>
       </template>
     </q-table>
@@ -99,22 +99,22 @@
     >
       <template v-slot:body-cell-budget="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.budget) }}
+          ₱{{ formatCurrency(props.row.budget) }}
         </q-td>
       </template>
       <template v-slot:body-cell-sb="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.sb) }}
+          ₱{{ formatCurrency(props.row.sb) }}
         </q-td>
       </template>
       <template v-slot:body-cell-totRel="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.totRel) }}
+          ₱{{ formatCurrency(props.row.totRel) }}
         </q-td>
       </template>
       <template v-slot:body-cell-remBal="props">
         <q-td :props="props">
-          {{ formatCurrency(props.row.remBal) }}
+          ₱{{ formatCurrency(props.row.remBal) }}
         </q-td>
       </template>
     </q-table>
