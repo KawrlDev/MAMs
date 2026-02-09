@@ -32,7 +32,7 @@
           dense
           :pagination="pagination"
           @update:pagination="updatePagination"
-          :rows-per-page-options="[5, 10, 15, 20]"
+          :rows-per-page-options="[5, 10, 15, 23]"
         >
           <template v-slot:header>
             <tr class="sticky-header">

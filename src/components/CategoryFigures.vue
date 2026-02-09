@@ -273,7 +273,7 @@ onMounted(async () => {
 
 .remaining-value {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 900;
   color: #2e7d32;
 }
 
@@ -335,7 +335,7 @@ onMounted(async () => {
 .amount-titles2 {
   font-weight: 700;
   font-size: 30px;
-  color: rgb(153, 0, 0);
+  color: #2e7d32;
 }
 
 .vertical-divider {
