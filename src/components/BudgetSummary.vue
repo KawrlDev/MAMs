@@ -430,8 +430,7 @@ const tabangRows = computed(() => {
 
 <style scoped>
 .budget-table {
-  margin-left: 90px;
-  width: 85%;
+  width: 100%;
   overflow-x: auto;
 }
 
