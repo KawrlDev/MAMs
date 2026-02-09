@@ -59,7 +59,7 @@ const STORAGE_KEY = 'patient_list_search'
 onMounted(() => {
   // Restore saved search filter
   const savedSearch = localStorage.getItem(STORAGE_KEY)
-  if (savedSearch) {
+  if (savedSearch && savedSearch !== 'null' && savedSearch !== '') {
     search.value = savedSearch
   }
 
@@ -69,7 +69,7 @@ onMounted(() => {
       rows.value = mapPatientsToRows(res.data)
       
       // If there's a saved search, trigger the search
-      if (savedSearch) {
+      if (savedSearch && savedSearch !== 'null' && savedSearch !== '') {
         const searchRes = await axios.get(
           'http://localhost:8000/api/patients/search',
           { params: { q: savedSearch } }
@@ -86,7 +86,11 @@ onMounted(() => {
 
 // Save search filter before component unmounts
 onBeforeUnmount(() => {
-  localStorage.setItem(STORAGE_KEY, search.value)
+  if (search.value && search.value !== '') {
+    localStorage.setItem(STORAGE_KEY, search.value)
+  } else {
+    localStorage.removeItem(STORAGE_KEY)
+  }
 })
 
 const mapPatientsToRows = (patients) => {
@@ -110,12 +114,16 @@ const mapPatientsToRows = (patients) => {
 }
 
 watch(search, async (val) => {
-  // Save to localStorage whenever search changes
-  localStorage.setItem(STORAGE_KEY, val)
+  // Save to localStorage whenever search changes (only if not empty)
+  if (val && val !== '') {
+    localStorage.setItem(STORAGE_KEY, val)
+  } else {
+    localStorage.removeItem(STORAGE_KEY)
+  }
   
   const res = await axios.get(
     'http://localhost:8000/api/patients/search',
-    { params: { q: val } }
+    { params: { q: val || '' } }
   )
 
   rows.value = mapPatientsToRows(res.data)

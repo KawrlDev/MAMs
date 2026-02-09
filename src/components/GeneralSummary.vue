@@ -233,7 +233,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
@@ -257,6 +257,14 @@ const barangayOptions = [
 const categoryValue = ref(null)
 const partnerValue = ref(null)
 const barangayValue = ref(null)
+
+// Storage keys
+const STORAGE_KEYS = {
+  DATE_RANGE: 'general_summary_date_range',
+  CATEGORY: 'general_summary_category',
+  PARTNER: 'general_summary_partner',
+  BARANGAY: 'general_summary_barangay'
+}
 
 // Column widths for resizable columns
 const columnWidths = ref({
@@ -351,6 +359,7 @@ const visibleMonths = computed(() => {
     `OCTOBER ${currentYear}`, `NOVEMBER ${currentYear}`, `DECEMBER ${currentYear}`
   ]
 })
+
 // Add this computed property for month mapping
 const monthMapping = computed(() => {
   const mapping = new Map()
@@ -409,6 +418,7 @@ const monthMapping = computed(() => {
   
   return mapping
 })
+
 // Computed: Partner options based on category
 const partnerOptions = computed(() => {
   if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
@@ -451,6 +461,41 @@ watch(categoryValue, (newVal, oldVal) => {
   if (newVal !== oldVal) {
     partnerValue.value = null
   }
+})
+
+// Save filters to localStorage
+const saveFiltersToStorage = () => {
+  localStorage.setItem(STORAGE_KEYS.DATE_RANGE, JSON.stringify(dateRange.value))
+  localStorage.setItem(STORAGE_KEYS.CATEGORY, JSON.stringify(categoryValue.value))
+  localStorage.setItem(STORAGE_KEYS.PARTNER, JSON.stringify(partnerValue.value))
+  localStorage.setItem(STORAGE_KEYS.BARANGAY, JSON.stringify(barangayValue.value))
+}
+
+// Load filters from localStorage
+const loadFiltersFromStorage = () => {
+  try {
+    const savedDateRange = localStorage.getItem(STORAGE_KEYS.DATE_RANGE)
+    const savedCategory = localStorage.getItem(STORAGE_KEYS.CATEGORY)
+    const savedPartner = localStorage.getItem(STORAGE_KEYS.PARTNER)
+    const savedBarangay = localStorage.getItem(STORAGE_KEYS.BARANGAY)
+
+    if (savedDateRange) dateRange.value = JSON.parse(savedDateRange)
+    if (savedCategory) categoryValue.value = JSON.parse(savedCategory)
+    if (savedPartner) partnerValue.value = JSON.parse(savedPartner)
+    if (savedBarangay) barangayValue.value = JSON.parse(savedBarangay)
+  } catch (error) {
+    console.error('Error loading filters from storage:', error)
+  }
+}
+
+// Watch filters and save to localStorage
+watch([dateRange, categoryValue, partnerValue, barangayValue], () => {
+  saveFiltersToStorage()
+})
+
+// Save filters before component unmounts
+onBeforeUnmount(() => {
+  saveFiltersToStorage()
 })
 
 // Format date for display
@@ -620,8 +665,6 @@ const processPatientData = (rawData) => {
 
   return allRows
 }
-
-
 
 // Computed: Filtered rows
 const filteredRows = computed(() => {
@@ -949,6 +992,9 @@ const downloadCSV = () => {
 }
 
 onMounted(() => {
+  // Load saved filters first
+  loadFiltersFromStorage()
+  // Then fetch patients (the watch on dateRange will handle the filter)
   fetchPatients()
 })
 
@@ -983,7 +1029,7 @@ const getPatientNumber = (patientId) => {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 250px);
   display: flex;
   flex-direction: column;
 }
@@ -1247,12 +1293,12 @@ const getPatientNumber = (patientId) => {
   border-bottom: 2px solid rgba(0, 0, 0, 0.12) !important;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling - moved higher in the container */
 .left-section::-webkit-scrollbar,
 .horizontal-scroll::-webkit-scrollbar,
 .right-section::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
+  height: 10px;
+  width: 10px;
 }
 
 .left-section::-webkit-scrollbar-track,
@@ -1264,14 +1310,14 @@ const getPatientNumber = (patientId) => {
 .left-section::-webkit-scrollbar-thumb,
 .horizontal-scroll::-webkit-scrollbar-thumb,
 .right-section::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  background: #1f8f2e;
+  border-radius: 5px;
 }
 
 .left-section::-webkit-scrollbar-thumb:hover,
 .horizontal-scroll::-webkit-scrollbar-thumb:hover,
 .right-section::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: #166921;
 }
 
 .left-section::-webkit-scrollbar-corner,
