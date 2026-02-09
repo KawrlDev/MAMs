@@ -1032,6 +1032,7 @@ const getPatientNumber = (patientId) => {
   height: calc(100vh - 250px);
   display: flex;
   flex-direction: column;
+  
 }
 
 .scrollable-wrapper {

@@ -6,7 +6,8 @@
       label="Export as CSV"
       color="green"
       class="q-mb-md"
-      style="margin-left: 960px"
+      icon="download"
+      style="margin-left: 1200px"
       @click="exportCombinedCSV"
     />
     <q-table
@@ -305,13 +306,14 @@ const tabangRows = computed(() => {
 
 <style scoped>
 .budget-table {
-  margin-left: 90px;
-  width: 85%;
+  margin-left: 0px;
+  width: 100%;
   overflow-x: auto;
 }
 
 .budget-table :deep(thead tr) {
   background: #1f8f2e;
+
 }
 
 .budget-table :deep(thead th) {

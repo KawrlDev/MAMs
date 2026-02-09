@@ -1,53 +1,100 @@
 <template>
-    <div class="toolbar-wrapper">
-        <div class="head" style="margin-left: 30px;">
-            <span class="title">{{ titleText }}</span>
+  <div
+    class="toolbar-wrapper"
+    :class="currentViewClass"
+  >
+    <div class="head">
+      <span class="title">{{ titleText }}</span>
 
-            <div class="tabs">
-                <q-btn label="GENERAL SUMMARY" color="green" style="margin-left: 500px;"
-                    @click="setView(GeneralSummary, 'General Summary')" />
-                <q-btn label="BUDGET SUMMARY" color="green" style="margin-left: 10px;"
-                    @click="setView(BudgetSummary, 'Budget Summary')" />
-            </div>
-        </div>
-
-        <br />
-
-        <component :is="currentComponent" />
+      <div class="tabs">
+        <q-btn
+          label="GENERAL SUMMARY"
+          color="green"
+          class="q-ml-lg"
+          @click="setView(GeneralSummary, 'GENERAL SUMMARY', 'general-summary-view')"
+        />
+        <q-btn
+          label="BUDGET SUMMARY"
+          color="green"
+          class="q-ml-sm"
+          @click="setView(BudgetSummary, 'BUDGET SUMMARY', 'budget-summary-view')"
+        />
+      </div>
     </div>
+
+    <br />
+
+    <component :is="currentComponent" />
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 
 import GeneralSummary from './GeneralSummary.vue'
-import DrmcFiles from './DrmcFiles.vue'
 import BudgetSummary from './BudgetSummary.vue'
 
 // defaults
 const currentComponent = ref(GeneralSummary)
 const titleText = ref('GENERAL SUMMARY')
+const currentViewClass = ref('general-summary-view')
 
-function setView(component, title) {
-    currentComponent.value = component
-    titleText.value = title
+function setView(component, title, viewClass) {
+  currentComponent.value = component
+  titleText.value = title
+  currentViewClass.value = viewClass
 }
 </script>
 
 <style scoped>
+/* ===============================
+   SHARED STYLES
+================================ */
+.toolbar-wrapper {
+  width: 100%;
+}
+
 .head {
-    font-size: 33px;
-    font-weight: 700;
-    color: #1f8f2e;
-    display: flex;
+  font-size: 33px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: right;
+  background-color: #0f601a;
+  width: 100%;
+  padding: 10px 30px;
 }
 
 .title {
-    width:400px;
+  width: 400px;
 }
 
 .tabs {
-    display: flex;
-    align-items:flex-end;
+  display: flex;
+  margin-left: auto;
+}
+
+/* ===============================
+   GENERAL SUMMARY STYLES
+   (edit freely)
+================================ */
+.general-summary-view {
+  background-color: #f0fdf4;
+}
+
+.general-summary-view .head {
+  background-color: #0f601a;
+}
+
+/* ===============================
+   BUDGET SUMMARY STYLES
+   (edit freely)
+================================ */
+.budget-summary-view {
+  background-color: #fff7ed;
+}
+
+.budget-summary-view .head {
+  background-color: #0f601a;
 }
 </style>
