@@ -6,8 +6,7 @@
       label="Export as CSV"
       color="green"
       class="q-mb-md"
-      icon="download"
-      style="margin-left: 100%"
+      style="margin-left: 960px"
       @click="exportCombinedCSV"
     />
     <q-table
@@ -18,12 +17,36 @@
       bordered
       :pagination.sync="pagination"
     >
+      <!-- Custom header to match screenshot -->
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th 
+            colspan="2" 
+            class="main-header"
+          >
+            TABANG MEDIKAL ASSISTANCE ({{ currentYear }})
+          </q-th>
+          <q-th class="month-header">JANUARY</q-th>
+          <q-th class="month-header">FEBRUARY</q-th>
+          <q-th class="month-header">MARCH</q-th>
+          <q-th class="month-header">APRIL</q-th>
+          <q-th class="month-header">MAY</q-th>
+          <q-th class="month-header">JUNE</q-th>
+          <q-th class="month-header">JULY</q-th>
+          <q-th class="month-header">AUG.</q-th>
+          <q-th class="month-header">SEPT.</q-th>
+          <q-th class="month-header">OCT.</q-th>
+          <q-th class="month-header">NOV.</q-th>
+          <q-th class="month-header">DEC.</q-th>
+        </q-tr>
+      </template>
+
       <template v-slot:body-cell-category="props">
-        <td>
-          <!-- Only show category on first row of the group -->
+        <td :class="{'category-cell': props.row.category}">
           <span v-if="props.row.category">{{ props.row.category }}</span>
         </td>
       </template>
+
       
       <!-- Format all month columns -->
       <template v-slot:body-cell-jan="props">
@@ -96,8 +119,21 @@
       row-key="type"
       flat
       bordered
+      class="second-table"
       :pagination.sync="pagination"
     >
+      <!-- Custom header for second table -->
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th class="second-table-main">TABANG MEDICAL</q-th>
+          <q-th class="second-table-blue">{{ currentYear }} BUDGET</q-th>
+          <q-th class="second-table-blue">SB#2</q-th>
+          <q-th class="second-table-blue">TOTAL RELEASED</q-th>
+          <q-th class="second-table-blue">REMAINING BAL.</q-th>
+          <q-th class="second-table-blue">PAX</q-th>
+        </q-tr>
+      </template>
+
       <template v-slot:body-cell-budget="props">
         <q-td :props="props">
           ₱{{ formatCurrency(props.row.budget) }}
@@ -114,7 +150,7 @@
         </q-td>
       </template>
       <template v-slot:body-cell-remBal="props">
-        <q-td :props="props">
+        <q-td :props="props" :class="props.row.remBal >= 0 ? 'positive-balance' : 'negative-balance'">
           ₱{{ formatCurrency(props.row.remBal) }}
         </q-td>
       </template>
@@ -237,7 +273,7 @@ onMounted(async () => {
 });
 
 const columns = [
-  { name: "category", label: "CATEGORY", field: "category", align: "left" },
+  { name: "category", label: "", field: "category", align: "left" },
   { name: "type", label: "", field: "type", align: "left" },
 
   { name: "jan", label: "Jan", field: "jan", align: "center" },
@@ -257,7 +293,7 @@ const columns = [
 const columns2 = [
   { name: "category", label: "TABANG MEDICAL", field: "category", align: "left" },
 
-  { name: "budget", label: "2026 BUDGET", field: "budget", align: "center" },
+  { name: "budget", label: `${currentYear} BUDGET`, field: "budget", align: "center" },
   { name: "sb", label: "SB#2", field: "sb", align: "center" },
   { name: "totRel", label: "TOTAL RELEASED", field: "totRel", align: "center" },
   { name: "remBal", label: "REMAINING BAL.", field: "remBal", align: "center" },
@@ -313,13 +349,13 @@ const summaryRows = computed(() => {
   }
 
   return [
-    { category: "Medicine", type: "Total Bene", ...summary.MEDICINE.bene },
+    { category: "MEDICINE", type: "Total Bene", ...summary.MEDICINE.bene },
     { category: "", type: "Amount", ...summary.MEDICINE.amount },
 
-    { category: "Laboratory", type: "Total Bene", ...summary.LABORATORY.bene },
+    { category: "LABORATORY", type: "Total Bene", ...summary.LABORATORY.bene },
     { category: "", type: "Amount", ...summary.LABORATORY.amount },
 
-    { category: "Hospital Bill", type: "Total Bene", ...summary.HOSPITAL.bene },
+    { category: "HOSPITAL BILL", type: "Total Bene", ...summary.HOSPITAL.bene },
     { category: "", type: "Amount", ...summary.HOSPITAL.amount },
   ];
 });
@@ -394,31 +430,102 @@ const tabangRows = computed(() => {
 
 <style scoped>
 .budget-table {
-  margin-left: 0px;
-  width: 100%;
+  margin-left: 90px;
+  width: 85%;
   overflow-x: auto;
 }
 
+/* First table header styling */
 .budget-table :deep(thead tr) {
-  background: #1f8f2e;
-
+  background: #c5c5c5;
 }
-
 .budget-table :deep(thead th) {
-  color: #ffffff;
-  font-weight: 600;
+  color: #000000;
+  font-weight: 700;
   text-align: center !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-  font-size: 12px;
+  padding: 8px 12px !important;
+  font-size: 11px;
+  border-bottom: 2px solid #7a7878;
 }
 
+.budget-table :deep(thead th.main-header) {
+  background: #fffdfd;
+  text-align: left !important;
+  font-weight: 700;
+  background: #cac4ff;
+}
+
+.budget-table :deep(thead th.month-header) {
+  background: #ffc7ce;
+  color: #000000;
+  font-weight: 600;
+}
+
+/* Second table header styling */
+.budget-table :deep(thead th.second-table-main) {
+  background: #c5c5c5;
+  color: #000000;
+  font-weight: 700;
+  text-align: left !important;
+  font-size: 15px;
+  font-style: italic;
+}
+
+.budget-table :deep(thead th.second-table-blue) {
+  background: #699cf3;
+  color: #000000;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Add border-bottom to ALL table cells */
 .budget-table :deep(td) {
   text-align: center;
   vertical-align: middle;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #ddd;
 }
 
 .budget-table :deep(td:first-child) {
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.budget-table :deep(td:nth-child(2)) {
+  text-align: left;
+  padding-left: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.category-cell {
+  background-color: #f8bc84; 
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Thicker bottom border for Amount rows in first table */
+.budget-table :deep(tbody tr:nth-child(2) td),
+.budget-table :deep(tbody tr:nth-child(4) td),
+.budget-table :deep(tbody tr:nth-child(6) td) {
+  border-bottom: 2px solid #7a7878;
+}
+
+/* Remove border-bottom from second table body cells */
+.budget-table .second-table :deep(tbody tr td) {
+  border-bottom: none !important;
+}
+
+/* Conditional colors for Remaining Balance */
+.budget-table :deep(.positive-balance) {
+  color: #28a745 !important;
+  font-weight: 600;
+}
+
+.budget-table :deep(.negative-balance) {
+  color: #dc3545 !important;
   font-weight: 600;
 }
 </style>
