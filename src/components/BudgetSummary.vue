@@ -24,6 +24,68 @@
           <span v-if="props.row.category">{{ props.row.category }}</span>
         </td>
       </template>
+      
+      <!-- Format all month columns -->
+      <template v-slot:body-cell-jan="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.jan) : props.row.jan }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-feb="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.feb) : props.row.feb }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-mar="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.mar) : props.row.mar }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-apr="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.apr) : props.row.apr }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-may="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.may) : props.row.may }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-jun="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.jun) : props.row.jun }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-jul="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.jul) : props.row.jul }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-aug="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.aug) : props.row.aug }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-sep="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.sep) : props.row.sep }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-oct="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.oct) : props.row.oct }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-nov="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.nov) : props.row.nov }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-dec="props">
+        <q-td :props="props">
+          {{ props.row.type === 'Amount' ? '₱' + formatCurrency(props.row.dec) : props.row.dec }}
+        </q-td>
+      </template>
     </q-table>
 
     <br />
@@ -36,8 +98,25 @@
       bordered
       :pagination.sync="pagination"
     >
-      <template #body-cell-action="props">
-        <ActionBtn :row="props.row" />
+      <template v-slot:body-cell-budget="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.budget) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-sb="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.sb) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-totRel="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.totRel) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-remBal="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.remBal) }}
+        </q-td>
       </template>
     </q-table>
   </div>
@@ -104,6 +183,15 @@ function exportCombinedCSV() {
   URL.revokeObjectURL(url);
 }
 
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return '0.00'
+  const num = parseFloat(value)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
 
 const pagination = ref({
   page: 1,

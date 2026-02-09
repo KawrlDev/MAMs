@@ -330,9 +330,17 @@
         </div>
 
         <div class="field">
-          <label>Issued Amount <span>*</span></label>
-          <q-input type="number" dense v-model="issuedAmountValue" outlined
-            :rules="[val => !!val || 'This field is required']" />
+        <label>Issued Amount <span>*</span></label>
+          <q-input
+            type="text"
+            dense
+            outlined
+            v-model="issuedAmountDisplay"
+            @update:model-value="onIssuedAmountInput"
+            @blur="finalizeIssuedAmount"
+            placeholder="0.00"
+            :rules="[val => !!val || 'This field is required']"
+          />
         </div>
       </div>
 
@@ -860,7 +868,7 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { date, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
@@ -913,7 +921,6 @@ const houseAddressValue = ref(null)
 const phoneNumberValue = ref(null)
 const partnerValue = ref(null)
 const hospitalBillValue = ref(null)
-const issuedAmountValue = ref(null)
 const issuedByValue = ref(JSON.parse(localStorage.getItem('user')).USERNAME)
 const glNum = ref(null)
 
@@ -947,6 +954,55 @@ const partnerOptions = computed(() => {
   if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
   return []
 })
+
+const issuedAmountDisplay = ref('');
+const issuedAmountValue = ref(null);
+
+const onIssuedAmountInput = (value) => {
+  // Remove commas
+  let cleaned = value.replace(/,/g, '');
+
+  // Keep digits and dot only
+  cleaned = cleaned.replace(/[^\d.]/g, '');
+
+  // Allow only one dot
+  const parts = cleaned.split('.');
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  let integer = parts[0] || '';
+  let decimal = parts[1] ?? null;
+
+  // Add live comma formatting
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Keep decimal as typed (do NOT force .00 here)
+  issuedAmountDisplay.value =
+    decimal !== null
+      ? `${integer}.${decimal.slice(0, 2)}`
+      : integer;
+
+  issuedAmountValue.value = parseFloat(cleaned);
+};
+
+const finalizeIssuedAmount = () => {
+  if (!issuedAmountDisplay.value) return;
+
+  const num = parseFloat(
+    issuedAmountDisplay.value.replace(/,/g, '')
+  );
+
+  if (isNaN(num)) return;
+
+  issuedAmountDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  issuedAmountValue.value = num;
+};
+
 
 const normalizePhoneNumber = (value) => {
   if (!value) return null

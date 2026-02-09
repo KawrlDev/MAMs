@@ -12,22 +12,49 @@
         <div class="budget-block">
           <h3>MEDICINE</h3>
           <label>BUDGET: <span>*</span></label>
-          <q-input v-model="medicineBudget" dense outlined type="number" placeholder="AMOUNT"
-            :rules="[val => !!val || 'Required']" class="amount-input" />
+          <q-input 
+            v-model="medicineDisplay" 
+            dense 
+            outlined 
+            type="text" 
+            placeholder="0.00"
+            :rules="[val => !!val || 'Required']" 
+            class="amount-input"
+            @update:model-value="onMedicineInput"
+            @blur="finalizeMedicine"
+          />
         </div>
 
         <div class="budget-block">
           <h3>LABORATORY</h3>
           <label>BUDGET: <span>*</span></label>
-          <q-input v-model="laboratoryBudget" dense outlined type="number" placeholder="AMOUNT"
-            :rules="[val => !!val || 'Required']" class="amount-input" />
+          <q-input 
+            v-model="laboratoryDisplay" 
+            dense 
+            outlined 
+            type="text" 
+            placeholder="0.00"
+            :rules="[val => !!val || 'Required']" 
+            class="amount-input"
+            @update:model-value="onLaboratoryInput"
+            @blur="finalizeLaboratory"
+          />
         </div>
 
         <div class="budget-block">
           <h3>HOSPITAL</h3>
           <label>BUDGET: <span>*</span></label>
-          <q-input v-model="hospitalBudget" dense outlined type="number" placeholder="AMOUNT"
-            :rules="[val => !!val || 'Required']" class="amount-input" />
+          <q-input 
+            v-model="hospitalDisplay" 
+            dense 
+            outlined 
+            type="text" 
+            placeholder="0.00"
+            :rules="[val => !!val || 'Required']" 
+            class="amount-input"
+            @update:model-value="onHospitalInput"
+            @blur="finalizeHospital"
+          />
         </div>
 
         <div class="divider"></div>
@@ -99,12 +126,107 @@ const medicineBudget = ref(null)
 const laboratoryBudget = ref(null)
 const hospitalBudget = ref(null)
 
+// Display values for formatting
+const medicineDisplay = ref('')
+const laboratoryDisplay = ref('')
+const hospitalDisplay = ref('')
+
+// Medicine Input Handler
+const onMedicineInput = (value) => {
+  let cleaned = value.replace(/,/g, '')
+  cleaned = cleaned.replace(/[^\d.]/g, '')
+
+  const parts = cleaned.split('.')
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('')
+  }
+
+  let integer = parts[0] || ''
+  let decimal = parts[1] ?? null
+
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  medicineDisplay.value = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer
+  medicineBudget.value = parseFloat(cleaned)
+}
+
+const finalizeMedicine = () => {
+  if (!medicineDisplay.value) return
+  const num = parseFloat(medicineDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  medicineDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+  medicineBudget.value = num
+}
+
+// Laboratory Input Handler
+const onLaboratoryInput = (value) => {
+  let cleaned = value.replace(/,/g, '')
+  cleaned = cleaned.replace(/[^\d.]/g, '')
+
+  const parts = cleaned.split('.')
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('')
+  }
+
+  let integer = parts[0] || ''
+  let decimal = parts[1] ?? null
+
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  laboratoryDisplay.value = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer
+  laboratoryBudget.value = parseFloat(cleaned)
+}
+
+const finalizeLaboratory = () => {
+  if (!laboratoryDisplay.value) return
+  const num = parseFloat(laboratoryDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  laboratoryDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+  laboratoryBudget.value = num
+}
+
+// Hospital Input Handler
+const onHospitalInput = (value) => {
+  let cleaned = value.replace(/,/g, '')
+  cleaned = cleaned.replace(/[^\d.]/g, '')
+
+  const parts = cleaned.split('.')
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('')
+  }
+
+  let integer = parts[0] || ''
+  let decimal = parts[1] ?? null
+
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  hospitalDisplay.value = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer
+  hospitalBudget.value = parseFloat(cleaned)
+}
+
+const finalizeHospital = () => {
+  if (!hospitalDisplay.value) return
+  const num = parseFloat(hospitalDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  hospitalDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+  hospitalBudget.value = num
+}
+
 const handleSaveClick = () => {
   if (budgetForm.value.validate()) {
     showSaveDialog.value = true
   } else {
-    $q.notify({
-      type: 'negative',
+    $q.notify({ 
+      type: 'negative', 
       message: 'Please fill in all required fields',
       position: 'top'
     })

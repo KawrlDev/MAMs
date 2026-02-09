@@ -7,7 +7,23 @@
     </div>
 
     <q-table flat bordered class="budget-table" :rows="rows" :columns="columns" row-key="year"
-      :rows-per-page-options="[5, 10, 15, 20, 0]" v-slot:bottom="props" />
+      :rows-per-page-options="[5, 10, 15, 20, 0]">
+      <template v-slot:body-cell-medicine="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.medicine_budget) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-lab="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.laboratory_budget) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-hospital="props">
+        <q-td :props="props">
+          ₱{{ formatCurrency(props.row.hospital_budget) }}
+        </q-td>
+      </template>
+    </q-table>
 
     <!-- Warning Dialog -->
     <q-dialog v-model="showWarning" persistent>
@@ -57,6 +73,16 @@ const getYearlyBudget = async () => {
   } catch (err) {
     console.error(err)
   }
+}
+
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return '0.00'
+  const num = parseFloat(value)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 }
 
 const checkBeforeCreate = () => {
