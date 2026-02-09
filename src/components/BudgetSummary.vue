@@ -2,13 +2,15 @@
   <br />
 
   <div class="budget-table table-scroll">
-    <q-btn
-      label="Export as CSV"
-      color="green"
-      class="q-mb-md"
-      style="margin-left: 960px"
-      @click="exportCombinedCSV"
-    />
+    <div class="button-container">
+      <q-btn
+        label="Export as CSV"
+        color="green"
+        class="q-mb-md"
+        icon="download"
+        @click="exportCombinedCSV"
+      />
+    </div>
     <q-table
       :rows="summaryRows"
       :columns="columns"
@@ -432,6 +434,13 @@ const tabangRows = computed(() => {
 .budget-table {
   width: 100%;
   overflow-x: auto;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 16px;
+  margin-top: 2%;
 }
 
 /* First table header styling */

@@ -73,6 +73,7 @@
         <div class="q-mt-sm row items-center justify-center text-white text-caption q-gutter-xs" style="opacity: 0.85">
           <span>Developed by</span>
           <q-img src="~assets/trademark.png" width="25px" height="25px" fit="contain" />
+          <span class="tm">™</span>
         </div>
       </div>
     </q-drawer>
