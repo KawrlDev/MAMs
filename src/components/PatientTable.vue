@@ -37,10 +37,13 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import ActionBtn from './ActionBtn.vue'
 
+const router = useRouter()
 const rows = ref([])
+const search = ref('')
 
 const columns = [
   { name: 'name', label: "Patient's Name", field: 'name', align: 'center', sortable: true },
@@ -51,13 +54,28 @@ const columns = [
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 
+const STORAGE_KEY = 'patient_list_search'
+
 onMounted(() => {
+  // Restore saved search filter
+  const savedSearch = localStorage.getItem(STORAGE_KEY)
+  if (savedSearch) {
+    search.value = savedSearch
+  }
+
   const getPatientList = async () => {
     try {
       const res = await axios.get('http://localhost:8000/api/patients')
-
-      // Map the data to include concatenated name
       rows.value = mapPatientsToRows(res.data)
+      
+      // If there's a saved search, trigger the search
+      if (savedSearch) {
+        const searchRes = await axios.get(
+          'http://localhost:8000/api/patients/search',
+          { params: { q: savedSearch } }
+        )
+        rows.value = mapPatientsToRows(searchRes.data)
+      }
     } catch (error) {
       console.error('Failed to fetch patients:', error)
     }
@@ -66,7 +84,10 @@ onMounted(() => {
   getPatientList()
 })
 
-const search = ref('')
+// Save search filter before component unmounts
+onBeforeUnmount(() => {
+  localStorage.setItem(STORAGE_KEY, search.value)
+})
 
 const mapPatientsToRows = (patients) => {
   return patients.map(patient => {
@@ -89,6 +110,9 @@ const mapPatientsToRows = (patients) => {
 }
 
 watch(search, async (val) => {
+  // Save to localStorage whenever search changes
+  localStorage.setItem(STORAGE_KEY, val)
+  
   const res = await axios.get(
     'http://localhost:8000/api/patients/search',
     { params: { q: val } }
