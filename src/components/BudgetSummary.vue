@@ -400,7 +400,7 @@ const tabangRows = computed(() => {
 
   return [
     {
-      category: "Medicine",
+      category: "MEDICINE",
       budget: Number(budget.medicine_budget || 0),
       sb: sb.medicine,
       totRel: medReleased,
@@ -408,7 +408,7 @@ const tabangRows = computed(() => {
       pax: getPax("MEDICINE"),
     },
     {
-      category: "Laboratory",
+      category: "LABORATORY",
       budget: Number(budget.laboratory_budget || 0),
       sb: sb.laboratory,
       totRel: labReleased,
@@ -417,7 +417,7 @@ const tabangRows = computed(() => {
       pax: getPax("LABORATORY"),
     },
     {
-      category: "Hospital Bill",
+      category: "HOSPITAL BILL",
       budget: Number(budget.hospital_budget || 0),
       sb: sb.hospital,
       totRel: hosReleased,
@@ -448,22 +448,24 @@ const tabangRows = computed(() => {
 }
 
 .budget-table :deep(thead th.main-header) {
-  background: #fffdfd;
+  color: #fffdfd;
   text-align: left !important;
   font-weight: 700;
-  background: #cac4ff;
+  font-size: 13px;
+  background: #1f8f2e;
 }
 
 .budget-table :deep(thead th.month-header) {
-  background: #ffc7ce;
-  color: #000000;
+  background: #1f8f2e;
+  color: #fffdfd;
   font-weight: 600;
+  font-size: 13px;
 }
 
 /* Second table header styling */
 .budget-table :deep(thead th.second-table-main) {
-  background: #c5c5c5;
-  color: #000000;
+  background: #1f8f2e;
+  color: #fffdfd;
   font-weight: 700;
   text-align: left !important;
   font-size: 15px;
@@ -471,8 +473,8 @@ const tabangRows = computed(() => {
 }
 
 .budget-table :deep(thead th.second-table-blue) {
-  background: #699cf3;
-  color: #000000;
+  background: #1f8f2e;
+  color: #fffdfd;
   font-weight: 600;
   font-size: 13px;
 }
@@ -481,7 +483,7 @@ const tabangRows = computed(() => {
 .budget-table :deep(td) {
   text-align: center;
   vertical-align: middle;
-  font-size: 11px;
+  font-size: 12px;
   padding: 6px 8px;
   border-bottom: 1px solid #ddd;
 }
@@ -499,7 +501,7 @@ const tabangRows = computed(() => {
 }
 
 .category-cell {
-  background-color: #f8bc84; 
+
   font-weight: bold;
   text-align: center;
   border-bottom: 1px solid #ddd;
