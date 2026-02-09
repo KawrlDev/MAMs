@@ -272,7 +272,7 @@ onMounted(async () => {
 }
 
 .remaining-value {
-  font-size: 18px;
+  font-size: 50px;
   font-weight: 900;
   color: #2e7d32;
 }

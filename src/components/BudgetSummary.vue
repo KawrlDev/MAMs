@@ -7,7 +7,7 @@
       color="green"
       class="q-mb-md"
       icon="download"
-      style="margin-left: 1200px"
+      style="margin-left: 100%"
       @click="exportCombinedCSV"
     />
     <q-table
