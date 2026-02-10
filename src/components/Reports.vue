@@ -53,7 +53,7 @@ function setView(component, title, viewClass) {
 }
 
 .head {
-  border-radius: 14px 14px 0 0;
+  border-radius: 5px 5px 0 0;
   border: 2px solid grey;
   font-size: 33px;
   font-weight: 700;
