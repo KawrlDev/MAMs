@@ -2,57 +2,54 @@
   <div>
     <!-- FILTERS -->
     <q-card flat bordered class="filter-card">
-      <q-card-section>
-        <div class="row items-center q-col-gutter-md">
-          <!-- DATE SEARCH -->
-          <div class="col-auto">
-            <div class="row items-center" style="gap: 8px;">
-              <span class="text-body2 text-weight-medium" style="white-space: nowrap;">
-                Filter by Period:
-              </span>
+      <q-card-section class="q-pa-sm">
+        <div class="filters-container">
+          <!-- LEFT GROUP: Filters -->
+          <div class="filters-group">
+            <!-- DATE SEARCH -->
+            <div class="filter-item filter-date">
+              <div class="filter-label-wrapper">
+                <span class="filter-label">Filter by Period:</span>
+                <q-input class="filter-input" :model-value="formattedDate" outlined dense
+                  placeholder="dd/mm/yyyy - dd/mm/yyyy" @clear="onClearDate" readonly clearable>
+                  <template #append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy cover>
+                        <q-date v-model="dateRange" range emit-immediately mask="DD/MM/YYYY">
+                          <div class="row items-center justify-end q-pa-sm">
+                            <q-btn label="Close" color="primary" flat v-close-popup />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+            </div>
 
-              <q-input style="width: 250px;" :model-value="formattedDate" outlined dense
-                placeholder="dd/mm/yyyy - dd/mm/yyyy" @clear="onClearDate" readonly clearable>
-                <template #append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy cover>
-                      <q-date v-model="dateRange" range emit-immediately mask="DD/MM/YYYY">
-                        <div class="row items-center justify-end q-pa-sm">
-                          <q-btn label="Close" color="primary" flat v-close-popup />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
+            <!-- CATEGORY -->
+            <div class="filter-item">
+              <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category"
+                dense outlined clearable @clear="onClearCategory" />
+            </div>
+
+            <!-- PARTNER -->
+            <div class="filter-item">
+              <q-select v-model="partnerValue" dense outlined :options="partnerOptions" label="Partner"
+                placeholder="Partner" clearable @clear="onClearPartner" :disable="categoryValue == null" />
+            </div>
+
+            <!-- BARANGAY -->
+            <div class="filter-item">
+              <q-select v-model="barangayValue" :options="barangayOptions" label="Barangay" placeholder="Barangay"
+                dense outlined clearable @clear="onClearBarangay" />
             </div>
           </div>
 
-          <!-- CATEGORY -->
-          <div class="col-auto" style="width: 200px;">
-            <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category" dense
-              outlined clearable @clear="onClearCategory" />
-          </div>
-
-          <!-- PARTNER -->
-          <div class="col-auto" style="width: 200px;">
-            <q-select v-model="partnerValue" dense outlined :options="partnerOptions" label="Partner"
-              placeholder="Partner" clearable @clear="onClearPartner" :disable="categoryValue == null" />
-          </div>
-
-          <!-- BARANGAY -->
-          <div class="col-auto" style="width: 200px;">
-            <q-select v-model="barangayValue" :options="barangayOptions" label="Barangay" placeholder="Barangay" dense
-              outlined clearable @clear="onClearBarangay" />
-          </div>
-
-          <!-- SPACER -->
-          <div class="col"></div>
-
-          <!-- DOWNLOAD CSV BUTTON -->
-          <div class="col-auto csv-button-container">
+          <!-- RIGHT GROUP: CSV Button -->
+          <div class="csv-button-wrapper">
             <q-btn icon="download" label="Export as CSV" color="green" @click="downloadCSV"
-              :disable="filteredRows.length === 0" />
+              :disable="filteredRows.length === 0" no-caps class="csv-button" />
           </div>
         </div>
       </q-card-section>
@@ -1029,7 +1026,6 @@ const getPatientNumber = (patientId) => {
   align-items: right;
   background-color: #1f8f2e;
   width: 100%;
-  padding: 5px 10px;
   margin-bottom: -20px;
 }
 
@@ -1042,9 +1038,135 @@ const getPatientNumber = (patientId) => {
   color: #333 !important;
 }
 
-/* CSV Button container styling */
-.csv-button-container {
-  margin-right: -22%;
+/* Responsive Filter Container */
+.filters-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.filters-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.filter-item {
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+.filter-date {
+  flex: 1.5 1 auto;
+  min-width: 250px;
+}
+
+.csv-button-wrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.csv-button {
+  white-space: nowrap;
+  min-width: 180px;
+}
+
+.filter-label-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+}
+
+.filter-input {
+  width: 100%;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1400px) {
+  .filter-item {
+    min-width: 160px;
+  }
+
+  .filter-date {
+    min-width: 220px;
+  }
+
+  .csv-button {
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-group {
+    width: 100%;
+  }
+
+  .filter-item {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+  }
+
+  .filter-date {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .csv-button-wrapper {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+
+  .csv-button {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-group {
+    gap: 8px;
+  }
+
+  .filter-item {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .filter-date {
+    flex: 1 1 100%;
+  }
+
+  .csv-button-wrapper {
+    justify-content: stretch;
+  }
+
+  .csv-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-label {
+    font-size: 11px;
+  }
 }
 
 .table-container {
