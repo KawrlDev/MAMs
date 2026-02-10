@@ -1,127 +1,131 @@
 <template>
-  <div class="q-pa-md">
-    <q-form ref="patientForm">
-      <!-- HEADER ROW -->
-      <div class="fieldset-header">
-        <div class="fieldset-title">Patient's Info.</div>
+  <div>
+    <!-- HEADER ROW - no padding needed, full width -->
+    <div class="fieldset-header">
+      <div class="fieldset-title">Patient's Info.</div>
 
-        <div class="actions">
-          <!-- View Mode Buttons -->
-          <template v-if="!edit">
-            <q-btn label="DELETE" icon="delete" class="action-btn delete-btn" @click="showDeleteDialog = true" dense />
-            <q-btn label="EDIT" icon="edit" class="action-btn edit-btn" dense @click="edit = true" />
-          </template>
+      <div class="actions">
+        <!-- View Mode Buttons -->
+        <template v-if="!edit">
+          <q-btn label="DELETE" icon="delete" class="action-btn delete-btn" @click="showDeleteDialog = true" dense />
+          <q-btn label="EDIT" icon="edit" class="action-btn edit-btn" dense @click="edit = true" />
+        </template>
 
-          <!-- Edit Mode Buttons -->
-          <template v-if="edit">
-            <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="showCancelDialog = true" dense />
-            <q-btn label="Save" icon="save" class="action-btn save-btn" @click="handleSaveClick" dense />
-          </template>
-        </div>
+        <!-- Edit Mode Buttons -->
+        <template v-if="edit">
+          <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="showCancelDialog = true" dense />
+          <q-btn label="Save" icon="save" class="action-btn save-btn" @click="handleSaveClick" dense />
+        </template>
       </div>
+    </div>
 
-      <div class="patient-ids">
-        <h6>Patient ID: {{ patientIDValue }}</h6>
-      </div>
-
-      <!-- ================= PATIENT DETAILS ================= -->
-      <div class="row q-col-gutter-md">
-
-        <div class="col-6">
-          <label class="form-label">Last Name <span class="required">*</span></label>
-          <q-input v-model="lastNameValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
-            @update:model-value="checkForChanges" />
+    <!-- Content with padding -->
+    <div class="q-pa-md">
+      <q-form ref="patientForm">
+        <div class="patient-ids">
+          <h6>Patient ID: {{ patientIDValue }}</h6>
         </div>
 
-        <div class="col-6">
-          <label class="form-label">First Name <span class="required">*</span></label>
-          <q-input v-model="firstNameValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
+        <!-- ================= PATIENT DETAILS ================= -->
+        <div class="row q-col-gutter-md">
 
-        <div class="col-6">
-          <label class="form-label">Middle Name</label>
-          <q-input v-model="middleNameValue" dense outlined class="flat-input" :readonly="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
+          <div class="col-6">
+            <label class="form-label">Last Name <span class="required">*</span></label>
+            <q-input v-model="lastNameValue" dense outlined class="flat-input"
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
 
-        <div class="col-6">
-          <label class="form-label">Suffix</label>
-          <q-input v-model="suffixValue" dense outlined class="flat-input" :readonly="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
+          <div class="col-6">
+            <label class="form-label">First Name <span class="required">*</span></label>
+            <q-input v-model="firstNameValue" dense outlined class="flat-input"
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
 
-        <div class="col-3">
-          <label class="form-label">Birthdate <span class="required">*</span></label>
-          <q-input v-model="birthdateValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit" placeholder="DD/MM/YYYY"
-            @update:model-value="checkForChanges">
-            <template #append v-if="edit">
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately>
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-        <div class="col-3">
-          <label class="form-label">Age </label>
-          <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" class="flat-input" readonly />
-        </div>
+          <div class="col-6">
+            <label class="form-label">Middle Name</label>
+            <q-input v-model="middleNameValue" dense outlined class="flat-input" :readonly="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
 
-        <div class="col-3">
-          <label class="form-label">Sex <span class="required">*</span></label>
-          <q-select v-model="sexValue" :options="options[0]" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :disable="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
+          <div class="col-6">
+            <label class="form-label">Suffix</label>
+            <q-input v-model="suffixValue" dense outlined class="flat-input" :readonly="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
 
-        <div class="col-3">
-          <label class="form-label">Preference</label>
-          <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input" :disable="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
+          <div class="col-3">
+            <label class="form-label">Birthdate <span class="required">*</span></label>
+            <q-input v-model="birthdateValue" dense outlined class="flat-input"
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit" placeholder="DD/MM/YYYY"
+              @update:model-value="checkForChanges">
+              <template #append v-if="edit">
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately>
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
+          <div class="col-3">
+            <label class="form-label">Age </label>
+            <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" class="flat-input" readonly />
+          </div>
 
-        <div class="col-4">
-          <label class="form-label">Province</label>
-          <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined
-            class="flat-input" readonly />
-        </div>
+          <div class="col-3">
+            <label class="form-label">Sex <span class="required">*</span></label>
+            <q-select v-model="sexValue" :options="options[0]" dense outlined class="flat-input"
+              :rules="[val => !!val || 'This field is required']" :disable="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
 
-        <div class="col-4">
-          <label class="form-label">City</label>
-          <q-input v-model="cityValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined
-            class="flat-input" readonly />
-        </div>
+          <div class="col-3">
+            <label class="form-label">Preference</label>
+            <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input" :disable="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
 
-        <div class="col-4">
-          <label class="form-label">Barangay <span class="required">*</span></label>
-          <q-select v-model="barangayValue" :options="options[2]" :rules="[val => !!val || 'This field is required']"
-            dense outlined class="flat-input" :disable="!edit" @update:model-value="checkForChanges" />
-        </div>
+          <div class="col-4">
+            <label class="form-label">Province</label>
+            <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined
+              class="flat-input" readonly />
+          </div>
 
-        <div class="col-6">
-          <label class="form-label">House Address <span class="required">*</span></label>
-          <q-input v-model="houseAddressValue" dense outlined class="flat-input"
-            :rules="[val => !!val || 'This field is required']" :readonly="!edit"
-            @update:model-value="checkForChanges" />
-        </div>
-        <div class="col-6">
-          <label class="form-label">Phone Number <span class="required">*</span></label>
-          <q-input v-model="phoneNumberValue" dense outlined class="flat-input" placeholder="09XXXXXXXXX"
-            :rules="[validatePhoneNumber]" :readonly="!edit" maxlength="11" @update:model-value="onPhoneNumberChange"
-            hint="Format: 09XXXXXXXXX (11 digits)" :persistent-hint="true" />
-        </div>
-      </div>
-    </q-form>
+          <div class="col-4">
+            <label class="form-label">City</label>
+            <q-input v-model="cityValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined
+              class="flat-input" readonly />
+          </div>
 
+          <div class="col-4">
+            <label class="form-label">Barangay <span class="required">*</span></label>
+            <q-select v-model="barangayValue" :options="options[2]" :rules="[val => !!val || 'This field is required']"
+              dense outlined class="flat-input" :disable="!edit" @update:model-value="checkForChanges" />
+          </div>
+
+          <div class="col-6">
+            <label class="form-label">House Address <span class="required">*</span></label>
+            <q-input v-model="houseAddressValue" dense outlined class="flat-input"
+              :rules="[val => !!val || 'This field is required']" :readonly="!edit"
+              @update:model-value="checkForChanges" />
+          </div>
+          <div class="col-6">
+            <label class="form-label">Phone Number <span class="required">*</span></label>
+            <q-input v-model="phoneNumberValue" dense outlined class="flat-input" placeholder="09XXXXXXXXX"
+              :rules="[validatePhoneNumber]" :readonly="!edit" maxlength="11" @update:model-value="onPhoneNumberChange"
+              hint="Format: 09XXXXXXXXX (11 digits)" :persistent-hint="true" />
+          </div>
+        </div>
+      </q-form>
+    </div>
+
+    <!-- All dialogs remain the same -->
     <!-- DELETE CONFIRMATION DIALOG -->
     <q-dialog v-model="showDeleteDialog">
       <q-card style="min-width: 350px">
@@ -178,7 +182,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- PATIENT EDIT CONFIRMATION DIALOG (when patient info is edited) -->
+    <!-- PATIENT EDIT CONFIRMATION DIALOG -->
     <q-dialog v-model="showPatientEditDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
         <q-card-section class="bg-orange-6 text-white">
@@ -222,7 +226,6 @@
               <div class="info-item">
                 <strong>Phone:</strong> {{ formatPhoneNumber(originalPatientData.phone_number) }}
               </div>
-
             </div>
           </div>
 
@@ -265,8 +268,6 @@
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
           <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="showFinalSaveDialog = true"
             :loading="editActionLoading" />
-
-
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -373,6 +374,7 @@
 </template>
 
 <script setup>
+// Script remains exactly the same - no changes needed
 import axios from 'axios'
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -381,7 +383,6 @@ import { toWords } from 'number-to-words'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
-// Enable custom parse format for dayjs
 dayjs.extend(customParseFormat)
 
 const router = useRouter()
@@ -484,34 +485,24 @@ const originalPatientData = ref({
 })
 const phoneNumberValue = ref(null)
 
-// Add validation functions before the computed properties
 const normalizePhoneNumber = (value) => {
   if (!value) return null
-
-  // Remove all non-digit characters
   let cleaned = value.replace(/\D/g, '')
-
-  // Ensure it starts with 09
   if (!cleaned.startsWith('09')) {
-    return null // Invalid format
+    return null
   }
-
-  // Check if it's the correct length (should be 11 digits: 09XXXXXXXXX)
   if (cleaned.length !== 11) {
-    return null // Invalid length
+    return null
   }
-
   return cleaned
 }
 
 const validatePhoneNumber = (value) => {
   if (!value) return 'Phone number is required'
-
   const normalized = normalizePhoneNumber(value)
   if (!normalized) {
     return 'Invalid phone number. Must be 11 digits starting with 09'
   }
-
   return true
 }
 
@@ -527,36 +518,26 @@ const onPhoneNumberChange = (value) => {
 
 const formatPhoneNumber = (phone) => {
   if (!phone) return 'N/A'
-  // Format as 0917 123 4567
   if (phone.length === 11) {
     return `${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}`
   }
   return phone
 }
-// Convert DD/MM/YYYY to MySQL-safe YYYY-MM-DD format
+
 const convertToMySQLDate = (dateString) => {
   if (!dateString) return null
-
   const parts = dateString.split('/')
   if (parts.length !== 3) return null
-
-  // parts[0] = day, parts[1] = month, parts[2] = year
   return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
 }
 
-// Convert MySQL YYYY-MM-DD to DD/MM/YYYY format
 const convertFromMySQLDate = (dateString) => {
   if (!dateString) return null
-
-  // Split the MySQL date format YYYY-MM-DD
   const parts = dateString.split('-')
   if (parts.length !== 3) return null
-
-  // parts[0] = year, parts[1] = month, parts[2] = day
   const year = parts[0]
   const month = parts[1].padStart(2, '0')
   const day = parts[2].padStart(2, '0')
-
   return `${day}/${month}/${year}`
 }
 
@@ -564,10 +545,8 @@ watch(categoryValue, () => {
   partnerValue.value = null
 })
 
-// Check for patient information changes
 const checkPatientChanges = () => {
   if (!edit.value) return false
-
   return lastNameValue.value !== originalPatientData.value.lastname ||
     firstNameValue.value !== originalPatientData.value.firstname ||
     (middleNameValue.value || null) !== (originalPatientData.value.middlename || null) ||
@@ -577,13 +556,11 @@ const checkPatientChanges = () => {
     (preferenceValue.value || null) !== (originalPatientData.value.preference || null) ||
     barangayValue.value !== originalPatientData.value.barangay ||
     houseAddressValue.value !== originalPatientData.value.house_address ||
-    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null)  // ADD THIS LINE
+    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null)
 }
 
-// Check for transaction/client details changes
 const checkTransactionChanges = () => {
   if (!edit.value) return false
-
   return categoryValue.value !== originalPatientData.value.category ||
     partnerValue.value !== originalPatientData.value.partner ||
     (hospitalBillValue.value || 0) !== (originalPatientData.value.hospital_bill || 0) ||
@@ -596,7 +573,6 @@ const checkTransactionChanges = () => {
     (relationshipValue.value || null) !== (originalPatientData.value.relationship || null)
 }
 
-// Combined check for any changes
 const checkForChanges = () => {
   hasPatientChanges.value = checkPatientChanges()
   hasTransactionChanges.value = checkTransactionChanges()
@@ -606,18 +582,15 @@ const handleDelete = async () => {
   deleteLoading.value = true
   try {
     await axios.delete(`http://localhost:8000/api/patient-details/delete/${glNum.value}`)
-
     $q.notify({
       type: 'positive',
       message: 'Patient record deleted successfully',
       position: 'top'
     })
-
     showDeleteDialog.value = false
     router.push('/patient-records')
   } catch (error) {
     console.error("Failed to delete patient:", error)
-
     $q.notify({
       type: 'negative',
       message: 'Failed to delete patient record',
@@ -630,24 +603,17 @@ const handleDelete = async () => {
 
 const ageValue = computed(() => {
   if (!birthdateValue.value) return null
-
   const birth = dayjs(birthdateValue.value, 'DD/MM/YYYY', true)
-
   if (!birth.isValid()) return null
   if (birth.isAfter(dayjs())) return null
-
   return dayjs().diff(birth, 'year')
 })
 
-// Helper function to calculate age from birthdate string (DD/MM/YYYY)
 const calculateAgeFromDate = (birthdateString) => {
   if (!birthdateString) return null
-
   const birth = dayjs(birthdateString, 'DD/MM/YYYY', true)
-
   if (!birth.isValid()) return null
   if (birth.isAfter(dayjs())) return null
-
   return dayjs().diff(birth, 'year')
 }
 
@@ -656,27 +622,22 @@ const handleCancel = async () => {
   edit.value = false
   hasPatientChanges.value = false
   hasTransactionChanges.value = false
-
   await getPatientDetails(glNum.value)
 }
 
 const validateRequiredFields = () => {
   const errors = []
-
-  // Basic patient info
   if (!lastNameValue.value?.trim()) errors.push('Last Name is required')
   if (!firstNameValue.value?.trim()) errors.push('First Name is required')
   if (!birthdateValue.value) errors.push('Birthdate is required')
   if (!sexValue.value) errors.push('Sex is required')
   if (!barangayValue.value) errors.push('Barangay is required')
   if (!houseAddressValue.value?.trim()) errors.push('House Address is required')
-
   return errors
 }
 
 const handleSaveClick = async () => {
   const errors = validateRequiredFields()
-
   if (errors.length > 0) {
     $q.notify({
       type: 'negative',
@@ -687,10 +648,7 @@ const handleSaveClick = async () => {
     })
     return
   }
-
-  // Then use Quasar's form validation
   const isValid = await patientForm.value.validate()
-
   if (!isValid) {
     $q.notify({
       type: 'negative',
@@ -699,11 +657,8 @@ const handleSaveClick = async () => {
     })
     return
   }
-
-  // Check which type of changes were made
   const patientChanged = checkPatientChanges()
   const transactionChanged = checkTransactionChanges()
-
   if (patientChanged) {
     showPatientEditDialog.value = true
   } else if (transactionChanged) {
@@ -728,10 +683,8 @@ const cancelTransactionEdit = () => {
 
 const proceedWithTransactionUpdate = async () => {
   editActionLoading.value = true
-
   try {
     await updateTransactionDetails()
-
     showTransactionEditDialog.value = false
     edit.value = false
     hasPatientChanges.value = false
@@ -758,11 +711,8 @@ const updatePatientInfo = async () => {
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
-
-  // Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
   formData.append('birthdate', mysqlBirthdate)
-
   formData.append('sex', sexValue.value)
   formData.append('preference', preferenceValue.value || '')
   formData.append('is_checked', isChecked.value ? 1 : 0)
@@ -770,7 +720,7 @@ const updatePatientInfo = async () => {
   formData.append('city', cityValue.value)
   formData.append('barangay', barangayValue.value)
   formData.append('house_address', houseAddressValue.value)
-  formData.append('phone_number', phoneNumberValue.value || '')  // ADD THIS LINE
+  formData.append('phone_number', phoneNumberValue.value || '')
   formData.append('partner', partnerValue.value)
   formData.append('hospital_bill', hospitalBillValue.value || 0)
   formData.append('issued_amount', issuedAmountValue.value)
@@ -781,9 +731,7 @@ const updatePatientInfo = async () => {
   formData.append('client_middlename', clientMiddleNameValue.value || '')
   formData.append('client_suffix', clientSuffixValue.value || '')
   formData.append('relationship', relationshipValue.value || '')
-
   await axios.post('http://localhost:8000/api/patient-details/update', formData)
-
   $q.notify({
     type: 'positive',
     message: 'Patient information updated successfully',
@@ -805,9 +753,7 @@ const updateTransactionDetails = async () => {
   formData.append('client_middlename', clientMiddleNameValue.value || '')
   formData.append('client_suffix', clientSuffixValue.value || '')
   formData.append('relationship', relationshipValue.value || '')
-
   await axios.post('http://localhost:8000/api/patient-details/update', formData)
-
   $q.notify({
     type: 'positive',
     message: 'Transaction details updated successfully',
@@ -831,14 +777,10 @@ watch(
 
 const confirmSave = async () => {
   editActionLoading.value = true
-
   try {
     await updatePatientInfo()
-
     showFinalSaveDialog.value = false
     showPatientEditDialog.value = false
-
-    // If transaction changes exist, handle next
     if (checkTransactionChanges()) {
       showTransactionEditDialog.value = true
     } else {
@@ -847,7 +789,6 @@ const confirmSave = async () => {
       hasTransactionChanges.value = false
       await getPatientDetails(glNum.value)
     }
-
     $q.notify({
       type: 'positive',
       message: 'Changes saved successfully',
@@ -871,17 +812,13 @@ const getPatientDetails = async (id) => {
   )
   const patientDetails = res.data
   if (!patientDetails) return
-
   patientIDValue.value = patientDetails.patient_id
   categoryValue.value = patientDetails.category
   lastNameValue.value = patientDetails.patient_lastname
   firstNameValue.value = patientDetails.patient_firstname
   middleNameValue.value = patientDetails.patient_middlename
   suffixValue.value = patientDetails.patient_suffix
-
-  // Convert birthdate from YYYY-MM-DD to DD/MM/YYYY
   birthdateValue.value = convertFromMySQLDate(patientDetails.birthdate)
-
   sexValue.value = patientDetails.sex
   preferenceValue.value = patientDetails.preference
   provinceValue.value = patientDetails.province
@@ -889,8 +826,6 @@ const getPatientDetails = async (id) => {
   barangayValue.value = patientDetails.barangay
   houseAddressValue.value = patientDetails.house_address
   phoneNumberValue.value = patientDetails.phone_number
-
-  // Store original data for comparison
   originalPatientData.value = {
     lastname: patientDetails.patient_lastname,
     firstname: patientDetails.patient_firstname,
@@ -916,15 +851,12 @@ const getPatientDetails = async (id) => {
     client_suffix: patientDetails.client_suffix,
     relationship: patientDetails.relationship
   }
-
   await nextTick()
-
   partnerValue.value = patientDetails.partner
   hospitalBillValue.value = patientDetails.hospital_bill
   issuedAmountValue.value = patientDetails.issued_amount
   issuedByValue.value = patientDetails.issued_by
   dateToday.value = patientDetails.date_issued
-
   if (patientDetails.client_lastname != null) {
     isChecked.value = false
     clientLastNameValue.value = patientDetails.client_lastname
@@ -940,7 +872,6 @@ const getPatientDetails = async (id) => {
     clientSuffixValue.value = null
     relationshipValue.value = null
   }
-
   hasPatientChanges.value = false
   hasTransactionChanges.value = false
 }
@@ -966,15 +897,13 @@ function getDaySuffix(day) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
   background-color: #1f8f2e;
   padding: 12px 24px;
-  border-radius: 4px;
-  margin-left: -24px;
-  margin-right: -24px;
-  margin-top: -24px;
-  width: calc(100% + 48px);
+  margin-bottom: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
 }
+
 .fieldset-title {
   font-size: 40px;
   font-weight: 700;
@@ -1116,8 +1045,6 @@ function getDaySuffix(day) {
   font-weight: bold;
   border-radius: 5%;
 }
-
-
 
 .cancel-btn,
 .save-btn {

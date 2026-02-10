@@ -367,8 +367,8 @@ const columns = [
   { name: 'Category', label: 'Category', field: 'category' },
   { name: 'Issued At', label: 'Date Issued', field: 'issuedAt' },
   { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate' },
-  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
   { name: 'Issued Amount', label: 'Issued Amount', field: 'issuedAmount' },
+  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 

@@ -1,425 +1,511 @@
 <template>
-  <div class="form-card">
-    <div class="patient-info-pill">Patient's Info.</div>
+  <div>
+    <!-- HEADER BANNER -->
+    <div class="form-header">
+      <div class="form-title">Patient's Info.</div>
+    </div>
 
-    <q-form ref="patientForm" class="form-body">
-      <div class="row-1">
-        <div class="category">
-          <label>Category <span>*</span></label>
-          <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category" dense
-            outlined :rules="[val => !!val || 'This field is required']" />
-        </div>
-      </div>
-
-      <h6 class="section-title">Patient Form</h6>
-
-      <div class="grid-4">
-        <div class="field">
-          <label>Last Name <span>*</span></label>
-          <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
-            :rules="[val => !!val || 'This field is required']" @update:model-value="onLastNameChange"
-            @focus="lastNameFocused = true" @blur="onLastNameBlur">
-            <template v-slot:append v-if="searchingPatients">
-              <q-spinner color="primary" size="20px" />
-            </template>
-          </q-input>
-
-          <!-- Patient Search Dropdown -->
-          <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0"
-            class="patient-dropdown">
-            <div class="dropdown-header">
-              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
-              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
-            </div>
-            <q-scroll-area style="height: 300px;">
-              <q-list separator>
-                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
-                    'dropdown-patient-item': true,
-                    'patient-eligible': patient.eligible,
-                    'patient-ineligible': !patient.eligible
-                  }">
-                  <q-item-section>
-                    <q-item-label class="patient-name-dropdown">
-                      {{ formatPatientName(patient) }}
-                    </q-item-label>
-                    <q-item-label caption class="patient-details-dropdown">
-                      <div class="detail-row-dropdown">
-                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
-                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                        }}</span>
-                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
-                          'N/A'
-                        }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
-                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
-                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
-                      </div>
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <div class="eligibility-badge-container-dropdown">
-                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
-                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
-                        ELIGIBLE
-                      </q-badge>
-                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                        <q-icon name="block" size="xs" class="q-mr-xs" />
-                        NOT ELIGIBLE
-                      </q-badge>
-                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
-                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
-                      </div>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
+    <!-- FORM CARD -->
+    <div class="form-card">
+      <q-form ref="patientForm" class="form-body">
+        <div class="row-1">
+          <div class="category">
+            <label>Category <span>*</span></label>
+            <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category" dense
+              outlined :rules="[val => !!val || 'This field is required']" />
           </div>
         </div>
 
-        <div class="field">
-          <label>First Name <span>*</span></label>
-          <q-input v-model="firstNameValue" dense outlined placeholder="First Name"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="onFirstNameChange"
-            @focus="firstNameFocused = true" @blur="onFirstNameBlur">
-            <template v-slot:append v-if="searchingPatients">
-              <q-spinner color="primary" size="20px" />
-            </template>
-          </q-input>
-
-          <!-- Patient Search Dropdown for First Name -->
-          <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0"
-            class="patient-dropdown">
-            <div class="dropdown-header">
-              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
-              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
-            </div>
-            <q-scroll-area style="height: 300px;">
-              <q-list separator>
-                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
-                    'dropdown-patient-item': true,
-                    'patient-eligible': patient.eligible,
-                    'patient-ineligible': !patient.eligible
-                  }">
-                  <q-item-section>
-                    <q-item-label class="patient-name-dropdown">
-                      {{ formatPatientName(patient) }}
-                    </q-item-label>
-                    <q-item-label caption class="patient-details-dropdown">
-                      <div class="detail-row-dropdown">
-                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
-                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                        }}</span>
-                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
-                          'N/A'
-                        }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
-                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
-                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
-                      </div>
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <div class="eligibility-badge-container-dropdown">
-                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
-                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
-                        ELIGIBLE
-                      </q-badge>
-                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                        <q-icon name="block" size="xs" class="q-mr-xs" />
-                        NOT ELIGIBLE
-                      </q-badge>
-                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
-                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
-                      </div>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Middle Name</label>
-          <q-input v-model="middleNameValue" dense outlined placeholder="Middle Name"
-            @update:model-value="onMiddleNameChange" @focus="middleNameFocused = true" @blur="onMiddleNameBlur">
-            <template v-slot:append v-if="searchingPatients">
-              <q-spinner color="primary" size="20px" />
-            </template>
-          </q-input>
-
-          <!-- Patient Search Dropdown for Middle Name -->
-          <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0"
-            class="patient-dropdown">
-            <div class="dropdown-header">
-              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
-              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
-            </div>
-            <q-scroll-area style="height: 300px;">
-              <q-list separator>
-                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
-                    'dropdown-patient-item': true,
-                    'patient-eligible': patient.eligible,
-                    'patient-ineligible': !patient.eligible
-                  }">
-                  <q-item-section>
-                    <q-item-label class="patient-name-dropdown">
-                      {{ formatPatientName(patient) }}
-                    </q-item-label>
-                    <q-item-label caption class="patient-details-dropdown">
-                      <div class="detail-row-dropdown">
-                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
-                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                        }}</span>
-                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
-                          'N/A'
-                        }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
-                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
-                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
-                      </div>
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <div class="eligibility-badge-container-dropdown">
-                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
-                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
-                        ELIGIBLE
-                      </q-badge>
-                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                        <q-icon name="block" size="xs" class="q-mr-xs" />
-                        NOT ELIGIBLE
-                      </q-badge>
-                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
-                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
-                      </div>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Suffix</label>
-          <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
-            @update:model-value="checkForPatientEdits" />
-        </div>
-      </div>
-
-      <div class="grid-4">
-        <div class="field">
-          <label>Birthdate <span>*</span></label>
-          <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits"
-            mask="##/##/####">
-            <template #append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately :options="dateOptions">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-        <div class="field">
-          <label>Age </label>
-          <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" readonly />
-        </div>
-
-        <div class="field">
-          <label>Sex <span>*</span></label>
-          <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex" placeholder="Sex"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
-        </div>
-
-        <div class="field">
-          <label>Preference</label>
-          <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
-            outlined @update:model-value="checkForPatientEdits" />
-        </div>
-      </div>
-
-      <div class="grid-5">
-        <div class="field">
-          <label>Province</label>
-          <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
-        </div>
-
-        <div class="field">
-          <label>City</label>
-          <q-input v-model="cityValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
-        </div>
-
-        <div class="field">
-          <label>Barangay <span>*</span></label>
-          <q-select v-model="barangayValue" :options="options[2]" dense outlined
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
-        </div>
-
-        <div class="field">
-          <label>House Address <span>*</span></label>
-          <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
-            @update:model-value="checkForPatientEdits" />
-        </div>
-
-        <div class="field">
-          <label>Phone Number <span>*</span></label>
-          <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
-            @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
-            :persistent-hint="true" />
-        </div>
-      </div>
-      <q-separator color="grey-5" size="2px" class="q-my-lg" />
-      <div class="patient-info-pill">Transaction Details</div>
-      <div class="grid-3">
-        <div class="field">
-          <label>Partner <span>*</span></label>
-          <q-select v-model="partnerValue" dense outlined :options="partnerOptions"
-            :rules="[val => !!val || 'This field is required']" :disable="categoryValue == null"
-            :hint="categoryValue == null ? 'Must select a category before selecting a partner!' : ''"
-            :persistent-hint="categoryValue == null" />
-        </div>
-
-        <div class="field" v-if="categoryValue == 'HOSPITAL'">
-          <label>Hospital Bill <span>*</span></label>
-          <q-input type="number" dense v-model="hospitalBillValue" outlined
-            :rules="[val => !!val || 'This field is required']" />
-        </div>
-
-        <div class="field">
-        <label>Issued Amount <span>*</span></label>
-          <q-input
-            type="text"
-            dense
-            outlined
-            v-model="issuedAmountDisplay"
-            @update:model-value="onIssuedAmountInput"
-            @blur="finalizeIssuedAmount"
-            placeholder="0.00"
-            :rules="[val => !!val || 'This field is required']"
-          />
-        </div>
-      </div>
-
-
-      <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
-
-      <div v-if="!isChecked">
-        <q-separator color="grey-5" size="2px" class="q-my-lg" />
-        <div class="patient-info-pill">Client's Name</div>
+        <h6 class="section-title">Patient Form</h6>
 
         <div class="grid-4">
           <div class="field">
             <label>Last Name <span>*</span></label>
-            <q-input v-model="clientLastNameValue" dense outlined placeholder="Last Name"
-              :rules="[val => !!val || 'This field is required']" />
+            <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
+              :rules="[val => !!val || 'This field is required']" @update:model-value="onLastNameChange"
+              @focus="lastNameFocused = true" @blur="onLastNameBlur">
+              <template v-slot:append v-if="searchingPatients">
+                <q-spinner color="primary" size="20px" />
+              </template>
+            </q-input>
+
+            <!-- Patient Search Dropdown -->
+            <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0"
+              class="patient-dropdown">
+              <div class="dropdown-header">
+                <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
+                <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
+              </div>
+              <q-scroll-area style="height: 300px;">
+                <q-list separator>
+                  <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
+                    :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
+                      'dropdown-patient-item': true,
+                      'patient-eligible': patient.eligible,
+                      'patient-ineligible': !patient.eligible
+                    }">
+                    <q-item-section>
+                      <q-item-label class="patient-name-dropdown">
+                        {{ formatPatientName(patient) }}
+                      </q-item-label>
+                      <q-item-label caption class="patient-details-dropdown">
+                        <div class="detail-row-dropdown">
+                          <span><strong>ID:</strong> {{ patient.patient_id }}</span>
+                          <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                            'N/A'
+                          }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                        </div>
+                        <div class="detail-row-dropdown" v-if="patient.last_issued_at">
+                          <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
+                          <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
+                        </div>
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section side top>
+                      <div class="eligibility-badge-container-dropdown">
+                        <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
+                          <q-icon name="check_circle" size="xs" class="q-mr-xs" />
+                          ELIGIBLE
+                        </q-badge>
+                        <q-badge v-else color="red" class="eligibility-badge-dropdown">
+                          <q-icon name="block" size="xs" class="q-mr-xs" />
+                          NOT ELIGIBLE
+                        </q-badge>
+                        <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
+                          <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
+                          <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                        </div>
+                      </div>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-scroll-area>
+            </div>
           </div>
 
           <div class="field">
             <label>First Name <span>*</span></label>
-            <q-input v-model="clientFirstNameValue" dense outlined placeholder="First Name"
-              :rules="[val => !!val || 'This field is required']" />
+            <q-input v-model="firstNameValue" dense outlined placeholder="First Name"
+              :rules="[val => !!val || 'This field is required']" @update:model-value="onFirstNameChange"
+              @focus="firstNameFocused = true" @blur="onFirstNameBlur">
+              <template v-slot:append v-if="searchingPatients">
+                <q-spinner color="primary" size="20px" />
+              </template>
+            </q-input>
+
+            <!-- Patient Search Dropdown for First Name -->
+            <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0"
+              class="patient-dropdown">
+              <div class="dropdown-header">
+                <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
+                <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
+              </div>
+              <q-scroll-area style="height: 300px;">
+                <q-list separator>
+                  <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
+                    :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
+                      'dropdown-patient-item': true,
+                      'patient-eligible': patient.eligible,
+                      'patient-ineligible': !patient.eligible
+                    }">
+                    <q-item-section>
+                      <q-item-label class="patient-name-dropdown">
+                        {{ formatPatientName(patient) }}
+                      </q-item-label>
+                      <q-item-label caption class="patient-details-dropdown">
+                        <div class="detail-row-dropdown">
+                          <span><strong>ID:</strong> {{ patient.patient_id }}</span>
+                          <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                            'N/A'
+                          }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                        </div>
+                        <div class="detail-row-dropdown" v-if="patient.last_issued_at">
+                          <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
+                          <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
+                        </div>
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section side top>
+                      <div class="eligibility-badge-container-dropdown">
+                        <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
+                          <q-icon name="check_circle" size="xs" class="q-mr-xs" />
+                          ELIGIBLE
+                        </q-badge>
+                        <q-badge v-else color="red" class="eligibility-badge-dropdown">
+                          <q-icon name="block" size="xs" class="q-mr-xs" />
+                          NOT ELIGIBLE
+                        </q-badge>
+                        <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
+                          <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
+                          <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                        </div>
+                      </div>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-scroll-area>
+            </div>
           </div>
 
           <div class="field">
             <label>Middle Name</label>
-            <q-input v-model="clientMiddleNameValue" dense outlined placeholder="Middle Name" />
+            <q-input v-model="middleNameValue" dense outlined placeholder="Middle Name"
+              @update:model-value="onMiddleNameChange" @focus="middleNameFocused = true" @blur="onMiddleNameBlur">
+              <template v-slot:append v-if="searchingPatients">
+                <q-spinner color="primary" size="20px" />
+              </template>
+            </q-input>
+
+            <!-- Patient Search Dropdown for Middle Name -->
+            <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0"
+              class="patient-dropdown">
+              <div class="dropdown-header">
+                <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
+                <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
+              </div>
+              <q-scroll-area style="height: 300px;">
+                <q-list separator>
+                  <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
+                    :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
+                      'dropdown-patient-item': true,
+                      'patient-eligible': patient.eligible,
+                      'patient-ineligible': !patient.eligible
+                    }">
+                    <q-item-section>
+                      <q-item-label class="patient-name-dropdown">
+                        {{ formatPatientName(patient) }}
+                      </q-item-label>
+                      <q-item-label caption class="patient-details-dropdown">
+                        <div class="detail-row-dropdown">
+                          <span><strong>ID:</strong> {{ patient.patient_id }}</span>
+                          <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                            'N/A'
+                          }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
+                        </div>
+                        <div class="detail-row-dropdown">
+                          <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
+                        </div>
+                        <div class="detail-row-dropdown" v-if="patient.last_issued_at">
+                          <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
+                          <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
+                        </div>
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section side top>
+                      <div class="eligibility-badge-container-dropdown">
+                        <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
+                          <q-icon name="check_circle" size="xs" class="q-mr-xs" />
+                          ELIGIBLE
+                        </q-badge>
+                        <q-badge v-else color="red" class="eligibility-badge-dropdown">
+                          <q-icon name="block" size="xs" class="q-mr-xs" />
+                          NOT ELIGIBLE
+                        </q-badge>
+                        <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
+                          <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
+                          <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                        </div>
+                      </div>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-scroll-area>
+            </div>
           </div>
 
           <div class="field">
             <label>Suffix</label>
-            <q-input v-model="clientSuffixValue" dense outlined placeholder="Suffix" />
+            <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
+              @update:model-value="checkForPatientEdits" />
           </div>
         </div>
 
-        <div class="field full">
-          <label>Relationship to patient <span>*</span></label>
-          <q-input v-model="relationshipValue" dense outlined placeholder="Relationship to patient"
-            :rules="[val => !!val || 'This field is required']" />
-        </div>
-      </div>
-
-      <div class="actions">
-        <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
-        <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
-        <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
-      </div>
-    </q-form>
-
-    <!-- FINAL CONFIRMATION DIALOG - Shows comparison between original and current -->
-    <q-dialog v-model="showFinalConfirmDialog" persistent>
-      <q-card style="min-width: 700px; max-width: 800px;">
-        <q-card-section class="bg-blue-6 text-white">
-          <div class="text-h6">
-            <q-icon name="info" size="sm" class="q-mr-sm" />
-            Confirm Patient Information
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <div class="text-subtitle1 q-mb-md">
-            Please review the patient information before proceeding.
-          </div>
-
-          <!-- Show comparison between original and current if there are changes -->
-          <div v-if="selectedBrowserPatient && browserPatientEdited">
-            <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
-              <template v-slot:avatar>
-                <q-icon name="warning" color="orange" />
+        <div class="grid-4">
+          <div class="field">
+            <label>Birthdate <span>*</span></label>
+            <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
+              :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits"
+              mask="##/##/####">
+              <template #append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately :options="dateOptions">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
               </template>
-              You have modified the patient information. Please confirm the changes.
-            </q-banner>
+            </q-input>
+          </div>
+          <div class="field">
+            <label>Age </label>
+            <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" readonly />
+          </div>
 
-            <div class="comparison-container">
-              <!-- Original Patient Info -->
-              <div class="patient-info-box">
-                <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
-                  <q-icon name="history" size="sm" class="q-mr-xs" />
-                  Original Patient Information:
+          <div class="field">
+            <label>Sex <span>*</span></label>
+            <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex" placeholder="Sex"
+              :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
+          </div>
+
+          <div class="field">
+            <label>Preference</label>
+            <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
+              outlined @update:model-value="checkForPatientEdits" />
+          </div>
+        </div>
+
+        <div class="grid-5">
+          <div class="field">
+            <label>Province</label>
+            <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
+          </div>
+
+          <div class="field">
+            <label>City</label>
+            <q-input v-model="cityValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
+          </div>
+
+          <div class="field">
+            <label>Barangay <span>*</span></label>
+            <q-select v-model="barangayValue" :options="options[2]" dense outlined
+              :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
+          </div>
+
+          <div class="field">
+            <label>House Address <span>*</span></label>
+            <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
+              @update:model-value="checkForPatientEdits" />
+          </div>
+
+          <div class="field">
+            <label>Phone Number <span>*</span></label>
+            <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
+              @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
+              :persistent-hint="true" />
+          </div>
+        </div>
+        <q-separator color="grey-5" size="2px" class="q-my-lg" />
+        
+        <div class="section-pill">Transaction Details</div>
+        
+        <div class="grid-3">
+          <div class="field">
+            <label>Partner <span>*</span></label>
+            <q-select v-model="partnerValue" dense outlined :options="partnerOptions"
+              :rules="[val => !!val || 'This field is required']" :disable="categoryValue == null"
+              :hint="categoryValue == null ? 'Must select a category before selecting a partner!' : ''"
+              :persistent-hint="categoryValue == null" />
+          </div>
+
+          <div class="field" v-if="categoryValue == 'HOSPITAL'">
+            <label>Hospital Bill <span>*</span></label>
+            <q-input type="number" dense v-model="hospitalBillValue" outlined
+              :rules="[val => !!val || 'This field is required']" />
+          </div>
+
+          <div class="field">
+          <label>Issued Amount <span>*</span></label>
+            <q-input
+              type="text"
+              dense
+              outlined
+              v-model="issuedAmountDisplay"
+              @update:model-value="onIssuedAmountInput"
+              @blur="finalizeIssuedAmount"
+              placeholder="0.00"
+              :rules="[val => !!val || 'This field is required']"
+            />
+          </div>
+        </div>
+
+        <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
+
+        <div v-if="!isChecked">
+          <q-separator color="grey-5" size="2px" class="q-my-lg" />
+          <div class="section-pill">Client's Name</div>
+
+          <div class="grid-4">
+            <div class="field">
+              <label>Last Name <span>*</span></label>
+              <q-input v-model="clientLastNameValue" dense outlined placeholder="Last Name"
+                :rules="[val => !!val || 'This field is required']" />
+            </div>
+
+            <div class="field">
+              <label>First Name <span>*</span></label>
+              <q-input v-model="clientFirstNameValue" dense outlined placeholder="First Name"
+                :rules="[val => !!val || 'This field is required']" />
+            </div>
+
+            <div class="field">
+              <label>Middle Name</label>
+              <q-input v-model="clientMiddleNameValue" dense outlined placeholder="Middle Name" />
+            </div>
+
+            <div class="field">
+              <label>Suffix</label>
+              <q-input v-model="clientSuffixValue" dense outlined placeholder="Suffix" />
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>Relationship to patient <span>*</span></label>
+            <q-input v-model="relationshipValue" dense outlined placeholder="Relationship to patient"
+              :rules="[val => !!val || 'This field is required']" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
+          <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
+          <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
+        </div>
+      </q-form>
+
+      <!-- All dialogs remain exactly the same -->
+      <!-- FINAL CONFIRMATION DIALOG - Shows comparison between original and current -->
+      <q-dialog v-model="showFinalConfirmDialog" persistent>
+        <q-card style="min-width: 700px; max-width: 800px;">
+          <q-card-section class="bg-blue-6 text-white">
+            <div class="text-h6">
+              <q-icon name="info" size="sm" class="q-mr-sm" />
+              Confirm Patient Information
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <div class="text-subtitle1 q-mb-md">
+              Please review the patient information before proceeding.
+            </div>
+
+            <!-- Show comparison between original and current if there are changes -->
+            <div v-if="selectedBrowserPatient && browserPatientEdited">
+              <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+                <template v-slot:avatar>
+                  <q-icon name="warning" color="orange" />
+                </template>
+                You have modified the patient information. Please confirm the changes.
+              </q-banner>
+
+              <div class="comparison-container">
+                <!-- Original Patient Info -->
+                <div class="patient-info-box">
+                  <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
+                    <q-icon name="history" size="sm" class="q-mr-xs" />
+                    Original Patient Information:
+                  </div>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <strong>Name:</strong>
+                      {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
+                      <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
+                      <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
+                    </div>
+                    <div class="info-item">
+                      <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
+                        formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
+                    </div>
+                    <div class="info-item info-item-full">
+                      <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Phone Number:</strong> {{ formatPhoneNumber(selectedBrowserPatient.phone_number) }}
+                    </div>
+                  </div>
                 </div>
+
+                <div class="comparison-arrow">
+                  <q-icon name="arrow_downward" size="lg" color="orange" />
+                </div>
+
+                <!-- Current Form Values -->
+                <div class="patient-info-box highlight-changes">
+                  <div class="text-subtitle2 text-weight-bold q-mb-sm text-orange-8">
+                    <q-icon name="edit" size="sm" class="q-mr-xs" />
+                    New Patient Information:
+                  </div>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <strong>Name:</strong>
+                      {{ lastNameValue }}, {{ firstNameValue }}
+                      <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                      <span v-if="suffixValue"> {{ suffixValue }}</span>
+                    </div>
+                    <div class="info-item">
+                      <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }} (unchanged)
+                    </div>
+                    <div class="info-item">
+                      <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Sex:</strong> {{ sexValue || 'N/A' }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
+                    </div>
+                    <div class="info-item info-item-full">
+                      <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                        provinceValue }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <q-banner class="bg-blue-1 text-blue-9 q-mt-md">
+                <template v-slot:avatar>
+                  <q-icon name="info" color="blue" />
+                </template>
+                Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future
+                records.
+              </q-banner>
+            </div>
+
+            <!-- Show just current info if no changes -->
+            <div v-else-if="selectedBrowserPatient && !browserPatientEdited">
+              <div class="patient-info-box">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm">Patient Information:</div>
                 <div class="info-grid">
                   <div class="info-item">
                     <strong>Name:</strong>
@@ -444,247 +530,8 @@
                     <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
                   </div>
                   <div class="info-item">
-                    <strong>Phone Number:</strong> {{ formatPhoneNumber(selectedBrowserPatient.phone_number) }}
+                    <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                   </div>
-                </div>
-              </div>
-
-              <div class="comparison-arrow">
-                <q-icon name="arrow_downward" size="lg" color="orange" />
-              </div>
-
-              <!-- Current Form Values -->
-              <div class="patient-info-box highlight-changes">
-                <div class="text-subtitle2 text-weight-bold q-mb-sm text-orange-8">
-                  <q-icon name="edit" size="sm" class="q-mr-xs" />
-                  New Patient Information:
-                </div>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>Name:</strong>
-                    {{ lastNameValue }}, {{ firstNameValue }}
-                    <span v-if="middleNameValue"> {{ middleNameValue }}</span>
-                    <span v-if="suffixValue"> {{ suffixValue }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }} (unchanged)
-                  </div>
-                  <div class="info-item">
-                    <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Sex:</strong> {{ sexValue || 'N/A' }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
-                  </div>
-                  <div class="info-item info-item-full">
-                    <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
-                      provinceValue }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <q-banner class="bg-blue-1 text-blue-9 q-mt-md">
-              <template v-slot:avatar>
-                <q-icon name="info" color="blue" />
-              </template>
-              Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future
-              records.
-            </q-banner>
-          </div>
-
-          <!-- Show just current info if no changes -->
-          <div v-else-if="selectedBrowserPatient && !browserPatientEdited">
-            <div class="patient-info-box">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm">Patient Information:</div>
-              <div class="info-grid">
-                <div class="info-item">
-                  <strong>Name:</strong>
-                  {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
-                  <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
-                  <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
-                </div>
-                <div class="info-item">
-                  <strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
-                </div>
-                <div class="info-item">
-                  <strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
-                    formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
-                </div>
-                <div class="info-item info-item-full">
-                  <strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}
-                </div>
-                <div class="info-item">
-                  <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Transaction Details -->
-          <div class="patient-info-box q-mt-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
-              <q-icon name="receipt" size="sm" class="q-mr-xs" />
-              Transaction Details:
-            </div>
-            <div class="info-grid">
-              <div class="info-item">
-                <strong>Category:</strong> {{ categoryValue }}
-              </div>
-              <div class="info-item">
-                <strong>Partner:</strong> {{ partnerValue }}
-              </div>
-              <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
-                <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
-              </div>
-              <div class="info-item">
-                <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Client Details (if different from patient) -->
-          <div v-if="!isChecked" class="patient-info-box q-mt-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-              <q-icon name="person_outline" size="sm" class="q-mr-xs" />
-              Client Information:
-            </div>
-            <div class="info-grid">
-              <div class="info-item info-item-full">
-                <strong>Client Name:</strong>
-                {{ clientLastNameValue }}, {{ clientFirstNameValue }}
-                <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
-                <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
-              </div>
-              <div class="info-item info-item-full">
-                <strong>Relationship to Patient:</strong> {{ relationshipValue }}
-              </div>
-            </div>
-          </div>
-          <div v-else class="patient-info-box q-mt-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-              <q-icon name="person_outline" size="sm" class="q-mr-xs" />
-              Client Information:
-            </div>
-            <div class="info-grid">
-              <div class="info-item info-item-full">
-                <strong>Client:</strong> Same as patient
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelFinalConfirm" />
-          <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated class="dialog-cancel-btn"
-            @click="proceedWithFinalConfirm" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- ELIGIBILITY WARNING DIALOG -->
-    <q-dialog v-model="showEligibilityWarning" persistent>
-      <q-card style="min-width: 500px;">
-        <q-card-section class="bg-red-6 text-white">
-          <div class="text-h6">
-            <q-icon name="warning" size="sm" class="q-mr-sm" />
-            Patient Not Yet Eligible
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <div class="text-subtitle1 q-mb-md">
-            This patient is not yet eligible for a new guarantee letter.
-          </div>
-
-          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="schedule" color="orange" />
-            </template>
-            <div v-if="eligibilityWarningData">
-              <div class="text-weight-bold">Last GL Number: {{ eligibilityWarningData.last_gl_no }}</div>
-              <div>Issued: {{ formatDate(eligibilityWarningData.last_issued_at) }}</div>
-              <div class="text-weight-bold text-orange-9 q-mt-sm">
-                Eligible from: {{ formatDate(eligibilityWarningData.eligibility_date) }}
-              </div>
-              <div class="text-caption q-mt-xs">
-                ({{ calculateDaysRemaining(eligibilityWarningData.eligibility_date) }} days remaining)
-              </div>
-            </div>
-          </q-banner>
-
-          <div class="text-body2 text-grey-8">
-            Patients must wait 3 months between guarantee letters.
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-          <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closeEligibilityWarning" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- ARE YOU SURE DIALOG - Final confirmation before submit -->
-    <q-dialog v-model="showAreYouSureDialog" persistent>
-      <q-card style="min-width: 700px; max-width: 800px;">
-        <q-card-section class="bg-blue-6 text-white">
-          <div class="text-h6">
-            <q-icon name="info" size="sm" class="q-mr-sm" />
-            {{ pendingAction === 'print' ? 'Save and Print Form?' : 'Save Form?' }}
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <!-- Show details if user did NOT select from dropdown (manual entry) -->
-          <div v-if="!usedBrowserPatient">
-            <div class="text-subtitle1 q-mb-md">
-              Please review the information before proceeding.
-            </div>
-
-            <!-- Patient Information -->
-            <div class="patient-info-box">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
-                <q-icon name="person" size="sm" class="q-mr-xs" />
-                Patient Information:
-              </div>
-              <div class="info-grid">
-                <div class="info-item info-item-full">
-                  <strong>Name:</strong>
-                  {{ lastNameValue }}, {{ firstNameValue }}
-                  <span v-if="middleNameValue"> {{ middleNameValue }}</span>
-                  <span v-if="suffixValue"> {{ suffixValue }}</span>
-                </div>
-                <div class="info-item">
-                  <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Age:</strong> {{ calculateAgeFromBirthdate(birthdateValue) }}
-                </div>
-                <div class="info-item">
-                  <strong>Sex:</strong> {{ sexValue || 'N/A' }}
-                </div>
-                <div class="info-item">
-                  <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
-                </div>
-                <div class="info-item info-item-full">
-                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
-                    provinceValue
-                  }}
-                </div>
-                <div class="info-item">
-                  <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                 </div>
               </div>
             </div>
@@ -711,7 +558,7 @@
               </div>
             </div>
 
-            <!-- Client Details -->
+            <!-- Client Details (if different from patient) -->
             <div v-if="!isChecked" class="patient-info-box q-mt-md">
               <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
                 <q-icon name="person_outline" size="sm" class="q-mr-xs" />
@@ -740,129 +587,290 @@
                 </div>
               </div>
             </div>
-          </div>
+          </q-card-section>
 
-          <!-- Simple text if user selected from dropdown -->
-          <div v-else>
-            <div class="text-body1">
-              Are you sure you want to {{ pendingAction === 'print' ? 'save and print' : 'save' }} this record?
+          <q-separator />
+
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelFinalConfirm" />
+            <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated class="dialog-cancel-btn"
+              @click="proceedWithFinalConfirm" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <!-- ELIGIBILITY WARNING DIALOG -->
+      <q-dialog v-model="showEligibilityWarning" persistent>
+        <q-card style="min-width: 500px;">
+          <q-card-section class="bg-red-6 text-white">
+            <div class="text-h6">
+              <q-icon name="warning" size="sm" class="q-mr-sm" />
+              Patient Not Yet Eligible
             </div>
-          </div>
-        </q-card-section>
+          </q-card-section>
 
-        <q-separator />
+          <q-card-section>
+            <div class="text-subtitle1 q-mb-md">
+              This patient is not yet eligible for a new guarantee letter.
+            </div>
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" @click="showAreYouSureDialog = false" />
-          <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmAreYouSure"
-            :loading="areYouSureLoading" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+            <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+              <template v-slot:avatar>
+                <q-icon name="schedule" color="orange" />
+              </template>
+              <div v-if="eligibilityWarningData">
+                <div class="text-weight-bold">Last GL Number: {{ eligibilityWarningData.last_gl_no }}</div>
+                <div>Issued: {{ formatDate(eligibilityWarningData.last_issued_at) }}</div>
+                <div class="text-weight-bold text-orange-9 q-mt-sm">
+                  Eligible from: {{ formatDate(eligibilityWarningData.eligibility_date) }}
+                </div>
+                <div class="text-caption q-mt-xs">
+                  ({{ calculateDaysRemaining(eligibilityWarningData.eligibility_date) }} days remaining)
+                </div>
+              </div>
+            </q-banner>
 
-    <!-- CANCEL CONFIRMATION DIALOG -->
-    <q-dialog v-model="showCancelDialog">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Close Form?</div>
-        </q-card-section>
+            <div class="text-body2 text-grey-8">
+              Patients must wait 3 months between guarantee letters.
+            </div>
+          </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          Are you sure you want to close? All unsaved changes will be lost.
-        </q-card-section>
+          <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+            <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closeEligibilityWarning" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
 
-    <!-- EXISTING PATIENTS DIALOG (for new patients found during save) -->
-    <q-dialog v-model="showExistingDialog" persistent>
-      <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-blue-6 text-white">
-          <div class="text-h6">
-            <q-icon name="info" size="sm" class="q-mr-sm" />
-            Existing Patients Found
-          </div>
-        </q-card-section>
+      <!-- ARE YOU SURE DIALOG - Final confirmation before submit -->
+      <q-dialog v-model="showAreYouSureDialog" persistent>
+        <q-card style="min-width: 700px; max-width: 800px;">
+          <q-card-section class="bg-blue-6 text-white">
+            <div class="text-h6">
+              <q-icon name="info" size="sm" class="q-mr-sm" />
+              {{ pendingAction === 'print' ? 'Save and Print Form?' : 'Save Form?' }}
+            </div>
+          </q-card-section>
 
-        <q-card-section>
-          <div class="text-subtitle1 q-mb-md">
-            One or more patients with the same name already exist in the system.
-          </div>
+          <q-card-section>
+            <!-- Show details if user did NOT select from dropdown (manual entry) -->
+            <div v-if="!usedBrowserPatient">
+              <div class="text-subtitle1 q-mb-md">
+                Please review the information before proceeding.
+              </div>
 
-          <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="help_outline" color="blue" />
-            </template>
-            Please choose whether to link this record to an existing patient or create a new patient entry.
-          </q-banner>
+              <!-- Patient Information -->
+              <div class="patient-info-box">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
+                  <q-icon name="person" size="sm" class="q-mr-xs" />
+                  Patient Information:
+                </div>
+                <div class="info-grid">
+                  <div class="info-item info-item-full">
+                    <strong>Name:</strong>
+                    {{ lastNameValue }}, {{ firstNameValue }}
+                    <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                    <span v-if="suffixValue"> {{ suffixValue }}</span>
+                  </div>
+                  <div class="info-item">
+                    <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Age:</strong> {{ calculateAgeFromBirthdate(birthdateValue) }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Sex:</strong> {{ sexValue || 'N/A' }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
+                  </div>
+                  <div class="info-item info-item-full">
+                    <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                      provinceValue
+                    }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
+                  </div>
+                </div>
+              </div>
 
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Existing Patient(s):</div>
-          <q-list bordered separator class="q-mb-md">
-            <q-item v-for="patient in existingPatients" :key="patient.patient_id" clickable
-              @click="selectedExistingPatient = patient"
-              :active="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
-              active-class="bg-blue-1">
-              <q-item-section>
-                <q-item-label class="text-weight-bold">
-                  {{ patient.lastname }}, {{ patient.firstname }}
-                  <span v-if="patient.middlename"> {{ patient.middlename }}</span>
-                  <span v-if="patient.suffix"> {{ patient.suffix }}</span>
-                </q-item-label>
-                <q-item-label caption>Patient ID: {{ patient.patient_id }}</q-item-label>
-                <q-item-label caption v-if="patient.gl_numbers">
-                  GL Numbers: {{ patient.gl_numbers }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon v-if="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
-                  name="check_circle" color="blue" size="sm" />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card-section>
+              <!-- Transaction Details -->
+              <div class="patient-info-box q-mt-md">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
+                  <q-icon name="receipt" size="sm" class="q-mr-xs" />
+                  Transaction Details:
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <strong>Category:</strong> {{ categoryValue }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Partner:</strong> {{ partnerValue }}
+                  </div>
+                  <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
+                    <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
+                  </div>
+                  <div class="info-item">
+                    <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
+                  </div>
+                </div>
+              </div>
 
-        <q-separator />
-
-        <q-card-section class="q-pt-md">
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Choose an Action:</div>
-          <div class="options-grid">
-            <!-- Option 1: Use Existing Patient -->
-            <div class="option-card" @click="selectedAction = 'existing'"
-              :class="{ 'option-selected': selectedAction === 'existing', 'option-disabled': !selectedExistingPatient }">
-              <q-icon name="link" size="md" color="blue" />
-              <div class="option-title">Use Existing Patient</div>
-              <div class="option-description">
-                Link this record to the selected patient above. This will add a new GL record under the same Patient ID.
-                <span v-if="!selectedExistingPatient" class="text-red"> (Please select a patient first)</span>
+              <!-- Client Details -->
+              <div v-if="!isChecked" class="patient-info-box q-mt-md">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                  <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+                  Client Information:
+                </div>
+                <div class="info-grid">
+                  <div class="info-item info-item-full">
+                    <strong>Client Name:</strong>
+                    {{ clientLastNameValue }}, {{ clientFirstNameValue }}
+                    <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
+                    <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
+                  </div>
+                  <div class="info-item info-item-full">
+                    <strong>Relationship to Patient:</strong> {{ relationshipValue }}
+                  </div>
+                </div>
+              </div>
+              <div v-else class="patient-info-box q-mt-md">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                  <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+                  Client Information:
+                </div>
+                <div class="info-grid">
+                  <div class="info-item info-item-full">
+                    <strong>Client:</strong> Same as patient
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Option 2: Create New Patient -->
-            <div class="option-card" @click="selectedAction = 'new'"
-              :class="{ 'option-selected': selectedAction === 'new' }">
-              <q-icon name="person_add" size="md" color="green" />
-              <div class="option-title">Create New Patient</div>
-              <div class="option-description">
-                Create a completely new patient with a new Patient ID. Use this if this is actually a different person.
+            <!-- Simple text if user selected from dropdown -->
+            <div v-else>
+              <div class="text-body1">
+                Are you sure you want to {{ pendingAction === 'print' ? 'save and print' : 'save' }} this record?
               </div>
             </div>
-          </div>
-        </q-card-section>
+          </q-card-section>
 
-        <q-separator />
+          <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelExistingDialog" />
-          <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
-            :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
-            @click="proceedWithAction" :loading="actionLoading" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
+            <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" @click="showAreYouSureDialog = false" />
+            <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmAreYouSure"
+              :loading="areYouSureLoading" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <!-- CANCEL CONFIRMATION DIALOG -->
+      <q-dialog v-model="showCancelDialog">
+        <q-card style="min-width: 350px">
+          <q-card-section>
+            <div class="text-h6">Close Form?</div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            Are you sure you want to close? All unsaved changes will be lost.
+          </q-card-section>
+
+          <q-card-actions align="right" class="q-px-md q-pb-md">
+            <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
+            <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <!-- EXISTING PATIENTS DIALOG (for new patients found during save) -->
+      <q-dialog v-model="showExistingDialog" persistent>
+        <q-card style="min-width: 600px; max-width: 700px;">
+          <q-card-section class="bg-blue-6 text-white">
+            <div class="text-h6">
+              <q-icon name="info" size="sm" class="q-mr-sm" />
+              Existing Patients Found
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <div class="text-subtitle1 q-mb-md">
+              One or more patients with the same name already exist in the system.
+            </div>
+
+            <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
+              <template v-slot:avatar>
+                <q-icon name="help_outline" color="blue" />
+              </template>
+              Please choose whether to link this record to an existing patient or create a new patient entry.
+            </q-banner>
+
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Existing Patient(s):</div>
+            <q-list bordered separator class="q-mb-md">
+              <q-item v-for="patient in existingPatients" :key="patient.patient_id" clickable
+                @click="selectedExistingPatient = patient"
+                :active="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
+                active-class="bg-blue-1">
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">
+                    {{ patient.lastname }}, {{ patient.firstname }}
+                    <span v-if="patient.middlename"> {{ patient.middlename }}</span>
+                    <span v-if="patient.suffix"> {{ patient.suffix }}</span>
+                  </q-item-label>
+                  <q-item-label caption>Patient ID: {{ patient.patient_id }}</q-item-label>
+                  <q-item-label caption v-if="patient.gl_numbers">
+                    GL Numbers: {{ patient.gl_numbers }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon v-if="selectedExistingPatient && selectedExistingPatient.patient_id === patient.patient_id"
+                    name="check_circle" color="blue" size="sm" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section class="q-pt-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Choose an Action:</div>
+            <div class="options-grid">
+              <!-- Option 1: Use Existing Patient -->
+              <div class="option-card" @click="selectedAction = 'existing'"
+                :class="{ 'option-selected': selectedAction === 'existing', 'option-disabled': !selectedExistingPatient }">
+                <q-icon name="link" size="md" color="blue" />
+                <div class="option-title">Use Existing Patient</div>
+                <div class="option-description">
+                  Link this record to the selected patient above. This will add a new GL record under the same Patient ID.
+                  <span v-if="!selectedExistingPatient" class="text-red"> (Please select a patient first)</span>
+                </div>
+              </div>
+
+              <!-- Option 2: Create New Patient -->
+              <div class="option-card" @click="selectedAction = 'new'"
+                :class="{ 'option-selected': selectedAction === 'new' }">
+                <q-icon name="person_add" size="md" color="green" />
+                <div class="option-title">Create New Patient</div>
+                <div class="option-description">
+                  Create a completely new patient with a new Patient ID. Use this if this is actually a different person.
+                </div>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelExistingDialog" />
+            <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
+              :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
+              @click="proceedWithAction" :loading="actionLoading" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </div>
   </div>
 </template>
 
@@ -1740,6 +1748,29 @@ function getDaySuffix(day) {
 
 <style scoped>
 /* =========================
+   HEADER BANNER
+========================= */
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f8f2e;
+  padding: 12px 24px;
+  margin-bottom: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.form-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* =========================
    PAGE & CARD
 ========================= */
 
@@ -1752,16 +1783,21 @@ function getDaySuffix(day) {
   margin: auto;
   background: #ffffff;
   border: 1px solid #989b98;
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   padding: 24px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
 }
 
 /* =========================
-   HEADER / TITLE
+   SECTION TITLES & PILLS
 ========================= */
 
-.patient-info-pill {
+.section-title {
+  margin: 15px 0 10px;
+  font-weight: 600;
+}
+
+.section-pill {
   font-size: 40px;
   font-weight: 700;
   color: #1f8f2e;
@@ -1769,16 +1805,6 @@ function getDaySuffix(day) {
   line-height: 0.5;
   margin-top: 15px;
   margin-bottom: 20px;
-}
-
-/* =========================
-   SECTION TITLES
-========================= */
-
-.section-title {
-  margin: 15px 0 10px;
-  /* reduced from 30px 0 12px */
-  font-weight: 600;
 }
 
 /* =========================
