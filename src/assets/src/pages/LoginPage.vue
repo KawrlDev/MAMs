@@ -2,7 +2,7 @@
   <div class="page-wrapper">
     <div class="card">
       <div class="intro">
-        <img class="logo" src="../assets/logo.png" alt="Logo" />
+        <img class="logo" src="../assets/loi.png" alt="Logo" />
         <img class="logo2" src="../assets/logo12.png" alt="Logo2" />
       </div>
 
@@ -123,8 +123,8 @@ const handleLogin = async (credentials) => {
 .logo {
   align-items: center;
   justify-content: center;
-  margin-top: 160px;
-  margin-bottom: -160px;
+  margin-top: 130px;
+  margin-bottom: -130px;
   display: block;
   width: 180px;
   height: auto;
@@ -134,7 +134,7 @@ const handleLogin = async (credentials) => {
 .logo2 {
   margin-left: 20px;
   display: block;
-  width: 510px;
+  width: 410px;
   height: auto;
 }
 </style>
