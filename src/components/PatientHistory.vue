@@ -78,18 +78,18 @@
                 <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
                   class="info-item">
                   <span class="info-label">Issued Amount:</span>
-                  <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                  <span class="info-value">₱{{ formatCurrency(selectedRecord?.issuedAmount) }}</span>
                 </div>
 
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="selectedRecord?.category === 'HOSPITAL'">
                   <div class="info-item">
                     <span class="info-label">Hospital Bill:</span>
-                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + Number(selectedRecord.hospitalBill).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A' }}</span>
+                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}</span>
                   </div>
                   <div class="info-item">
                     <span class="info-label">Issued Amount:</span>
-                    <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                    <span class="info-value">₱{{ formatCurrency(selectedRecord?.issuedAmount) }}</span>
                   </div>
                 </template>
 
@@ -143,14 +143,12 @@
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
                   <q-input 
-                    v-model="editIssuedAmountDisplay" 
-                    type="text" 
+                    :model-value="formatInputCurrency(editData.issuedAmount)" 
+                    @update:model-value="updateIssuedAmount"
                     dense 
                     outlined 
                     class="edit-input" 
                     prefix="₱"
-                    @update:model-value="onEditIssuedAmountInput"
-                    @blur="finalizeEditIssuedAmount"
                     :error="validationErrors.issuedAmount"
                     error-message="Issued Amount is required and must be greater than 0" 
                   />
@@ -161,14 +159,12 @@
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
                     <q-input 
-                      v-model="editHospitalBillDisplay" 
-                      type="text" 
+                      :model-value="formatInputCurrency(editData.hospitalBill)" 
+                      @update:model-value="updateHospitalBill"
                       dense 
                       outlined 
                       class="edit-input" 
                       prefix="₱"
-                      @update:model-value="onEditHospitalBillInput"
-                      @blur="finalizeEditHospitalBill"
                       :error="validationErrors.hospitalBill"
                       error-message="Hospital Bill is required and must be greater than 0" 
                     />
@@ -176,14 +172,12 @@
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
                     <q-input 
-                      v-model="editIssuedAmountDisplay" 
-                      type="text" 
+                      :model-value="formatInputCurrency(editData.issuedAmount)" 
+                      @update:model-value="updateIssuedAmount"
                       dense 
                       outlined 
                       class="edit-input" 
                       prefix="₱"
-                      @update:model-value="onEditIssuedAmountInput"
-                      @blur="finalizeEditIssuedAmount"
                       :error="validationErrors.issuedAmount"
                       error-message="Issued Amount is required and must be greater than 0" 
                     />
@@ -248,6 +242,48 @@
             <q-btn label="CANCEL" icon="close" unelevated class="dialog-close-btn" @click="cancelEdit" />
             <q-btn label="SAVE" icon="save" unelevated class="dialog-save-btn" @click="handleSaveClick" />
           </template>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- INSUFFICIENT FUNDS DIALOG -->
+    <q-dialog v-model="showInsufficientFundsDialog" persistent>
+      <q-card style="min-width: 500px;">
+        <q-card-section class="bg-orange-6 text-white">
+          <div class="text-h6">
+            <q-icon name="warning" size="sm" class="q-mr-sm" />
+            Insufficient Funds Warning
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-subtitle1 q-mb-md">
+            The updated issued amount will result in a negative or insufficient budget balance.
+          </div>
+
+          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+            <template v-slot:avatar>
+              <q-icon name="account_balance_wallet" color="orange" />
+            </template>
+            <div>
+              <div class="text-weight-bold q-mb-xs">Current Budget: ₱{{ formatCurrency(budgetData.currentBudget) }}</div>
+              <div class="text-weight-bold q-mb-xs">Original Amount: ₱{{ formatCurrency(budgetData.originalAmount) }}</div>
+              <div class="text-weight-bold q-mb-xs">New Amount: ₱{{ formatCurrency(budgetData.newAmount) }}</div>
+              <div class="text-weight-bold q-mb-xs">Difference: ₱{{ formatCurrency(budgetData.difference) }}</div>
+              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance) }}</div>
+            </div>
+          </q-banner>
+
+          <div class="text-body2 text-grey-8">
+            You do not have sufficient funds in your budget for this update. Do you still want to proceed?
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
+          <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-confirm-btn" @click="proceedWithInsufficientFunds" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -342,6 +378,46 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
+// Helper function for currency formatting (for display)
+const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined) return '0.00'
+  const num = parseFloat(amount)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+// Helper function for input currency formatting
+const formatInputCurrency = (amount) => {
+  if (amount === null || amount === undefined || amount === '') return ''
+  const num = parseFloat(amount)
+  if (isNaN(num)) return ''
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+// Helper function to parse formatted currency back to number
+const parseCurrency = (formattedValue) => {
+  if (!formattedValue) return null
+  // Remove commas and parse to float
+  const cleaned = formattedValue.replace(/,/g, '')
+  const num = parseFloat(cleaned)
+  return isNaN(num) ? null : num
+}
+
+// Update functions for currency inputs
+const updateIssuedAmount = (value) => {
+  editData.value.issuedAmount = parseCurrency(value)
+}
+
+const updateHospitalBill = (value) => {
+  editData.value.hospitalBill = parseCurrency(value)
+}
+
 const rows = ref([])
 const showDetailsDialog = ref(false)
 const selectedRecord = ref(null)
@@ -352,11 +428,16 @@ const showSaveConfirmDialog = ref(false)
 const showCancelConfirmDialog = ref(false)
 const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
+const showInsufficientFundsDialog = ref(false)
 const eligibilityCooldownDays = ref(90) // Default to 90, will be fetched from backend
 
-// Edit mode display refs for comma formatting
-const editIssuedAmountDisplay = ref('');
-const editHospitalBillDisplay = ref('');
+const budgetData = ref({
+  currentBudget: 0,
+  originalAmount: 0,
+  newAmount: 0,
+  difference: 0,
+  projectedBalance: 0
+})
 
 const editData = ref({
   glNum: null,
@@ -392,7 +473,6 @@ const partnerOptions = computed(() => {
   return []
 })
 
-// FIXED: Removed duplicate columns
 const columns = [
   { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'right' },
   { name: 'Category', label: 'Category', field: 'category' },
@@ -403,7 +483,7 @@ const columns = [
     name: 'Issued Amount', 
     label: 'Issued Amount', 
     field: 'issuedAmount',
-    format: val => `₱${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    format: val => `₱${formatCurrency(val)}`
   },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
@@ -477,81 +557,6 @@ const validateForm = () => {
   return isValid
 }
 
-// Edit mode formatting functions
-const onEditIssuedAmountInput = (value) => {
-  let cleaned = value.replace(/,/g, '');
-  cleaned = cleaned.replace(/[^\d.]/g, '');
-  
-  const parts = cleaned.split('.');
-  if (parts.length > 2) {
-    cleaned = parts[0] + '.' + parts.slice(1).join('');
-  }
-  
-  let integer = parts[0] || '';
-  let decimal = parts[1] ?? null;
-  
-  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  
-  editIssuedAmountDisplay.value =
-    decimal !== null
-      ? `${integer}.${decimal.slice(0, 2)}`
-      : integer;
-  
-  editData.value.issuedAmount = parseFloat(cleaned) || null;
-};
-
-const finalizeEditIssuedAmount = () => {
-  if (!editIssuedAmountDisplay.value) return;
-  
-  const num = parseFloat(editIssuedAmountDisplay.value.replace(/,/g, ''));
-  
-  if (isNaN(num)) return;
-  
-  editIssuedAmountDisplay.value = num.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-  
-  editData.value.issuedAmount = num;
-};
-
-const onEditHospitalBillInput = (value) => {
-  let cleaned = value.replace(/,/g, '');
-  cleaned = cleaned.replace(/[^\d.]/g, '');
-  
-  const parts = cleaned.split('.');
-  if (parts.length > 2) {
-    cleaned = parts[0] + '.' + parts.slice(1).join('');
-  }
-  
-  let integer = parts[0] || '';
-  let decimal = parts[1] ?? null;
-  
-  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  
-  editHospitalBillDisplay.value =
-    decimal !== null
-      ? `${integer}.${decimal.slice(0, 2)}`
-      : integer;
-  
-  editData.value.hospitalBill = parseFloat(cleaned) || null;
-};
-
-const finalizeEditHospitalBill = () => {
-  if (!editHospitalBillDisplay.value) return;
-  
-  const num = parseFloat(editHospitalBillDisplay.value.replace(/,/g, ''));
-  
-  if (isNaN(num)) return;
-  
-  editHospitalBillDisplay.value = num.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-  
-  editData.value.hospitalBill = num;
-};
-
 // Fetch eligibility cooldown from backend
 const fetchEligibilityCooldown = async () => {
   try {
@@ -575,6 +580,43 @@ const calculateEligibility = (dateIssued) => {
     eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
     daysRemaining: diff > 0 ? diff : 0
   }
+}
+
+const checkBudget = async (originalAmount, newAmount) => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/budget/current')
+    const currentBudget = parseFloat(res.data.amount || 0)
+    
+    const difference = newAmount - originalAmount
+    const projectedBalance = currentBudget - difference
+    
+    budgetData.value = {
+      currentBudget,
+      originalAmount,
+      newAmount,
+      difference,
+      projectedBalance
+    }
+    
+    return projectedBalance >= 0
+  } catch (error) {
+    console.error('Failed to fetch budget:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to check budget',
+      position: 'top'
+    })
+    return true // Allow to proceed if budget check fails
+  }
+}
+
+const cancelInsufficientFunds = () => {
+  showInsufficientFundsDialog.value = false
+}
+
+const proceedWithInsufficientFunds = () => {
+  showInsufficientFundsDialog.value = false
+  showSaveConfirmDialog.value = true
 }
 
 const viewDetails = async (glNumber) => {
@@ -637,21 +679,6 @@ const enterEditMode = () => {
     isChecked: !data.client_lastname
   }
 
-  // Format the display values with commas
-  if (selectedRecord.value.issuedAmount) {
-    editIssuedAmountDisplay.value = Number(selectedRecord.value.issuedAmount).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-  
-  if (selectedRecord.value.hospitalBill) {
-    editHospitalBillDisplay.value = Number(selectedRecord.value.hospitalBill).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-
   resetValidationErrors()
   editMode.value = true
 }
@@ -683,8 +710,6 @@ const confirmCancel = () => {
     relationship: null,
     isChecked: false
   }
-  editIssuedAmountDisplay.value = '';
-  editHospitalBillDisplay.value = '';
 }
 
 const closeDialog = () => {
@@ -701,8 +726,6 @@ const onCategoryChange = () => {
   // Clear hospital bill validation when switching away from HOSPITAL
   if (editData.value.category !== 'HOSPITAL') {
     validationErrors.value.hospitalBill = false
-    editHospitalBillDisplay.value = '';
-    editData.value.hospitalBill = null;
   }
 }
 
@@ -730,13 +753,26 @@ const confirmClose = () => {
   resetValidationErrors()
 }
 
-const handleSaveClick = () => {
-  // Validate form before showing confirmation dialog
+const handleSaveClick = async () => {
+  // Validate form before checking budget
   if (!validateForm()) {
     return
   }
 
-  // If validation passes, show confirmation dialog
+  // Check budget if issued amount has changed
+  const originalAmount = parseFloat(selectedRecord.value.issuedAmount)
+  const newAmount = parseFloat(editData.value.issuedAmount)
+
+  if (originalAmount !== newAmount) {
+    const hasSufficientBudget = await checkBudget(originalAmount, newAmount)
+    
+    if (!hasSufficientBudget) {
+      showInsufficientFundsDialog.value = true
+      return
+    }
+  }
+
+  // If validation passes and budget is sufficient, show confirmation dialog
   showSaveConfirmDialog.value = true
 }
 
@@ -927,7 +963,8 @@ const generatePDF = async () => {
       })
     }
 
-    page.drawText(Number(data.issued_amount).toFixed(2), {
+    // Use formatCurrency for the PDF amount display
+    page.drawText(formatCurrency(data.issued_amount), {
       x: 90,
       y: 248,
       size: 12,
