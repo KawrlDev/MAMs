@@ -50,7 +50,7 @@
           <div class="col"></div>
 
           <!-- DOWNLOAD CSV BUTTON -->
-          <div class="col-auto csv-button-container">
+          <div class="col-auto">
             <q-btn icon="download" label="Export as CSV" color="green" @click="downloadCSV"
               :disable="filteredRows.length === 0" />
           </div>
@@ -1027,24 +1027,11 @@ const getPatientNumber = (patientId) => {
   color: #ffffff;
   display: flex;
   align-items: right;
-  background-color: #1f8f2e;
+  background-color: #0f601a;
   width: 100%;
   padding: 5px 10px;
-  margin-bottom: -20px;
-}
 
-.filter-card :deep(.q-field__control) {
-  background-color: white !important;
-}
-
-.filter-card :deep(.q-field__native),
-.filter-card :deep(.q-field__label) {
-  color: #333 !important;
-}
-
-/* CSV Button container styling */
-.csv-button-container {
-  margin-right: -22px;
+  margin-bottom: -px;
 }
 
 .table-container {
@@ -1058,6 +1045,7 @@ const getPatientNumber = (patientId) => {
   height: calc(100vh - 250px);
   display: flex;
   flex-direction: column;
+
 }
 
 .scrollable-wrapper {
