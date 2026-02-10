@@ -439,8 +439,12 @@ const tabangRows = computed(() => {
 .button-container {
   display: flex;
   justify-content: flex-end;
-  margin-right: 16px;
-  margin-top: 3%;
+  margin-right: 8px;
+  margin-top: 2%;
+  background-color: #1f8f2e;
+  padding: 20px;
+  width: 100%;
+  margin-bottom: -1%;
 }
 
 /* First table header styling */
