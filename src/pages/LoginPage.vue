@@ -123,16 +123,16 @@ const handleLogin = async (credentials) => {
 .logo {
   align-items: center;
   justify-content: center;
-  margin-top: 160px;
-  margin-bottom: -160px;
+  margin-top: 200px;
+  margin-bottom: -150px;
   display: block;
   width: 180px;
   height: auto;
-  margin-left: 10px;
+  margin-left: 1px;
 }
 
 .logo2 {
-  margin-left: 20px;
+  margin-left: -30px;
   display: block;
   width: 510px;
   height: auto;
