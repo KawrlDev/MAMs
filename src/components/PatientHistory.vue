@@ -75,23 +75,23 @@
                 </div>
 
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
-<div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
-  class="info-item">
-  <span class="info-label">Issued Amount:</span>
-  <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-</div>
+                <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
+                  class="info-item">
+                  <span class="info-label">Issued Amount:</span>
+                  <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                </div>
 
-<!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
-<template v-if="selectedRecord?.category === 'HOSPITAL'">
-  <div class="info-item">
-    <span class="info-label">Hospital Bill:</span>
-    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + Number(selectedRecord.hospitalBill).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A' }}</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Issued Amount:</span>
-    <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-  </div>
-</template>
+                <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
+                <template v-if="selectedRecord?.category === 'HOSPITAL'">
+                  <div class="info-item">
+                    <span class="info-label">Hospital Bill:</span>
+                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + Number(selectedRecord.hospitalBill).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Issued Amount:</span>
+                    <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                  </div>
+                </template>
 
                 <!-- Patient is same as client checkbox (view mode - disabled) -->
                 <div class="info-item info-item-full">
@@ -142,24 +142,51 @@
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                  <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱"
+                  <q-input 
+                    v-model="editIssuedAmountDisplay" 
+                    type="text" 
+                    dense 
+                    outlined 
+                    class="edit-input" 
+                    prefix="₱"
+                    @update:model-value="onEditIssuedAmountInput"
+                    @blur="finalizeEditIssuedAmount"
                     :error="validationErrors.issuedAmount"
-                    error-message="Issued Amount is required and must be greater than 0" />
+                    error-message="Issued Amount is required and must be greater than 0" 
+                  />
                 </div>
 
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
-                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input" prefix="₱"
+                    <q-input 
+                      v-model="editHospitalBillDisplay" 
+                      type="text" 
+                      dense 
+                      outlined 
+                      class="edit-input" 
+                      prefix="₱"
+                      @update:model-value="onEditHospitalBillInput"
+                      @blur="finalizeEditHospitalBill"
                       :error="validationErrors.hospitalBill"
-                      error-message="Hospital Bill is required and must be greater than 0" />
+                      error-message="Hospital Bill is required and must be greater than 0" 
+                    />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱"
+                    <q-input 
+                      v-model="editIssuedAmountDisplay" 
+                      type="text" 
+                      dense 
+                      outlined 
+                      class="edit-input" 
+                      prefix="₱"
+                      @update:model-value="onEditIssuedAmountInput"
+                      @blur="finalizeEditIssuedAmount"
                       :error="validationErrors.issuedAmount"
-                      error-message="Issued Amount is required and must be greater than 0" />
+                      error-message="Issued Amount is required and must be greater than 0" 
+                    />
                   </div>
                 </template>
 
@@ -327,6 +354,10 @@ const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
 const eligibilityCooldownDays = ref(90) // Default to 90, will be fetched from backend
 
+// Edit mode display refs for comma formatting
+const editIssuedAmountDisplay = ref('');
+const editHospitalBillDisplay = ref('');
+
 const editData = ref({
   glNum: null,
   category: null,
@@ -361,6 +392,7 @@ const partnerOptions = computed(() => {
   return []
 })
 
+// FIXED: Removed duplicate columns
 const columns = [
   { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'right' },
   { name: 'Category', label: 'Category', field: 'category' },
@@ -373,10 +405,6 @@ const columns = [
     field: 'issuedAmount',
     format: val => `₱${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   },
-
-  { name: 'Issued Amount', label: 'Issued Amount', field: 'issuedAmount' },
-  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
-
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 
@@ -448,6 +476,81 @@ const validateForm = () => {
 
   return isValid
 }
+
+// Edit mode formatting functions
+const onEditIssuedAmountInput = (value) => {
+  let cleaned = value.replace(/,/g, '');
+  cleaned = cleaned.replace(/[^\d.]/g, '');
+  
+  const parts = cleaned.split('.');
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('');
+  }
+  
+  let integer = parts[0] || '';
+  let decimal = parts[1] ?? null;
+  
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  editIssuedAmountDisplay.value =
+    decimal !== null
+      ? `${integer}.${decimal.slice(0, 2)}`
+      : integer;
+  
+  editData.value.issuedAmount = parseFloat(cleaned) || null;
+};
+
+const finalizeEditIssuedAmount = () => {
+  if (!editIssuedAmountDisplay.value) return;
+  
+  const num = parseFloat(editIssuedAmountDisplay.value.replace(/,/g, ''));
+  
+  if (isNaN(num)) return;
+  
+  editIssuedAmountDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  
+  editData.value.issuedAmount = num;
+};
+
+const onEditHospitalBillInput = (value) => {
+  let cleaned = value.replace(/,/g, '');
+  cleaned = cleaned.replace(/[^\d.]/g, '');
+  
+  const parts = cleaned.split('.');
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('');
+  }
+  
+  let integer = parts[0] || '';
+  let decimal = parts[1] ?? null;
+  
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  editHospitalBillDisplay.value =
+    decimal !== null
+      ? `${integer}.${decimal.slice(0, 2)}`
+      : integer;
+  
+  editData.value.hospitalBill = parseFloat(cleaned) || null;
+};
+
+const finalizeEditHospitalBill = () => {
+  if (!editHospitalBillDisplay.value) return;
+  
+  const num = parseFloat(editHospitalBillDisplay.value.replace(/,/g, ''));
+  
+  if (isNaN(num)) return;
+  
+  editHospitalBillDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  
+  editData.value.hospitalBill = num;
+};
 
 // Fetch eligibility cooldown from backend
 const fetchEligibilityCooldown = async () => {
@@ -534,6 +637,21 @@ const enterEditMode = () => {
     isChecked: !data.client_lastname
   }
 
+  // Format the display values with commas
+  if (selectedRecord.value.issuedAmount) {
+    editIssuedAmountDisplay.value = Number(selectedRecord.value.issuedAmount).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+  
+  if (selectedRecord.value.hospitalBill) {
+    editHospitalBillDisplay.value = Number(selectedRecord.value.hospitalBill).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
   resetValidationErrors()
   editMode.value = true
 }
@@ -565,6 +683,8 @@ const confirmCancel = () => {
     relationship: null,
     isChecked: false
   }
+  editIssuedAmountDisplay.value = '';
+  editHospitalBillDisplay.value = '';
 }
 
 const closeDialog = () => {
@@ -581,6 +701,8 @@ const onCategoryChange = () => {
   // Clear hospital bill validation when switching away from HOSPITAL
   if (editData.value.category !== 'HOSPITAL') {
     validationErrors.value.hospitalBill = false
+    editHospitalBillDisplay.value = '';
+    editData.value.hospitalBill = null;
   }
 }
 
