@@ -962,20 +962,25 @@ function getDaySuffix(day) {
 
 <style scoped>
 /* TITLE */
-.fieldset-title {
-  font-size: 40px;
-  font-weight: 700;
-  color: #1f8f2e;
-  margin: 0;
-  line-height: 0.5;
-  margin-top: 15px;
-}
-
 .fieldset-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  background-color: #1f8f2e;
+  padding: 12px 24px;
+  border-radius: 4px;
+  margin-left: -24px;
+  margin-right: -24px;
+  margin-top: -24px;
+  width: calc(100% + 48px);
+}
+.fieldset-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .patient-ids {

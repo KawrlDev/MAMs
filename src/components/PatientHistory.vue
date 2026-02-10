@@ -903,6 +903,23 @@ onMounted(async () => {
   vertical-align: middle;
 }
 
+.budget-table :deep(.q-table__top) {
+  padding: 12px 16px !important;
+  margin: 0;
+  background-color: #1f8f2e;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.budget-table :deep(.q-table__top .text-h4) {
+  color: #ffffff !important;
+}
+
+.budget-table :deep(.q-table__card) {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
 .budget-table :deep(.action-cell) {
   height: 100%;
   min-height: 48px;
