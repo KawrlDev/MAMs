@@ -7,6 +7,7 @@
 
         <q-toolbar-title class="row items-center q-gutter-sm">
           <div class="row items-center q-gutter-sm cursor-pointer" @click="$router.push('/')">
+            <q-img src="~assets/logo.png" width="40px" height="50px" fit="contain" />
             <q-img src="~assets/loi.png" width="90px" height="40px" />
           </div>
         </q-toolbar-title>
