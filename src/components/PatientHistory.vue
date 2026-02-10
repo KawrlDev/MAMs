@@ -75,23 +75,23 @@
                 </div>
 
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
-<div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
-  class="info-item">
-  <span class="info-label">Issued Amount:</span>
-  <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-</div>
+                <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
+                  class="info-item">
+                  <span class="info-label">Issued Amount:</span>
+                  <span class="info-value">₱{{ formatCurrency(selectedRecord?.issuedAmount) }}</span>
+                </div>
 
-<!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
-<template v-if="selectedRecord?.category === 'HOSPITAL'">
-  <div class="info-item">
-    <span class="info-label">Hospital Bill:</span>
-    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + Number(selectedRecord.hospitalBill).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A' }}</span>
-  </div>
-  <div class="info-item">
-    <span class="info-label">Issued Amount:</span>
-    <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-  </div>
-</template>
+                <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
+                <template v-if="selectedRecord?.category === 'HOSPITAL'">
+                  <div class="info-item">
+                    <span class="info-label">Hospital Bill:</span>
+                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Issued Amount:</span>
+                    <span class="info-value">₱{{ formatCurrency(selectedRecord?.issuedAmount) }}</span>
+                  </div>
+                </template>
 
                 <!-- Patient is same as client checkbox (view mode - disabled) -->
                 <div class="info-item info-item-full">
@@ -225,6 +225,48 @@
       </q-card>
     </q-dialog>
 
+    <!-- INSUFFICIENT FUNDS DIALOG -->
+    <q-dialog v-model="showInsufficientFundsDialog" persistent>
+      <q-card style="min-width: 500px;">
+        <q-card-section class="bg-orange-6 text-white">
+          <div class="text-h6">
+            <q-icon name="warning" size="sm" class="q-mr-sm" />
+            Insufficient Funds Warning
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-subtitle1 q-mb-md">
+            The updated issued amount will result in a negative or insufficient budget balance.
+          </div>
+
+          <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+            <template v-slot:avatar>
+              <q-icon name="account_balance_wallet" color="orange" />
+            </template>
+            <div>
+              <div class="text-weight-bold q-mb-xs">Current Budget: ₱{{ formatCurrency(budgetData.currentBudget) }}</div>
+              <div class="text-weight-bold q-mb-xs">Original Amount: ₱{{ formatCurrency(budgetData.originalAmount) }}</div>
+              <div class="text-weight-bold q-mb-xs">New Amount: ₱{{ formatCurrency(budgetData.newAmount) }}</div>
+              <div class="text-weight-bold q-mb-xs">Difference: ₱{{ formatCurrency(budgetData.difference) }}</div>
+              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance) }}</div>
+            </div>
+          </q-banner>
+
+          <div class="text-body2 text-grey-8">
+            You do not have sufficient funds in your budget for this update. Do you still want to proceed?
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
+          <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-confirm-btn" @click="proceedWithInsufficientFunds" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <q-dialog v-model="showCloseConfirmDialog">
       <q-card style="min-width: 350px">
         <q-card-section>
@@ -315,6 +357,17 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
+// Helper function for currency formatting
+const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined) return '0.00'
+  const num = parseFloat(amount)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
 const rows = ref([])
 const showDetailsDialog = ref(false)
 const selectedRecord = ref(null)
@@ -325,7 +378,16 @@ const showSaveConfirmDialog = ref(false)
 const showCancelConfirmDialog = ref(false)
 const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
+const showInsufficientFundsDialog = ref(false)
 const eligibilityCooldownDays = ref(90) // Default to 90, will be fetched from backend
+
+const budgetData = ref({
+  currentBudget: 0,
+  originalAmount: 0,
+  newAmount: 0,
+  difference: 0,
+  projectedBalance: 0
+})
 
 const editData = ref({
   glNum: null,
@@ -371,12 +433,8 @@ const columns = [
     name: 'Issued Amount', 
     label: 'Issued Amount', 
     field: 'issuedAmount',
-    format: val => `₱${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    format: val => `₱${formatCurrency(val)}`
   },
-
-  { name: 'Issued Amount', label: 'Issued Amount', field: 'issuedAmount' },
-  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
-
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 
@@ -472,6 +530,43 @@ const calculateEligibility = (dateIssued) => {
     eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
     daysRemaining: diff > 0 ? diff : 0
   }
+}
+
+const checkBudget = async (originalAmount, newAmount) => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/budget/current')
+    const currentBudget = parseFloat(res.data.amount || 0)
+    
+    const difference = newAmount - originalAmount
+    const projectedBalance = currentBudget - difference
+    
+    budgetData.value = {
+      currentBudget,
+      originalAmount,
+      newAmount,
+      difference,
+      projectedBalance
+    }
+    
+    return projectedBalance >= 0
+  } catch (error) {
+    console.error('Failed to fetch budget:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to check budget',
+      position: 'top'
+    })
+    return true // Allow to proceed if budget check fails
+  }
+}
+
+const cancelInsufficientFunds = () => {
+  showInsufficientFundsDialog.value = false
+}
+
+const proceedWithInsufficientFunds = () => {
+  showInsufficientFundsDialog.value = false
+  showSaveConfirmDialog.value = true
 }
 
 const viewDetails = async (glNumber) => {
@@ -608,13 +703,26 @@ const confirmClose = () => {
   resetValidationErrors()
 }
 
-const handleSaveClick = () => {
-  // Validate form before showing confirmation dialog
+const handleSaveClick = async () => {
+  // Validate form before checking budget
   if (!validateForm()) {
     return
   }
 
-  // If validation passes, show confirmation dialog
+  // Check budget if issued amount has changed
+  const originalAmount = parseFloat(selectedRecord.value.issuedAmount)
+  const newAmount = parseFloat(editData.value.issuedAmount)
+
+  if (originalAmount !== newAmount) {
+    const hasSufficientBudget = await checkBudget(originalAmount, newAmount)
+    
+    if (!hasSufficientBudget) {
+      showInsufficientFundsDialog.value = true
+      return
+    }
+  }
+
+  // If validation passes and budget is sufficient, show confirmation dialog
   showSaveConfirmDialog.value = true
 }
 
@@ -805,7 +913,8 @@ const generatePDF = async () => {
       })
     }
 
-    page.drawText(Number(data.issued_amount).toFixed(2), {
+    // Use formatCurrency for the PDF amount display
+    page.drawText(formatCurrency(data.issued_amount), {
       x: 90,
       y: 248,
       size: 12,

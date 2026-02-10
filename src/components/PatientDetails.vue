@@ -119,7 +119,7 @@
             <label class="form-label">Phone Number <span class="required">*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined class="flat-input" placeholder="09XXXXXXXXX"
               :rules="[validatePhoneNumber]" :readonly="!edit" maxlength="11" @update:model-value="onPhoneNumberChange"
-              hint="Format: 09XXXXXXXXX (11 digits)" :persistent-hint="true" />
+              @keypress="onPhoneNumberKeyPress" hint="Format: 09XXXXXXXXX (11 digits)" :persistent-hint="true" />
           </div>
         </div>
       </q-form>
@@ -508,12 +508,24 @@ const validatePhoneNumber = (value) => {
 
 const onPhoneNumberChange = (value) => {
   if (value) {
-    const normalized = normalizePhoneNumber(value)
+    // Remove all non-digit characters
+    const cleaned = value.replace(/\D/g, '')
+    phoneNumberValue.value = cleaned
+    
+    const normalized = normalizePhoneNumber(cleaned)
     if (normalized) {
       phoneNumberValue.value = normalized
     }
   }
   checkForChanges()
+}
+
+const onPhoneNumberKeyPress = (event) => {
+  // Only allow numbers (0-9)
+  const charCode = event.which ? event.which : event.keyCode
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault()
+  }
 }
 
 const formatPhoneNumber = (phone) => {
