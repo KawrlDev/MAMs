@@ -73,7 +73,6 @@
 
           <!-- AMOUNT -->
           <div class="budget-block">
-            <h3>AMOUNT</h3>
 
             <!-- Remaining Budget Display -->
             <div v-if="budgetBreakdown" class="budget-breakdown">
@@ -780,8 +779,8 @@ const confirmAddBudget = async () => {
 .budget-block h3 {
   font-size: 19px;
   font-weight: bold;
-  margin-bottom: 0px;
-  margin-top: 12px;
+  margin-bottom: -5px;
+  margin-top: -15px;
 }
 
 .budget-block label {
@@ -789,7 +788,7 @@ const confirmAddBudget = async () => {
   font-weight: bold;
   margin-bottom: 6px;
   margin-left: 0px;
-  margin-top: 8px;
+  margin-top: -1px;
 }
 
 .budget-block label span {
