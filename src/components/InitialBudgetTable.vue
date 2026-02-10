@@ -1,19 +1,19 @@
 <template>
   <div class="budget-card">
-    <q-table 
+    <q-table
       title="Annual Budget"
-      flat 
-      bordered 
-      class="budget-table" 
-      :rows="rows" 
-      :columns="columns" 
+      flat
+      bordered
+      class="budget-table"
+      :rows="rows"
+      :columns="columns"
       row-key="year"
       :rows-per-page-options="[5, 10, 15, 20, 0]"
     >
       <template #top-right>
         <q-btn icon="add" label="ADD BUDGET" class="add-btn" @click="checkBeforeCreate" />
       </template>
-      
+
       <template v-slot:body-cell-medicine="props">
         <q-td :props="props">
           ₱{{ formatCurrency(props.row.medicine_budget) }}
@@ -94,7 +94,7 @@ const formatCurrency = (value) => {
 const checkBeforeCreate = () => {
   // Check if current year budget already exists
   const existingBudget = rows.value.find(budget => budget.year === currentYear)
-  
+
   if (existingBudget) {
     showWarning.value = true
   } else {
