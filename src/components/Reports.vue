@@ -9,13 +9,11 @@
       <div class="tabs">
         <q-btn
           label="GENERAL SUMMARY"
-          color="green"
           class="q-ml-lg tab-btn"
           @click="setView(GeneralSummary, 'GENERAL SUMMARY', 'general-summary-view')"
         />
         <q-btn
           label="BUDGET SUMMARY"
-          color="green"
           class="q-ml-sm tab-btn"
           @click="setView(BudgetSummary, 'BUDGET SUMMARY', 'budget-summary-view')"
         />
@@ -55,17 +53,17 @@ function setView(component, title, viewClass) {
 }
 
 .head {
+  border-radius: 14px 14px 0 0;
+  border: 2px solid grey;
   font-size: 33px;
   font-weight: 700;
   color: #ffffff;
   display: flex;
   align-items: right;
-  background-color: #0f601a;
+background-color: #1f8f2e;
   width: 100%;
   padding: 5px 10px;
-
-  margin-bottom: -50px;
-
+  margin-bottom: -73px;
 }
 
 .title {
@@ -75,14 +73,13 @@ function setView(component, title, viewClass) {
 .tabs {
   display: flex;
   margin-left: auto;
-   padding: 10px 5px;
-
+  padding: 10px 5px;
 }
 
 .tab-btn {
-  padding: 4px 12px !important;
-  min-height: 32px !important;
-   padding: 5px 10px;
+  background: #0aa64f;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 /* ===============================
@@ -94,7 +91,7 @@ function setView(component, title, viewClass) {
 }
 
 .general-summary-view .head {
-  background-color: #0f601a;
+  background-color: #1f8f2e;
 }
 
 /* ===============================
@@ -106,6 +103,6 @@ function setView(component, title, viewClass) {
 }
 
 .budget-summary-view .head {
-  background-color: #0f601a;
+ background-color: #1f8f2e;
 }
 </style>

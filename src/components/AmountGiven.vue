@@ -23,52 +23,54 @@
       <div class="barangay-title">PER BARANGAY</div>
 
       <div class="table-container">
-        <q-table
-          class="budget-table"
-          :rows="rows"
-          row-key="num"
-          flat
-          bordered
-          dense
-          :pagination="pagination"
-          @update:pagination="updatePagination"
-          :rows-per-page-options="[5, 10, 15, 23]"
-        >
-          <template v-slot:header>
-            <tr class="sticky-header">
-              <th rowspan="2">#</th>
-              <th rowspan="2">Barangay</th>
-              <th colspan="2">Medicine</th>
-              <th colspan="2">Laboratory</th>
-              <th colspan="2">Hospital</th>
-              <th rowspan="2">Total Patients</th>
-              <th rowspan="2">Total Amount</th>
-            </tr>
-            <tr class="sticky-header second-row">
-              <th>Patients</th>
-              <th>Amount</th>
-              <th>Patients</th>
-              <th>Amount</th>
-              <th>Patients</th>
-              <th>Amount</th>
-            </tr>
-          </template>
+        <div class="table-scroll-wrapper">
+          <q-table
+            class="budget-table"
+            :rows="rows"
+            row-key="num"
+            flat
+            bordered
+            dense
+            :pagination="pagination"
+            @update:pagination="updatePagination"
+            :rows-per-page-options="[5, 10, 15, 23]"
+          >
+            <template v-slot:header>
+              <tr class="sticky-header">
+                <th rowspan="2">#</th>
+                <th rowspan="2">Barangay</th>
+                <th colspan="2">Medicine</th>
+                <th colspan="2">Laboratory</th>
+                <th colspan="2">Hospital</th>
+                <th rowspan="2">Total Patients</th>
+                <th rowspan="2">Total Amount</th>
+              </tr>
+              <tr class="sticky-header second-row">
+                <th>Patients</th>
+                <th>Amount</th>
+                <th>Patients</th>
+                <th>Amount</th>
+                <th>Patients</th>
+                <th>Amount</th>
+              </tr>
+            </template>
 
-          <template v-slot:body="props">
-            <tr>
-              <td>{{ props.row.num }}</td>
-              <td>{{ props.row.barangay }}</td>
-              <td align="right">{{ props.row.medicinePatients }}</td>
-              <td align="right">{{ formatPeso(props.row.medicineAmount) }}</td>
-              <td align="right">{{ props.row.laboratoryPatients }}</td>
-              <td align="right">{{ formatPeso(props.row.laboratoryAmount) }}</td>
-              <td align="right">{{ props.row.hospitalPatients }}</td>
-              <td align="right">{{ formatPeso(props.row.hospitalAmount) }}</td>
-              <td align="right">{{ props.row.totalPatients }}</td>
-              <td align="right">{{ formatPeso(props.row.totalAmount) }}</td>
-            </tr>
-          </template>
-        </q-table>
+            <template v-slot:body="props">
+              <tr>
+                <td>{{ props.row.num }}</td>
+                <td>{{ props.row.barangay }}</td>
+                <td align="right">{{ props.row.medicinePatients }}</td>
+                <td align="right">{{ formatPeso(props.row.medicineAmount) }}</td>
+                <td align="right">{{ props.row.laboratoryPatients }}</td>
+                <td align="right">{{ formatPeso(props.row.laboratoryAmount) }}</td>
+                <td align="right">{{ props.row.hospitalPatients }}</td>
+                <td align="right">{{ formatPeso(props.row.hospitalAmount) }}</td>
+                <td align="right">{{ props.row.totalPatients }}</td>
+                <td align="right">{{ formatPeso(props.row.totalAmount) }}</td>
+              </tr>
+            </template>
+          </q-table>
+        </div>
       </div>
     </q-card-section>
   </q-card>
@@ -294,6 +296,14 @@ onMounted(async () => {
   border-radius: 8px;
 }
 
+/* Add scrollable wrapper with fixed height */
+.table-scroll-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+}
+
 .q-table__container {
   max-height: 490px;
 }
@@ -379,6 +389,10 @@ onMounted(async () => {
     margin-bottom: 15px;
   }
 
+  .table-scroll-wrapper {
+    max-height: 400px;
+  }
+
   .sticky-header th {
     padding: 6px 3px;
     font-size: 9px;
@@ -431,6 +445,10 @@ onMounted(async () => {
     font-size: 17px;
     margin-top: 25px;
     margin-bottom: 15px;
+  }
+
+  .table-scroll-wrapper {
+    max-height: 450px;
   }
 
   .sticky-header th {
@@ -487,6 +505,10 @@ onMounted(async () => {
     margin-bottom: 18px;
   }
 
+  .table-scroll-wrapper {
+    max-height: 500px;
+  }
+
   .sticky-header th {
     padding: 8px 5px;
     font-size: 11px;
@@ -539,6 +561,10 @@ onMounted(async () => {
     font-size: 19px;
     margin-top: 35px;
     margin-bottom: 18px;
+  }
+
+  .table-scroll-wrapper {
+    max-height: 500px;
   }
 
   .sticky-header th {
@@ -595,6 +621,10 @@ onMounted(async () => {
     margin-bottom: 19px;
   }
 
+  .table-scroll-wrapper {
+    max-height: 500px;
+  }
+
   .sticky-header th {
     padding: 9px 7px;
     font-size: 12px;
@@ -647,6 +677,10 @@ onMounted(async () => {
     font-size: 21px;
     margin-top: 40px;
     margin-bottom: 20px;
+  }
+
+  .table-scroll-wrapper {
+    max-height: 500px;
   }
 
   .sticky-header th {
@@ -703,6 +737,10 @@ onMounted(async () => {
     margin-bottom: 20px;
   }
 
+  .table-scroll-wrapper {
+    max-height: 500px;
+  }
+
   .sticky-header th {
     padding: 10px 8px;
     font-size: 13px;
@@ -755,6 +793,10 @@ onMounted(async () => {
     font-size: 24px;
     margin-top: 45px;
     margin-bottom: 22px;
+  }
+
+  .table-scroll-wrapper {
+    max-height: 600px;
   }
 
   .sticky-header th {
