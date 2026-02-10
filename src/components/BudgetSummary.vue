@@ -22,8 +22,8 @@
       <!-- Custom header to match screenshot -->
       <template v-slot:header="props">
         <q-tr :props="props">
-          <q-th 
-            colspan="2" 
+          <q-th
+            colspan="2"
             class="main-header"
           >
             TABANG MEDIKAL ASSISTANCE ({{ currentYear }})
@@ -49,7 +49,7 @@
         </td>
       </template>
 
-      
+
       <!-- Format all month columns -->
       <template v-slot:body-cell-jan="props">
         <q-td :props="props">
@@ -351,13 +351,13 @@ const summaryRows = computed(() => {
   }
 
   return [
-    { category: "MEDICINE", type: "Total Bene", ...summary.MEDICINE.bene },
+    { category: "MEDICINE", type: "Total Benefeciaries", ...summary.MEDICINE.bene },
     { category: "", type: "Amount", ...summary.MEDICINE.amount },
 
-    { category: "LABORATORY", type: "Total Bene", ...summary.LABORATORY.bene },
+    { category: "LABORATORY", type: "Total Benefeciaries", ...summary.LABORATORY.bene },
     { category: "", type: "Amount", ...summary.LABORATORY.amount },
 
-    { category: "HOSPITAL BILL", type: "Total Bene", ...summary.HOSPITAL.bene },
+    { category: "HOSPITAL BILL", type: "Total Benefeciaries", ...summary.HOSPITAL.bene },
     { category: "", type: "Amount", ...summary.HOSPITAL.amount },
   ];
 });
@@ -440,7 +440,7 @@ const tabangRows = computed(() => {
   display: flex;
   justify-content: flex-end;
   margin-right: 16px;
-  margin-top: 2%;
+  margin-top: 3%;
 }
 
 /* First table header styling */
@@ -508,7 +508,7 @@ const tabangRows = computed(() => {
 }
 
 .category-cell {
-  background-color: #f8bc84; 
+  background-color: #f8bc84;
   font-weight: bold;
   text-align: center;
   border-bottom: 1px solid #ddd;

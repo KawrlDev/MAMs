@@ -272,7 +272,7 @@ onMounted(async () => {
 }
 
 .remaining-value {
-  font-size: 50px;
+  font-size: 20px;
   font-weight: 900;
   color: #2e7d32;
 }
@@ -417,7 +417,7 @@ onMounted(async () => {
   }
 
   .remaining-value {
-    font-size: 13px;
+    font-size: 20px;
   }
 
   .divider {
