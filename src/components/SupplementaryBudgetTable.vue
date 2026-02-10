@@ -1,32 +1,14 @@
 <template>
   <div class="budget-card">
-    <q-table
-      title="Supplemental Budget"
-      flat
-      bordered
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      class="budget-table"
-      :rows-per-page-options="[5, 10, 15, 20, 0]"
-    >
+    <q-table title="Supplemental Budget" flat bordered :rows="rows" :columns="columns" row-key="id" class="budget-table"
+      :rows-per-page-options="[5, 10, 15, 20, 0]">
       <template #top-right>
         <div class="header-buttons">
           <!-- TRANSFER BUDGET BUTTON - Now opens popup -->
-          <q-btn
-            icon="swap_horiz"
-            label="TRANSFER BUDGET"
-            class="transfer-btn"
-            @click="openTransferDialog"
-          />
+          <q-btn icon="swap_horiz" label="TRANSFER BUDGET" class="transfer-btn" @click="openTransferDialog" />
 
           <!-- ADD BUDGET BUTTON -->
-          <q-btn
-            icon="add"
-            label="ADD SUPPLEMENTAL BUDGET"
-            class="add-btn"
-            @click="openAddBudgetDialog"
-          />
+          <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" @click="openAddBudgetDialog" />
         </div>
       </template>
 
@@ -72,6 +54,8 @@
           </div>
 
           <!-- AMOUNT -->
+
+          <label>TRANSFER AMOUNT: <span>*</span></label>
           <div class="budget-block">
 
             <!-- Remaining Budget Display -->
@@ -89,18 +73,8 @@
                 </span>
               </div>
             </div>
-
-            <label>TRANSFER AMOUNT: <span>*</span></label>
-            <q-input
-              v-model="amountDisplay"
-              dense
-              outlined
-              type="text"
-              placeholder="0.00"
-              class="amount-input"
-              @update:model-value="onAmountInput"
-              @blur="finalizeAmount"
-            />
+            <q-input v-model="amountDisplay" dense outlined type="text" placeholder="0.00" class="amount-input"
+              @update:model-value="onAmountInput" @blur="finalizeAmount" />
           </div>
 
           <!-- VALIDATION MESSAGE -->
@@ -112,8 +86,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="CANCEL" class="dialog-goback-btn" @click="closeTransferDialog" />
-          <q-btn unelevated icon="swap_horiz" label="TRANSFER" class="dialog-cancel-btn"
-            @click="handleTransferClick" :disable="!isValid" />
+          <q-btn unelevated icon="swap_horiz" label="TRANSFER" class="dialog-cancel-btn" @click="handleTransferClick"
+            :disable="!isValid" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -134,8 +108,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="swap_horiz" label="YES, TRANSFER" class="dialog-cancel-btn"
-            @click="confirmTransfer" :loading="transferLoading" />
+          <q-btn unelevated icon="swap_horiz" label="YES, TRANSFER" class="dialog-cancel-btn" @click="confirmTransfer"
+            :loading="transferLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -156,53 +130,29 @@
           <div class="budget-block">
             <h3>MEDICINE</h3>
             <label>SUPPLEMENTAL BUDGET: <span>*</span></label>
-            <q-input
-              v-model="medicineDisplay"
-              dense
-              outlined
-              type="text"
-              placeholder="0.00"
-              class="amount-input"
-              @update:model-value="onMedicineInput"
-              @blur="finalizeMedicine"
-            />
+            <q-input v-model="medicineDisplay" dense outlined type="text" placeholder="0.00" class="amount-input"
+              @update:model-value="onMedicineInput" @blur="finalizeMedicine" />
           </div>
 
           <div class="budget-block">
             <h3>LABORATORY</h3>
             <label>SUPPLEMENTAL BUDGET: <span>*</span></label>
-            <q-input
-              v-model="laboratoryDisplay"
-              dense
-              outlined
-              type="text"
-              placeholder="0.00"
-              class="amount-input"
-              @update:model-value="onLaboratoryInput"
-              @blur="finalizeLaboratory"
-            />
+            <q-input v-model="laboratoryDisplay" dense outlined type="text" placeholder="0.00" class="amount-input"
+              @update:model-value="onLaboratoryInput" @blur="finalizeLaboratory" />
           </div>
 
           <div class="budget-block">
             <h3>HOSPITAL</h3>
             <label>SUPPLEMENTAL BUDGET: <span>*</span></label>
-            <q-input
-              v-model="hospitalDisplay"
-              dense
-              outlined
-              type="text"
-              placeholder="0.00"
-              class="amount-input"
-              @update:model-value="onHospitalInput"
-              @blur="finalizeHospital"
-            />
+            <q-input v-model="hospitalDisplay" dense outlined type="text" placeholder="0.00" class="amount-input"
+              @update:model-value="onHospitalInput" @blur="finalizeHospital" />
           </div>
         </q-card-section>
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="CANCEL" class="dialog-goback-btn" @click="closeAddBudgetDialog" />
-          <q-btn unelevated icon="save" label="SAVE" class="dialog-cancel-btn"
-            @click="handleAddBudgetSave" :disable="!isAddFormValid" />
+          <q-btn unelevated icon="save" label="SAVE" class="dialog-cancel-btn" @click="handleAddBudgetSave"
+            :disable="!isAddFormValid" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -220,8 +170,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn"
-            @click="confirmAddBudget" :loading="addBudgetLoading" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmAddBudget"
+            :loading="addBudgetLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -301,11 +251,11 @@ const validationIcon = computed(() => {
 // Add form validation
 const isAddFormValid = computed(() => {
   return medicineSupplementaryBudget.value !== null &&
-         laboratorySupplementaryBudget.value !== null &&
-         hospitalSupplementaryBudget.value !== null &&
-         medicineDisplay.value !== '' &&
-         laboratoryDisplay.value !== '' &&
-         hospitalDisplay.value !== ''
+    laboratorySupplementaryBudget.value !== null &&
+    hospitalSupplementaryBudget.value !== null &&
+    medicineDisplay.value !== '' &&
+    laboratoryDisplay.value !== '' &&
+    hospitalDisplay.value !== ''
 })
 
 const columns = [
