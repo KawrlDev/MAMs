@@ -16,274 +16,7 @@
           </div>
         </div>
 
-        <div class="field">
-          <label>First Name <span>*</span></label>
-          <q-input v-model="firstNameValue" dense outlined placeholder="First Name"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="onFirstNameChange"
-            @focus="firstNameFocused = true" @blur="onFirstNameBlur">
-            <template v-slot:append v-if="searchingPatients">
-              <q-spinner color="primary" size="20px" />
-            </template>
-          </q-input>
-
-          <!-- Patient Search Dropdown for First Name -->
-          <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0"
-            class="patient-dropdown">
-            <div class="dropdown-header">
-              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
-              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
-            </div>
-            <q-scroll-area style="height: 300px;">
-              <q-list separator>
-                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
-                    'dropdown-patient-item': true,
-                    'patient-eligible': patient.eligible,
-                    'patient-ineligible': !patient.eligible
-                  }">
-                  <q-item-section>
-                    <q-item-label class="patient-name-dropdown">
-                      {{ formatPatientName(patient) }}
-                    </q-item-label>
-                    <q-item-label caption class="patient-details-dropdown">
-                      <div class="detail-row-dropdown">
-                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
-                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                        }}</span>
-                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
-                          'N/A'
-                        }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
-                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
-                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
-                      </div>
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <div class="eligibility-badge-container-dropdown">
-                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
-                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
-                        ELIGIBLE
-                      </q-badge>
-                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                        <q-icon name="block" size="xs" class="q-mr-xs" />
-                        NOT ELIGIBLE
-                      </q-badge>
-                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
-                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
-                      </div>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Middle Name</label>
-          <q-input v-model="middleNameValue" dense outlined placeholder="Middle Name"
-            @update:model-value="onMiddleNameChange" @focus="middleNameFocused = true" @blur="onMiddleNameBlur">
-            <template v-slot:append v-if="searchingPatients">
-              <q-spinner color="primary" size="20px" />
-            </template>
-          </q-input>
-
-          <!-- Patient Search Dropdown for Middle Name -->
-          <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0"
-            class="patient-dropdown">
-            <div class="dropdown-header">
-              <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
-              <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
-            </div>
-            <q-scroll-area style="height: 300px;">
-              <q-list separator>
-                <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                  :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)" :class="{
-                    'dropdown-patient-item': true,
-                    'patient-eligible': patient.eligible,
-                    'patient-ineligible': !patient.eligible
-                  }">
-                  <q-item-section>
-                    <q-item-label class="patient-name-dropdown">
-                      {{ formatPatientName(patient) }}
-                    </q-item-label>
-                    <q-item-label caption class="patient-details-dropdown">
-                      <div class="detail-row-dropdown">
-                        <span><strong>ID:</strong> {{ patient.patient_id }}</span>
-                        <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
-                        }}</span>
-                        <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
-                          'N/A'
-                        }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Address:</strong> {{ formatAddress(patient) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown">
-                        <span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span>
-                      </div>
-                      <div class="detail-row-dropdown" v-if="patient.last_issued_at">
-                        <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
-                        <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
-                      </div>
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section side top>
-                    <div class="eligibility-badge-container-dropdown">
-                      <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
-                        <q-icon name="check_circle" size="xs" class="q-mr-xs" />
-                        ELIGIBLE
-                      </q-badge>
-                      <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                        <q-icon name="block" size="xs" class="q-mr-xs" />
-                        NOT ELIGIBLE
-                      </q-badge>
-                      <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
-                        <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                        <small class="text-red">{{ patient.days_remaining }} days remaining</small>
-                      </div>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Suffix</label>
-          <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
-            @update:model-value="checkForPatientEdits" />
-        </div>
-      </q-form>
-
-      <div class="grid-4">
-        <div class="field">
-          <label>Birthdate <span>*</span></label>
-          <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits"
-            mask="##/##/####">
-            <template #append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="birthdateValue" mask="DD/MM/YYYY" emit-immediately :options="dateOptions">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
-        <div class="field">
-          <label>Age </label>
-          <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" readonly />
-        </div>
-
-        <div class="field">
-          <label>Sex <span>*</span></label>
-          <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex" placeholder="Sex"
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
-        </div>
-
-        <div class="field">
-          <label>Preference</label>
-          <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
-            outlined @update:model-value="checkForPatientEdits" />
-        </div>
-      </div>
-
-      <div class="grid-5">
-        <div class="field">
-          <label>Province</label>
-          <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
-        </div>
-
-        <div class="field">
-          <label>City</label>
-          <q-input v-model="cityValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
-        </div>
-
-        <div class="field">
-          <label>Barangay <span>*</span></label>
-          <q-select v-model="barangayValue" :options="options[2]" dense outlined
-            :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
-        </div>
-
-        <div class="field">
-          <label>House Address <span>*</span></label>
-          <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
-            @update:model-value="checkForPatientEdits" />
-        </div>
-
-        <div class="field">
-          <label>Phone Number <span>*</span></label>
-          <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
-            @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
-            :persistent-hint="true" />
-        </div>
-      </div>
-      <q-separator color="grey-5" size="2px" class="q-my-lg" />
-      <div class="patient-info-pill">Transaction Details</div>
-      <div class="grid-3">
-        <div class="field">
-          <label>Partner <span>*</span></label>
-          <q-select v-model="partnerValue" dense outlined :options="partnerOptions"
-            :rules="[val => !!val || 'This field is required']" :disable="categoryValue == null"
-            :hint="categoryValue == null ? 'Must select a category before selecting a partner!' : ''"
-            :persistent-hint="categoryValue == null" />
-        </div>
-
-        <div class="field" v-if="categoryValue == 'HOSPITAL'">
-          <label>Hospital Bill <span>*</span></label>
-          <q-input
-            type="text"
-            dense
-            outlined
-            v-model="hospitalBillDisplay"
-            @update:model-value="onHospitalBillInput"
-            @blur="finalizeHospitalBill"
-            placeholder="0.00"
-            :rules="[val => !!val || 'This field is required']"
-          />
-        </div>
-
-        <div class="field">
-          <label>Issued Amount <span>*</span></label>
-          <q-input
-            type="text"
-            dense
-            outlined
-            v-model="issuedAmountDisplay"
-            @update:model-value="onIssuedAmountInput"
-            @blur="finalizeIssuedAmount"
-            placeholder="0.00"
-            :rules="[val => !!val || 'This field is required']"
-          />
-        </div>
-      </div>
-
-      <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
-
-      <div v-if="!isChecked">
-        <q-separator color="grey-5" size="2px" class="q-my-lg" />
-        <div class="patient-info-pill">Client's Name</div>
+        <h6 class="section-title">Patient Form</h6>
 
         <div class="grid-4">
           <div class="field">
@@ -557,7 +290,8 @@
         <div class="grid-5">
           <div class="field">
             <label>Province</label>
-            <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
+            <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined
+              disable />
           </div>
 
           <div class="field">
@@ -581,12 +315,12 @@
             <label>Phone Number <span>*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
               @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
-              :persistent-hint="true" />
+              :persistent-hint="true"
+              @keypress="onPhoneNumberKeyPress" />
           </div>
         </div>
-        <q-separator color="grey-5" size="2px" class="q-my-lg" />
 
-        <div class="section-pill">Transaction Details</div>
+        <div class="section-banner">Transaction Details</div>
 
         <div class="grid-3">
           <div class="field">
@@ -599,38 +333,21 @@
 
           <div class="field" v-if="categoryValue == 'HOSPITAL'">
             <label>Hospital Bill <span>*</span></label>
-            <q-input
-              type="text"
-              dense
-              outlined
-              v-model="hospitalBillDisplay"
-              @update:model-value="onHospitalBillInput"
-              @blur="finalizeHospitalBill"
-              placeholder="0.00"
-              :rules="[val => !!val || 'This field is required']"
-            />
+            <q-input type="number" dense v-model="hospitalBillValue" outlined
+              :rules="[val => !!val || 'This field is required']" />
           </div>
 
           <div class="field">
             <label>Issued Amount <span>*</span></label>
-            <q-input
-              type="text"
-              dense
-              outlined
-              v-model="issuedAmountDisplay"
-              @update:model-value="onIssuedAmountInput"
-              @blur="finalizeIssuedAmount"
-              placeholder="0.00"
-              :rules="[val => !!val || 'This field is required']"
-            />
+            <q-input type="text" dense outlined v-model="issuedAmountDisplay" @update:model-value="onIssuedAmountInput"
+              @blur="finalizeIssuedAmount" placeholder="0.00" :rules="[val => !!val || 'This field is required']" />
           </div>
         </div>
 
         <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
 
         <div v-if="!isChecked">
-          <q-separator color="grey-5" size="2px" class="q-my-lg" />
-          <div class="section-pill">Client's Name</div>
+          <div class="section-banner">Client's Name</div>
 
           <div class="grid-4">
             <div class="field">
@@ -662,15 +379,56 @@
               :rules="[val => !!val || 'This field is required']" />
           </div>
         </div>
-      </div>
 
-      <div class="actions">
-        <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
-        <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
-        <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
-      </div>
+        <div class="actions">
+          <q-btn class="btn-cancel" label="CLOSE" @click="showCancelDialog = true" dense>
+            <q-icon name="close" class="centered-icon" />
+          </q-btn>
+          <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
+          <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
+        </div>
+      </q-form>
 
-      <!-- All dialogs remain exactly the same -->
+      <!-- INSUFFICIENT FUNDS DIALOG -->
+      <q-dialog v-model="showInsufficientFundsDialog" persistent>
+        <q-card style="min-width: 500px;">
+          <q-card-section class="bg-orange-6 text-white">
+            <div class="text-h6">
+              <q-icon name="warning" size="sm" class="q-mr-sm" />
+              Insufficient Funds Warning
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <div class="text-subtitle1 q-mb-md">
+              The issued amount will result in a negative or insufficient budget balance.
+            </div>
+
+            <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
+              <template v-slot:avatar>
+                <q-icon name="account_balance_wallet" color="orange" />
+              </template>
+              <div>
+                <div class="text-weight-bold q-mb-xs">Current Budget: ₱{{ formatCurrency(currentBudget) }}</div>
+                <div class="text-weight-bold q-mb-xs">Requested Amount: ₱{{ formatCurrency(issuedAmountValue) }}</div>
+                <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(projectedBalance) }}</div>
+              </div>
+            </q-banner>
+
+            <div class="text-body2 text-grey-8">
+              You do not have sufficient funds in your budget to issue this guarantee letter. Do you still want to proceed?
+            </div>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
+            <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithInsufficientFunds" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
       <!-- FINAL CONFIRMATION DIALOG - Shows comparison between original and current -->
       <q-dialog v-model="showFinalConfirmDialog" persistent>
         <q-card style="min-width: 700px; max-width: 800px;">
@@ -825,10 +583,10 @@
                   <strong>Partner:</strong> {{ partnerValue }}
                 </div>
                 <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
-                  <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
+                  <strong>Hospital Bill:</strong> ₱{{ formatCurrency(hospitalBillValue) }}
                 </div>
                 <div class="info-item">
-                  <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
+                  <strong>Issued Amount:</strong> ₱{{ formatCurrency(issuedAmountValue) }}
                 </div>
               </div>
             </div>
@@ -868,8 +626,8 @@
 
           <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
             <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelFinalConfirm" />
-            <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated class="dialog-cancel-btn"
-              @click="proceedWithFinalConfirm" />
+            <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated
+              class="dialog-cancel-btn" @click="proceedWithFinalConfirm" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -985,10 +743,10 @@
                     <strong>Partner:</strong> {{ partnerValue }}
                   </div>
                   <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
-                    <strong>Hospital Bill:</strong> ₱{{ parseFloat(hospitalBillValue || 0).toFixed(2) }}
+                    <strong>Hospital Bill:</strong> ₱{{ formatCurrency(hospitalBillValue) }}
                   </div>
                   <div class="info-item">
-                    <strong>Issued Amount:</strong> ₱{{ parseFloat(issuedAmountValue || 0).toFixed(2) }}
+                    <strong>Issued Amount:</strong> ₱{{ formatCurrency(issuedAmountValue) }}
                   </div>
                 </div>
               </div>
@@ -1118,7 +876,8 @@
                 <q-icon name="link" size="md" color="blue" />
                 <div class="option-title">Use Existing Patient</div>
                 <div class="option-description">
-                  Link this record to the selected patient above. This will add a new GL record under the same Patient ID.
+                  Link this record to the selected patient above. This will add a new GL record under the same Patient
+                  ID.
                   <span v-if="!selectedExistingPatient" class="text-red"> (Please select a patient first)</span>
                 </div>
               </div>
@@ -1129,7 +888,8 @@
                 <q-icon name="person_add" size="md" color="green" />
                 <div class="option-title">Create New Patient</div>
                 <div class="option-description">
-                  Create a completely new patient with a new Patient ID. Use this if this is actually a different person.
+                  Create a completely new patient with a new Patient ID. Use this if this is actually a different
+                  person.
                 </div>
               </div>
             </div>
@@ -1145,7 +905,6 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
-
     </div>
   </div>
 </template>
@@ -1205,7 +964,6 @@ const houseAddressValue = ref(null)
 const phoneNumberValue = ref(null)
 const partnerValue = ref(null)
 const hospitalBillValue = ref(null)
-const hospitalBillDisplay = ref('');
 const issuedByValue = ref(JSON.parse(localStorage.getItem('user')).USERNAME)
 const glNum = ref(null)
 
@@ -1288,7 +1046,6 @@ const finalizeIssuedAmount = () => {
   issuedAmountValue.value = num;
 };
 
-
 const normalizePhoneNumber = (value) => {
   if (!value) return null
 
@@ -1318,59 +1075,27 @@ const validatePhoneNumber = (value) => {
 
   return true
 }
-const onHospitalBillInput = (value) => {
-  // Remove commas
-  let cleaned = value.replace(/,/g, '');
-
-  // Keep digits and dot only
-  cleaned = cleaned.replace(/[^\d.]/g, '');
-
-  // Allow only one dot
-  const parts = cleaned.split('.');
-  if (parts.length > 2) {
-    cleaned = parts[0] + '.' + parts.slice(1).join('');
-  }
-
-  let integer = parts[0] || '';
-  let decimal = parts[1] ?? null;
-
-  // Add live comma formatting
-  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-  // Keep decimal as typed (do NOT force .00 here)
-  hospitalBillDisplay.value =
-    decimal !== null
-      ? `${integer}.${decimal.slice(0, 2)}`
-      : integer;
-
-  hospitalBillValue.value = parseFloat(cleaned);
-};
-
-const finalizeHospitalBill = () => {
-  if (!hospitalBillDisplay.value) return;
-
-  const num = parseFloat(
-    hospitalBillDisplay.value.replace(/,/g, '')
-  );
-
-  if (isNaN(num)) return;
-
-  hospitalBillDisplay.value = num.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-
-  hospitalBillValue.value = num;
-};
 
 const onPhoneNumberChange = (value) => {
   if (value) {
-    const normalized = normalizePhoneNumber(value)
+    // Remove all non-digit characters
+    const cleaned = value.replace(/\D/g, '')
+    phoneNumberValue.value = cleaned
+
+    const normalized = normalizePhoneNumber(cleaned)
     if (normalized) {
       phoneNumberValue.value = normalized
     }
   }
   checkForPatientEdits()
+}
+
+const onPhoneNumberKeyPress = (event) => {
+  // Only allow numbers (0-9)
+  const charCode = event.which ? event.which : event.keyCode
+  if (charCode < 48 || charCode > 57) {
+    event.preventDefault()
+  }
 }
 
 const formatPhoneNumber = (phone) => {
@@ -1422,10 +1147,13 @@ const showCancelDialog = ref(false)
 const showExistingDialog = ref(false)
 const showEligibilityWarning = ref(false)
 const showAreYouSureDialog = ref(false)
+const showInsufficientFundsDialog = ref(false)
 const actionLoading = ref(false)
 const areYouSureLoading = ref(false)
 
 const pendingAction = ref(null)
+const currentBudget = ref(0)
+const projectedBalance = ref(0)
 
 const existingPatients = ref([])
 const selectedExistingPatient = ref(null)
@@ -1433,6 +1161,16 @@ const selectedAction = ref(null)
 const eligibilityWarningData = ref(null)
 
 // Helper functions
+const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined) return '0.00'
+  const num = parseFloat(amount)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   return dayjs(dateString).format('MMMM DD, YYYY')
@@ -1692,6 +1430,40 @@ const cancelFinalConfirm = () => {
 
 const proceedWithFinalConfirm = () => {
   showFinalConfirmDialog.value = false
+  checkBudget()
+}
+
+const checkBudget = async () => {
+  try {
+    // Fetch current budget from your API
+    const res = await axios.get('http://localhost:8000/api/budget/current')
+    currentBudget.value = parseFloat(res.data.amount || 0)
+
+    const requestedAmount = parseFloat(issuedAmountValue.value || 0)
+    projectedBalance.value = currentBudget.value - requestedAmount
+
+    if (projectedBalance.value < 0) {
+      showInsufficientFundsDialog.value = true
+    } else {
+      showAreYouSureDialog.value = true
+    }
+  } catch (error) {
+    console.error('Failed to fetch budget:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to check budget',
+      position: 'top'
+    })
+  }
+}
+
+const cancelInsufficientFunds = () => {
+  showInsufficientFundsDialog.value = false
+  pendingAction.value = null
+}
+
+const proceedWithInsufficientFunds = () => {
+  showInsufficientFundsDialog.value = false
   showAreYouSureDialog.value = true
 }
 
@@ -1732,7 +1504,7 @@ const checkExistingPatients = async (isPrint = false) => {
     return
   }
 
-  showAreYouSureDialog.value = true
+  await checkBudget()
 }
 
 const proceedWithAction = async () => {
@@ -1784,12 +1556,12 @@ const checkEligibilityAndProceed = async (patientId) => {
 
 const useExistingPatient = () => {
   showExistingDialog.value = false
-  showAreYouSureDialog.value = true
+  checkBudget()
 }
 
 const createNewPatient = () => {
   showExistingDialog.value = false
-  showAreYouSureDialog.value = true
+  checkBudget()
 }
 
 const cancelExistingDialog = () => {
@@ -2018,7 +1790,7 @@ const generatePDF = async () => {
   }
 
   page.drawText(
-    Number(issuedAmountValue.value).toFixed(2),
+    formatCurrency(issuedAmountValue.value),
     {
       x: 90,
       y: 248,
@@ -2110,7 +1882,7 @@ function getDaySuffix(day) {
 }
 
 /* =========================
-   SECTION TITLES & PILLS
+   SECTION TITLES & BANNERS
 ========================= */
 
 .section-title {
@@ -2118,14 +1890,17 @@ function getDaySuffix(day) {
   font-weight: 600;
 }
 
-.section-pill {
-  font-size: 40px;
+.section-banner {
+  background-color: #1f8f2e;
+  color: white;
+  font-size: 24px;
   font-weight: 700;
-  color: #1f8f2e;
-  margin: 0;
-  line-height: 0.5;
-  margin-top: 15px;
-  margin-bottom: 20px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin: 24px -24px 20px -24px;
+  /* ← Negative margins to span full width */
+  display: flex;
+  align-items: center;
 }
 
 /* =========================
@@ -2402,6 +2177,9 @@ label span {
 
 .btn-cancel {
   background: #ff3b3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-save {
@@ -2414,6 +2192,17 @@ label span {
 
 .actions .q-btn .q-icon {
   margin-right: 6px;
+}
+
+/* =========================
+   CENTERED ICON
+========================= */
+
+.centered-icon {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================
@@ -2503,4 +2292,3 @@ label span {
   line-height: 1.4;
 }
 </style>
- 
