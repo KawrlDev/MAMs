@@ -71,7 +71,7 @@
         <!-- Trademark -->
         <div class="q-mt-sm row items-center justify-center text-white text-caption q-gutter-xs" style="opacity: 0.85">
           <span>Developed by</span>
-          <q-img src="~assets/trademake.png" width="50px" height="50px" fit="contain" />
+          <q-img src="~assets/trademake.png" width="30px" height="50px" fit="contain" />
           <span class="tm">™</span>
         </div>
       </div>
