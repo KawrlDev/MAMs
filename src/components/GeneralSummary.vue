@@ -1044,7 +1044,7 @@ const getPatientNumber = (patientId) => {
 
 /* CSV Button container styling */
 .csv-button-container {
-  margin-right: -22%;
+  margin-right: -22px;
 }
 
 .table-container {
