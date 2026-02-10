@@ -200,6 +200,7 @@ onMounted(async () => {
   margin: 10px 0;
   overflow: hidden;
   margin-bottom: -2%;
+  max-height: 980px;
 }
 
 .amount-title {
@@ -291,11 +292,10 @@ onMounted(async () => {
 .table-container {
   width: 100%;
   border-radius: 8px;
-  overflow: hidden;
 }
 
 .q-table__container {
-  overflow-x: hidden !important;
+  max-height: 500px;
 }
 
 .sticky-header {

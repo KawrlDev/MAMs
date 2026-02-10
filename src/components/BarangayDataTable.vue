@@ -4,7 +4,7 @@
       <div class="text-h5 text-green-8 q-mb-sm amount-title">BARANGAY RECORDS</div>
       <div class="table-container">
         <q-table class="budget-table" :rows="rows" row-key="num" flat bordered dense :pagination="{ rowsPerPage: 0 }"
-          style="height: 230px" virtual-scroll :virtual-scroll-sticky-size-start="48">
+          virtual-scroll :virtual-scroll-sticky-size-start="48">
           <template v-slot:header>
             <tr class="sticky-header">
               <th rowspan="2">#</th>
@@ -118,7 +118,7 @@ const formatPeso = (amount) => {
 }
 
 .table-container {
-  max-height: 320px;
+  height: 50px;
   overflow-y: auto;
 }
 
@@ -163,7 +163,6 @@ const formatPeso = (amount) => {
   border-bottom: 1px solid #1b5e20;
   text-align: center;
 }
-
 
 .budget-table {
   overflow-y: auto;
