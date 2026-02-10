@@ -75,24 +75,23 @@
                 </div>
 
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
-                <div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
-                  class="info-item">
-                  <span class="info-label">Issued Amount:</span>
-                  <span class="info-value">₱{{ selectedRecord?.issuedAmount }}</span>
-                </div>
+<div v-if="selectedRecord?.category === 'MEDICINE' || selectedRecord?.category === 'LABORATORY'"
+  class="info-item">
+  <span class="info-label">Issued Amount:</span>
+  <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+</div>
 
-                <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
-                <template v-if="selectedRecord?.category === 'HOSPITAL'">
-                  <div class="info-item">
-                    <span class="info-label">Hospital Bill:</span>
-                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + selectedRecord.hospitalBill : 'N/A'
-                    }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Issued Amount:</span>
-                    <span class="info-value">₱{{ selectedRecord?.issuedAmount }}</span>
-                  </div>
-                </template>
+<!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
+<template v-if="selectedRecord?.category === 'HOSPITAL'">
+  <div class="info-item">
+    <span class="info-label">Hospital Bill:</span>
+    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + Number(selectedRecord.hospitalBill).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A' }}</span>
+  </div>
+  <div class="info-item">
+    <span class="info-label">Issued Amount:</span>
+    <span class="info-value">₱{{ Number(selectedRecord?.issuedAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+  </div>
+</template>
 
                 <!-- Patient is same as client checkbox (view mode - disabled) -->
                 <div class="info-item info-item-full">
@@ -368,7 +367,12 @@ const columns = [
   { name: 'Issued At', label: 'Date Issued', field: 'issuedAt' },
   { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate' },
   { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
-  { name: 'Issued Amount', label: 'Issued Amount', field: 'issuedAmount' },
+  { 
+    name: 'Issued Amount', 
+    label: 'Issued Amount', 
+    field: 'issuedAmount',
+    format: val => `₱${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 

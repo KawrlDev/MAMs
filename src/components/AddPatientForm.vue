@@ -324,10 +324,18 @@
         </div>
 
         <div class="field" v-if="categoryValue == 'HOSPITAL'">
-          <label>Hospital Bill <span>*</span></label>
-          <q-input type="number" dense v-model="hospitalBillValue" outlined
-            :rules="[val => !!val || 'This field is required']" />
-        </div>
+  <label>Hospital Bill <span>*</span></label>
+  <q-input
+    type="text"
+    dense
+    outlined
+    v-model="hospitalBillDisplay"
+    @update:model-value="onHospitalBillInput"
+    @blur="finalizeHospitalBill"
+    placeholder="0.00"
+    :rules="[val => !!val || 'This field is required']"
+  />
+</div>
 
         <div class="field">
         <label>Issued Amount <span>*</span></label>
@@ -1033,6 +1041,50 @@ const validatePhoneNumber = (value) => {
 
   return true
 }
+const onHospitalBillInput = (value) => {
+  // Remove commas
+  let cleaned = value.replace(/,/g, '');
+
+  // Keep digits and dot only
+  cleaned = cleaned.replace(/[^\d.]/g, '');
+
+  // Allow only one dot
+  const parts = cleaned.split('.');
+  if (parts.length > 2) {
+    cleaned = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  let integer = parts[0] || '';
+  let decimal = parts[1] ?? null;
+
+  // Add live comma formatting
+  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Keep decimal as typed (do NOT force .00 here)
+  hospitalBillDisplay.value =
+    decimal !== null
+      ? `${integer}.${decimal.slice(0, 2)}`
+      : integer;
+
+  hospitalBillValue.value = parseFloat(cleaned);
+};
+
+const finalizeHospitalBill = () => {
+  if (!hospitalBillDisplay.value) return;
+
+  const num = parseFloat(
+    hospitalBillDisplay.value.replace(/,/g, '')
+  );
+
+  if (isNaN(num)) return;
+
+  hospitalBillDisplay.value = num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  hospitalBillValue.value = num;
+};
 
 const onPhoneNumberChange = (value) => {
   if (value) {
