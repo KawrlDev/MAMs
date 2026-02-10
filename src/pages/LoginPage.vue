@@ -3,7 +3,7 @@
     <div class="card">
       <div class="intro">
         <img class="logo" src="../assets/logo.png" alt="Logo" />
-        <img class="logo2" src="../assets/mams-logo.png" alt="Logo2" />
+        <img class="logo2" src="../assets/logo12.png" alt="Logo2" />
       </div>
       
       <LoginForm 
@@ -121,14 +121,20 @@ const handleLogin = async (credentials) => {
 }
 
 .logo {
+  align-items: center;
+  justify-content: center;
+  margin-top: 130px;
+  margin-bottom: -130px;
   display: block;
-  width: 250px;
+  width: 180px;
   height: auto;
+  margin-left: 10px;
 }
 
 .logo2 {
+  margin-left: 20px;
   display: block;
-  width: 350px;
+  width: 410px;
   height: auto;
 }
 </style>
