@@ -170,7 +170,6 @@
           <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
             @update:model-value="checkForPatientEdits" />
         </div>
-      </q-form>
 
       <div class="grid-4">
         <div class="field">
@@ -251,21 +250,21 @@
         </div>
 
         <div class="field" v-if="categoryValue == 'HOSPITAL'">
-          <label>Hospital Bill <span>*</span></label>
-          <q-input
-            type="text"
-            dense
-            outlined
-            v-model="hospitalBillDisplay"
-            @update:model-value="onHospitalBillInput"
-            @blur="finalizeHospitalBill"
-            placeholder="0.00"
-            :rules="[val => !!val || 'This field is required']"
-          />
-        </div>
+        <label>Hospital Bill <span>*</span></label>
+        <q-input
+          type="text"
+          dense
+          outlined
+          v-model="hospitalBillDisplay"
+          @update:model-value="onHospitalBillInput"
+          @blur="finalizeHospitalBill"
+          placeholder="0.00"
+          :rules="[val => !!val || 'This field is required']"
+        />
+      </div>
 
         <div class="field">
-          <label>Issued Amount <span>*</span></label>
+        <label>Issued Amount <span>*</span></label>
           <q-input
             type="text"
             dense
@@ -279,11 +278,13 @@
         </div>
       </div>
 
+
       <q-checkbox v-model="isChecked" class="checkbox" label="Patient is same as client?" />
 
       <div v-if="!isChecked">
         <q-separator color="grey-5" size="2px" class="q-my-lg" />
         <div class="patient-info-pill">Client's Name</div>
+        <h6 class="section-title">Patient Form</h6>
 
         <div class="grid-4">
           <div class="field">
@@ -599,20 +600,12 @@
 
           <div class="field" v-if="categoryValue == 'HOSPITAL'">
             <label>Hospital Bill <span>*</span></label>
-            <q-input
-              type="text"
-              dense
-              outlined
-              v-model="hospitalBillDisplay"
-              @update:model-value="onHospitalBillInput"
-              @blur="finalizeHospitalBill"
-              placeholder="0.00"
-              :rules="[val => !!val || 'This field is required']"
-            />
+            <q-input type="number" dense v-model="hospitalBillValue" outlined
+              :rules="[val => !!val || 'This field is required']" />
           </div>
 
           <div class="field">
-            <label>Issued Amount <span>*</span></label>
+          <label>Issued Amount <span>*</span></label>
             <q-input
               type="text"
               dense
@@ -662,13 +655,13 @@
               :rules="[val => !!val || 'This field is required']" />
           </div>
         </div>
-      </div>
 
-      <div class="actions">
-        <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
-        <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
-        <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
-      </div>
+        <div class="actions">
+          <q-btn class="btn-cancel" icon="close" label="CLOSE" @click="showCancelDialog = true" dense />
+          <q-btn class="btn-save" icon="save" label="SAVE" @click="handleSaveClick" dense />
+          <q-btn class="btn-print" icon="print" label="SAVE AND PRINT" @click="handleSaveAndPrintClick" dense />
+        </div>
+      </q-form>
 
       <!-- All dialogs remain exactly the same -->
       <!-- FINAL CONFIRMATION DIALOG - Shows comparison between original and current -->
@@ -1205,7 +1198,6 @@ const houseAddressValue = ref(null)
 const phoneNumberValue = ref(null)
 const partnerValue = ref(null)
 const hospitalBillValue = ref(null)
-const hospitalBillDisplay = ref('');
 const issuedByValue = ref(JSON.parse(localStorage.getItem('user')).USERNAME)
 const glNum = ref(null)
 
@@ -1649,7 +1641,7 @@ const selectPatientFromDropdown = (patient) => {
   cityValue.value = patient.city || 'Tagum City'
   barangayValue.value = patient.barangay
   houseAddressValue.value = patient.house_address
-  phoneNumberValue.value = patient.phone_number
+  phoneNumberValue.value = patient.phone_number  // ADD THIS LINE
 
   $q.notify({
     type: 'positive',
@@ -1865,7 +1857,7 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   formData.append('city', cityValue.value)
   formData.append('barangay', barangayValue.value)
   formData.append('house_address', houseAddressValue.value)
-  formData.append('phone_number', phoneNumberValue.value || '')
+  formData.append('phone_number', phoneNumberValue.value || '')  // ADD THIS LINE
   formData.append('partner', partnerValue.value)
   formData.append('hospital_bill', hospitalBillValue.value || 0)
   formData.append('issued_amount', issuedAmountValue.value)
