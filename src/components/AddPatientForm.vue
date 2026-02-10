@@ -409,7 +409,7 @@
 
           <q-card-section>
             <div class="text-subtitle1 q-mb-md">
-              The issued amount will result in a negative or insufficient budget balance.
+              You do not have enough funds for this transaction.
             </div>
 
             <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
@@ -417,15 +417,9 @@
                 <q-icon name="account_balance_wallet" color="orange" />
               </template>
               <div>
-                <div class="text-weight-bold q-mb-xs">Current Budget: ₱{{ formatCurrency(currentBudget) }}</div>
-                <div class="text-weight-bold q-mb-xs">Requested Amount: ₱{{ formatCurrency(issuedAmountValue) }}</div>
-                <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(projectedBalance) }}</div>
+                <div class="text-weight-bold text-red">Current Balance: ₱{{ formatCurrency(projectedBalance) }}</div>
               </div>
             </q-banner>
-
-            <div class="text-body2 text-grey-8">
-              You do not have sufficient funds in your budget to issue this guarantee letter. Do you still want to proceed?
-            </div>
           </q-card-section>
 
           <q-separator />
