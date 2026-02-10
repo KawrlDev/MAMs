@@ -142,24 +142,45 @@
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                  <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱"
+                  <q-input 
+                    :model-value="formatInputCurrency(editData.issuedAmount)" 
+                    @update:model-value="updateIssuedAmount"
+                    dense 
+                    outlined 
+                    class="edit-input" 
+                    prefix="₱"
                     :error="validationErrors.issuedAmount"
-                    error-message="Issued Amount is required and must be greater than 0" />
+                    error-message="Issued Amount is required and must be greater than 0" 
+                  />
                 </div>
 
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
-                    <q-input v-model="editData.hospitalBill" type="number" dense outlined class="edit-input" prefix="₱"
+                    <q-input 
+                      :model-value="formatInputCurrency(editData.hospitalBill)" 
+                      @update:model-value="updateHospitalBill"
+                      dense 
+                      outlined 
+                      class="edit-input" 
+                      prefix="₱"
                       :error="validationErrors.hospitalBill"
-                      error-message="Hospital Bill is required and must be greater than 0" />
+                      error-message="Hospital Bill is required and must be greater than 0" 
+                    />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                    <q-input v-model="editData.issuedAmount" type="number" dense outlined class="edit-input" prefix="₱"
+                    <q-input 
+                      :model-value="formatInputCurrency(editData.issuedAmount)" 
+                      @update:model-value="updateIssuedAmount"
+                      dense 
+                      outlined 
+                      class="edit-input" 
+                      prefix="₱"
                       :error="validationErrors.issuedAmount"
-                      error-message="Issued Amount is required and must be greater than 0" />
+                      error-message="Issued Amount is required and must be greater than 0" 
+                    />
                   </div>
                 </template>
 
@@ -357,7 +378,7 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
-// Helper function for currency formatting
+// Helper function for currency formatting (for display)
 const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) return '0.00'
   const num = parseFloat(amount)
@@ -366,6 +387,35 @@ const formatCurrency = (amount) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })
+}
+
+// Helper function for input currency formatting
+const formatInputCurrency = (amount) => {
+  if (amount === null || amount === undefined || amount === '') return ''
+  const num = parseFloat(amount)
+  if (isNaN(num)) return ''
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+// Helper function to parse formatted currency back to number
+const parseCurrency = (formattedValue) => {
+  if (!formattedValue) return null
+  // Remove commas and parse to float
+  const cleaned = formattedValue.replace(/,/g, '')
+  const num = parseFloat(cleaned)
+  return isNaN(num) ? null : num
+}
+
+// Update functions for currency inputs
+const updateIssuedAmount = (value) => {
+  editData.value.issuedAmount = parseCurrency(value)
+}
+
+const updateHospitalBill = (value) => {
+  editData.value.hospitalBill = parseCurrency(value)
 }
 
 const rows = ref([])
