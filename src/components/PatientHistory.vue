@@ -373,6 +373,10 @@ const columns = [
     field: 'issuedAmount',
     format: val => `₱${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   },
+
+  { name: 'Issued Amount', label: 'Issued Amount', field: 'issuedAmount' },
+  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
+
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 
@@ -905,6 +909,23 @@ onMounted(async () => {
 
 .budget-table :deep(td) {
   vertical-align: middle;
+}
+
+.budget-table :deep(.q-table__top) {
+  padding: 12px 16px !important;
+  margin: 0;
+  background-color: #1f8f2e;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.budget-table :deep(.q-table__top .text-h4) {
+  color: #ffffff !important;
+}
+
+.budget-table :deep(.q-table__card) {
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .budget-table :deep(.action-cell) {

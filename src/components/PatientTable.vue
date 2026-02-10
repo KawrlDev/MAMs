@@ -157,10 +157,29 @@ watch(search, async (val) => {
   vertical-align: middle;
 }
 
+.budget-table :deep(.q-table__card) {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.budget-table :deep(.q-table__top) {
+  padding: 0 !important;
+  margin: 0;
+  display: block;
+}
+
 .budget-table :deep(.q-table__title) {
-  font-size: 24px;
+  font-size: 35px;
   font-weight: 700;
-  color: #1f8f2e;
+  color: #ffffff;
+  background-color: #1f8f2e;
+  padding: 8px 16px;
+  width: 100%;
+  margin: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  display: block;
+  box-sizing: border-box;
 }
 
 .budget-table :deep(.action-cell) {

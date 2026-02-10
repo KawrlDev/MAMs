@@ -324,9 +324,9 @@ const visibleMonths = computed(() => {
       // Check if this is the first month or last month in the range
       const isFirstMonth = current.isSame(fromDate, 'month')
       const isLastMonth = current.isSame(toDate, 'month')
-      
+
       let monthDisplay = ''
-      
+
       if (isFirstMonth && isLastMonth) {
         // Single month with date range
         monthDisplay = `${fromDate.format('MMM DD, YYYY')} - ${toDate.format('MMM DD, YYYY')}`
@@ -342,7 +342,7 @@ const visibleMonths = computed(() => {
         // Middle months - show full month
         monthDisplay = `${current.format('MMMM YYYY').toUpperCase()}`
       }
-      
+
       monthYears.push(monthDisplay)
       current = current.add(1, 'month')
     }
@@ -363,7 +363,7 @@ const visibleMonths = computed(() => {
 // Add this computed property for month mapping
 const monthMapping = computed(() => {
   const mapping = new Map()
-  
+
   if (dateRange.value) {
     let fromDate, toDate
 
@@ -382,9 +382,9 @@ const monthMapping = computed(() => {
       while (current.isBefore(end) || current.isSame(end, 'month')) {
         const isFirstMonth = current.isSame(fromDate, 'month')
         const isLastMonth = current.isSame(toDate, 'month')
-        
+
         let monthDisplay = ''
-        
+
         if (isFirstMonth && isLastMonth) {
           monthDisplay = `${fromDate.format('MMM DD, YYYY')} - ${toDate.format('MMM DD, YYYY')}`
         } else if (isFirstMonth) {
@@ -394,11 +394,11 @@ const monthMapping = computed(() => {
         } else {
           monthDisplay = `${current.format('MMMM YYYY').toUpperCase()}`
         }
-        
+
         // Map the display format to the data storage format
         const dataKey = `${current.format('MMMM').toUpperCase()} ${current.format('YYYY')}`
         mapping.set(monthDisplay, dataKey)
-        
+
         current = current.add(1, 'month')
       }
     }
@@ -409,13 +409,13 @@ const monthMapping = computed(() => {
       'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
       'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
     ]
-    
+
     months.forEach(month => {
       const key = `${month} ${currentYear}`
       mapping.set(key, key)
     })
   }
-  
+
   return mapping
 })
 
@@ -1021,12 +1021,26 @@ const getPatientNumber = (patientId) => {
 
 <style scoped>
 .filter-card {
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   margin-top: 50px;
+  font-size: 33px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: right;
+  background-color: #1f8f2e;
+  width: 100%;
+  padding: 5px 10px;
+
+  margin-bottom: -20px;
+}
+.filter-card :deep(.q-field__control) {
+  background-color: white !important;
 }
 
+.filter-card :deep(.q-field__native),
+.filter-card :deep(.q-field__label) {
+  color: #333 !important;
+}
 .table-container {
   width: 100%;
   margin-top: 20px;
@@ -1038,7 +1052,7 @@ const getPatientNumber = (patientId) => {
   height: calc(100vh - 250px);
   display: flex;
   flex-direction: column;
-  
+
 }
 
 .scrollable-wrapper {

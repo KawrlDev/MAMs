@@ -1,13 +1,19 @@
 <template>
   <div class="budget-card">
-    <div class="section-header">
-      <h4>Annual Budget</h4>
-
-      <q-btn icon="add" label="ADD BUDGET" class="add-btn" @click="checkBeforeCreate" />
-    </div>
-
-    <q-table flat bordered class="budget-table" :rows="rows" :columns="columns" row-key="year"
-      :rows-per-page-options="[5, 10, 15, 20, 0]">
+    <q-table 
+      title="Annual Budget"
+      flat 
+      bordered 
+      class="budget-table" 
+      :rows="rows" 
+      :columns="columns" 
+      row-key="year"
+      :rows-per-page-options="[5, 10, 15, 20, 0]"
+    >
+      <template #top-right>
+        <q-btn icon="add" label="ADD BUDGET" class="add-btn" @click="checkBeforeCreate" />
+      </template>
+      
       <template v-slot:body-cell-medicine="props">
         <q-td :props="props">
           ₱{{ formatCurrency(props.row.medicine_budget) }}
@@ -110,23 +116,35 @@ const closeWarning = () => {
   margin-top: 32px;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-header h4 {
-  font-weight: 700;
-  margin: 5px;
-  color: #1f8f2e;
-}
-
 .add-btn {
   background: #0aa64f;
   color: #ffffff;
   font-weight: 600;
+}
+
+.budget-table :deep(.q-table__card) {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.budget-table :deep(.q-table__top) {
+  padding: 0 16px 0 0 !important;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1f8f2e;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.budget-table :deep(.q-table__title) {
+  font-size: 30px;
+  font-weight: 700;
+  color: #ffffff;
+  padding: 12px 16px;
+  margin: 0;
+  flex: 1;
 }
 
 .budget-table :deep(thead tr) {
@@ -155,6 +173,7 @@ const closeWarning = () => {
 .dialog-cancel-btn .q-icon {
   margin-right: 6px;
 }
+
 .dialog-title {
   font-size: 20px;
   font-weight: 700;

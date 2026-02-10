@@ -1,26 +1,7 @@
 <template>
   <div class="budget-card">
-    <div class="section-header">
-      <h4>Supplemental Budget</h4>
-
-      <div class="header-buttons">
-        <!-- TRANSFER BUDGET BUTTON - Now navigates to separate page -->
-        <RouterLink to="/transfer-supplemental-budget">
-          <q-btn 
-            icon="swap_horiz" 
-            label="TRANSFER BUDGET" 
-            class="transfer-btn" 
-          />
-        </RouterLink>
-        
-        <!-- ADD BUDGET BUTTON -->
-        <RouterLink to="/add-supplementary-bonus">
-          <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" />
-        </RouterLink>
-      </div>
-    </div>
-
     <q-table
+      title="Supplemental Budget"
       flat
       bordered
       :rows="rows"
@@ -29,6 +10,24 @@
       class="budget-table"
       :rows-per-page-options="[5, 10, 15, 20, 0]"
     >
+      <template #top-right>
+        <div class="header-buttons">
+          <!-- TRANSFER BUDGET BUTTON - Now navigates to separate page -->
+          <RouterLink to="/transfer-supplemental-budget">
+            <q-btn 
+              icon="swap_horiz" 
+              label="TRANSFER BUDGET" 
+              class="transfer-btn" 
+            />
+          </RouterLink>
+          
+          <!-- ADD BUDGET BUTTON -->
+          <RouterLink to="/add-supplementary-bonus">
+            <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" />
+          </RouterLink>
+        </div>
+      </template>
+
       <template v-slot:body-cell-medicine="props">
         <q-td :props="props">
           ₱{{ formatCurrency(props.row.medicine_supplementary_bonus) }}
@@ -93,19 +92,6 @@ onMounted(() => {
   padding: 24px;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-header h4 {
-  font-weight: 700;
-  margin: 5px;
-  color: #1f8f2e;
-}
-
 .header-buttons {
   display: flex;
   gap: 10px;
@@ -121,6 +107,31 @@ onMounted(() => {
   background: #0aa64f;
   color: #ffffff;
   font-weight: 600;
+}
+
+.budget-table :deep(.q-table__card) {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.budget-table :deep(.q-table__top) {
+  padding: 0 16px 0 0 !important;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1f8f2e;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.budget-table :deep(.q-table__title) {
+  font-size: 30px;
+  font-weight: 700;
+  color: #ffffff;
+  padding: 12px 16px;
+  margin: 0;
+  flex: 1;
 }
 
 .budget-table :deep(thead tr) {
