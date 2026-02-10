@@ -2,16 +2,16 @@
   <div class="page-wrapper">
     <div class="card">
       <div class="intro">
-        <img class="logo" src="../assets/logo.png" alt="Logo" />
+        <img class="logo" src="../assets/loi.png" alt="Logo" />
         <img class="logo2" src="../assets/logo12.png" alt="Logo2" />
       </div>
-      
-      <LoginForm 
+
+      <LoginForm
         @submit="handleLogin"
         :loading="loading"
         :errors="errors"
       />
-      
+
       <div class="copyright">© 2026 MAMs</div>
       <div class="version">V 1.0.0</div>
     </div>
@@ -34,11 +34,11 @@ const handleLogin = async (credentials) => {
 
   try {
     await api.get('/sanctum/csrf-cookie');
-    
+
     const response = await api.post('/api/login', credentials);
 
     localStorage.setItem('user', JSON.stringify(response.data.user));
-    
+
     $q.notify({
       type: 'positive',
       message: 'Login successful!',
@@ -48,7 +48,7 @@ const handleLogin = async (credentials) => {
 
     // Small delay for notification, then force full page reload
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // Force full page reload - this ensures session cookie is properly set
     window.location.href = '/';
   } catch (error) {
@@ -57,7 +57,7 @@ const handleLogin = async (credentials) => {
     } else {
       errors.value.general = 'Invalid credentials';
     }
-    
+
     $q.notify({
       type: 'negative',
       message: 'Invalid username or password',
@@ -123,8 +123,8 @@ const handleLogin = async (credentials) => {
 .logo {
   align-items: center;
   justify-content: center;
-  margin-top: 200px;
-  margin-bottom: -140px;
+  margin-top: 130px;
+  margin-bottom: -130px;
   display: block;
   width: 180px;
   height: auto;
@@ -134,7 +134,7 @@ const handleLogin = async (credentials) => {
 .logo2 {
   margin-left: 20px;
   display: block;
-  width: 500px;
+  width: 410px;
   height: auto;
 }
 </style>
