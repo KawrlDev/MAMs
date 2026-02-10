@@ -315,7 +315,7 @@
             <label>Phone Number <span>*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
               @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
-              :persistent-hint="true" 
+              :persistent-hint="true"
               @keypress="onPhoneNumberKeyPress" />
           </div>
         </div>
@@ -1081,7 +1081,7 @@ const onPhoneNumberChange = (value) => {
     // Remove all non-digit characters
     const cleaned = value.replace(/\D/g, '')
     phoneNumberValue.value = cleaned
-    
+
     const normalized = normalizePhoneNumber(cleaned)
     if (normalized) {
       phoneNumberValue.value = normalized
@@ -1438,10 +1438,10 @@ const checkBudget = async () => {
     // Fetch current budget from your API
     const res = await axios.get('http://localhost:8000/api/budget/current')
     currentBudget.value = parseFloat(res.data.amount || 0)
-    
+
     const requestedAmount = parseFloat(issuedAmountValue.value || 0)
     projectedBalance.value = currentBudget.value - requestedAmount
-    
+
     if (projectedBalance.value < 0) {
       showInsufficientFundsDialog.value = true
     } else {
