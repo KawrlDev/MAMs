@@ -510,11 +510,6 @@ const tabangRows = computed(() => {
 }
 
 .category-cell {
-<<<<<<< HEAD
-
-=======
-  background-color: #f8bc84;
->>>>>>> 45b817c736687f991bc085e50ee4855184355049
   font-weight: bold;
   text-align: center;
   border-bottom: 1px solid #ddd;
