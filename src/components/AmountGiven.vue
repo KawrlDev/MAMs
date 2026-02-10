@@ -295,7 +295,7 @@ onMounted(async () => {
 }
 
 .q-table__container {
-  max-height: 500px;
+  max-height: 490px;
 }
 
 .sticky-header {
