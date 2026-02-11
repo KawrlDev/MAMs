@@ -8,7 +8,7 @@
         <q-toolbar-title class="row items-center q-gutter-sm">
           <div class="row items-center q-gutter-sm cursor-pointer" @click="$router.push('/')">
             <q-img src="~assets/logo.png" width="35px" height="50px" fit="contain" style="margin-left: -2%; margin-top: 2px;"/>
-            <q-img src="~assets/loi.png" width="90px" height="40px" style="margin-left: -4%;"/>
+            <q-img src="~assets/loi.png" width="90px" height="40px" style="margin-left: -5%;"/>
           </div>
         </q-toolbar-title>
 
@@ -73,7 +73,7 @@
         <div class="q-mt-sm row items-center justify-center text-white text-caption q-gutter-xs" style="opacity: 0.85">
           <span>Developed by</span>
           <q-img src="~assets/trademake.png" width="30px" height="50px" fit="contain" />
-          <span class="tm">™</span>
+          <span class="tm" style="margin-left: 0;">™</span>
         </div>
       </div>
     </q-drawer>
