@@ -7,8 +7,8 @@
 
         <q-toolbar-title class="row items-center q-gutter-sm">
           <div class="row items-center q-gutter-sm cursor-pointer" @click="$router.push('/')">
-            <q-img src="~assets/logo.png" width="40px" height="50px" fit="contain" style="margin-left: -2%;"/>
-            <q-img src="~assets/loi.png" width="90px" height="40px" style="margin-left: -8%;"/>
+            <q-img src="~assets/logo.png" width="35px" height="50px" fit="contain" style="margin-left: -2%; margin-top: 2px;"/>
+            <q-img src="~assets/loi.png" width="90px" height="40px" style="margin-left: -4%;"/>
           </div>
         </q-toolbar-title>
 
