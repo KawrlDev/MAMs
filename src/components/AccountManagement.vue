@@ -1,59 +1,106 @@
 <template>
   <div class="page-bg">
-    <div class="form-container settings-block">
-      <h4>Create Account</h4>
-
-      <div class="content">
-        <q-form ref="accountForm">
-          <div class="grid-3">
-            <div class="field">
-              <label>Name / Username <span>*</span></label>
-              <q-input v-model="name" outlined dense :rules="[val => !!val || 'This field is required']" />
-            </div>
-
-            <div class="field">
-              <label>Password <span>*</span></label>
-              <q-input v-model="password" type="password" outlined dense
-                :rules="[val => !!val || 'This field is required']" />
-            </div>
-
-            <div class="field">
-              <label>Role <span>*</span></label>
-              <q-select v-model="role" :options="roles" outlined dense
-                :rules="[val => !!val || 'This field is required']" />
-            </div>
-          </div>
-
-          <div class="actions">
-            <q-btn label="CREATE ACCOUNT" icon="save" unelevated class="btn-save" @click="showCreateDialog" />
-          </div>
-        </q-form>
-      </div>
+    <!-- PARENT CONTAINER HEADER -->
+    <div class="parent-header">
+      <div class="parent-title">Account Options</div>
     </div>
 
-    <!-- Accounts Table -->
-    <div class="budget-table table-scroll q-mt-lg">
-      <q-table title="Accounts" :rows="accountRows" :columns="accountColumns" row-key="id">
-        <template #body-cell-action="props">
-          <q-td :props="props">
-            <div class="action-buttons">
-              <q-btn icon="edit" label="EDIT" color="orange" size="sm" unelevated @click="showEditDialog(props.row)" />
-              <q-btn icon="delete" label="DELETE" color="red" size="sm" unelevated
-                @click="showDeleteDialog(props.row)" />
-            </div>
-          </q-td>
-        </template>
-      </q-table>
+    <div class="parent-container">
+      <div class="form-container">
+        <q-form ref="accountForm">
+          <!-- HEADER ROW -->
+          <div class="fieldset-header">
+            <div class="fieldset-title">Create Account</div>
+          </div>
+
+        <!-- ================= ACCOUNT CREATION FORM ================= -->
+        <div class="row q-col-gutter-md q-mb-lg">
+          <div class="col-4">
+            <label class="form-label">Name / Username <span class="required">*</span></label>
+            <q-input 
+              v-model="name" 
+              type="text" 
+              dense 
+              outlined 
+              class="flat-input"
+              placeholder="Enter username"
+              :rules="[val => !!val || 'This field is required']"
+            />
+          </div>
+
+          <div class="col-4">
+            <label class="form-label">Password <span class="required">*</span></label>
+            <q-input 
+              v-model="password" 
+              type="password" 
+              dense 
+              outlined 
+              class="flat-input"
+              placeholder="Enter password"
+              :rules="[val => !!val || 'This field is required']"
+            />
+          </div>
+
+          <div class="col-4">
+            <label class="form-label">Role <span class="required">*</span></label>
+            <q-select 
+              v-model="role" 
+              :options="roles" 
+              dense 
+              outlined 
+              class="flat-input"
+              placeholder="Select role"
+              :rules="[val => !!val || 'This field is required']"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12" style="text-align: right;">
+            <q-btn label="CREATE ACCOUNT" icon="save" class="action-btn save-btn" dense @click="showCreateDialog" />
+          </div>
+        </div>
+      </q-form>
+    </div>
+
+    <!-- ACCOUNTS TABLE -->
+    <div class="form-container q-mt-lg">
+      <div class="fieldset-header">
+        <div class="fieldset-title">Accounts</div>
+      </div>
+
+      <div class="table-wrapper">
+        <q-table 
+          :rows="accountRows" 
+          :columns="accountColumns" 
+          row-key="id"
+          :rows-per-page-options="[0]"
+          hide-pagination
+          flat
+        >
+          <template #body-cell-action="props">
+            <q-td :props="props">
+              <div class="action-buttons">
+                <q-btn icon="edit" label="EDIT" color="orange" size="sm" unelevated @click="showEditDialog(props.row)" />
+                <q-btn icon="delete" label="DELETE" color="red" size="sm" unelevated @click="showDeleteDialog(props.row)" />
+              </div>
+            </q-td>
+          </template>
+        </q-table>
+      </div>
     </div>
 
     <!-- CREATE ACCOUNT CONFIRMATION DIALOG -->
     <q-dialog v-model="createDialogVisible">
       <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Create Account?</div>
+        <q-card-section class="bg-blue-6 text-white">
+          <div class="text-h6">
+            <q-icon name="info" size="sm" class="q-mr-sm" />
+            Create Account?
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
+        <q-card-section class="q-pt-md">
           <div class="text-subtitle1 q-mb-md">
             Are you sure you want to create an account with these details?
           </div>
@@ -68,10 +115,11 @@
           </div>
         </q-card-section>
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="createAccount"
-            :loading="createLoading" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="createAccount" :loading="createLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -95,8 +143,7 @@
 
             <div class="edit-field">
               <label>Role <span class="required">*</span></label>
-              <q-select v-model="editData.role" :options="roles" outlined dense
-                :rules="[val => !!val || 'This field is required']" />
+              <q-select v-model="editData.role" :options="roles" outlined dense :rules="[val => !!val || 'This field is required']" />
             </div>
 
             <q-separator class="q-my-md" />
@@ -106,28 +153,23 @@
 
             <div class="edit-field">
               <label>New Password</label>
-              <q-input v-model="editData.password" :type="showPassword ? 'text' : 'password'" outlined dense
-                :rules="passwordRules">
+              <q-input v-model="editData.password" :type="showPassword ? 'text' : 'password'" outlined dense :rules="passwordRules">
                 <template v-slot:append>
-                  <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
-                    @click="showPassword = !showPassword" />
+                  <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPassword = !showPassword" />
                 </template>
               </q-input>
             </div>
 
             <div class="edit-field">
               <label>Confirm New Password</label>
-              <q-input v-model="editData.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" outlined
-                dense :rules="confirmPasswordRules">
+              <q-input v-model="editData.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" outlined dense :rules="confirmPasswordRules">
                 <template v-slot:append>
-                  <q-icon :name="showConfirmPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
-                    @click="showConfirmPassword = !showConfirmPassword" />
+                  <q-icon :name="showConfirmPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showConfirmPassword = !showConfirmPassword" />
                 </template>
               </q-input>
             </div>
           </q-form>
-          
-          <!-- Warning if editing own account -->
+
           <q-banner v-if="isEditingOwnAccount" class="bg-orange-1 text-orange-9 q-mt-md">
             <template v-slot:avatar>
               <q-icon name="warning" color="orange" />
@@ -140,8 +182,7 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn unelevated icon="close" label="CANCEL" class="dialog-goback-btn" @click="closeEditDialog" />
-          <q-btn unelevated icon="check" label="SAVE CHANGES" class="dialog-cancel-btn" @click="confirmEdit"
-            :loading="editLoading" />
+          <q-btn unelevated icon="check" label="SAVE CHANGES" class="dialog-cancel-btn" @click="confirmEdit" :loading="editLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -149,11 +190,14 @@
     <!-- DELETE ACCOUNT CONFIRMATION DIALOG -->
     <q-dialog v-model="deleteDialogVisible">
       <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Delete Account?</div>
+        <q-card-section class="bg-red-6 text-white">
+          <div class="text-h6">
+            <q-icon name="warning" size="sm" class="q-mr-sm" />
+            Delete Account?
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
+        <q-card-section class="q-pt-md">
           <div class="text-subtitle1 q-mb-md">
             Are you sure you want to delete this account?
           </div>
@@ -176,8 +220,7 @@
             </template>
             This action cannot be undone.
           </q-banner>
-          
-          <!-- Warning if deleting own account -->
+
           <q-banner v-if="isDeletingOwnAccount" class="bg-orange-1 text-orange-9 q-mt-md">
             <template v-slot:avatar>
               <q-icon name="warning" color="orange" />
@@ -186,25 +229,25 @@
           </q-banner>
         </q-card-section>
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="deleteAccount"
-            :loading="deleteLoading" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="deleteAccount" :loading="deleteLoading" />
         </q-card-actions>
       </q-card>
     </q-dialog>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-//import axios from 'axios'
 import { useQuasar } from 'quasar'
 import { api } from 'src/boot/axios'
 
 const axios = api
-
 const $q = useQuasar()
 const router = useRouter()
 
@@ -226,7 +269,6 @@ const accountToDelete = ref(null)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
-// Get current user ID from localStorage or session
 const currentUserId = ref(null)
 
 const editData = ref({
@@ -245,29 +287,22 @@ const accountColumns = [
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ]
 
-// Check if editing own account
 const isEditingOwnAccount = computed(() => {
   return currentUserId.value && editData.value.id === currentUserId.value
 })
 
-// Check if deleting own account
 const isDeletingOwnAccount = computed(() => {
   return currentUserId.value && accountToDelete.value && accountToDelete.value.ID === currentUserId.value
 })
 
-// Password validation rules
 const passwordRules = computed(() => {
-  return [
-    // No validation - allow any password
-    val => true
-  ]
+  return [val => true]
 })
 
 const confirmPasswordRules = computed(() => {
   return [
-    // Only check if passwords match when both are provided
     val => {
-      if (!editData.value.password && !val) return true // Both empty is ok
+      if (!editData.value.password && !val) return true
       if (val !== editData.value.password) return 'Passwords do not match'
       return true
     }
@@ -275,7 +310,6 @@ const confirmPasswordRules = computed(() => {
 })
 
 const showCreateDialog = async () => {
-  // Use Quasar's built-in form validation
   const isValid = await accountForm.value.validate()
 
   if (!isValid) {
@@ -317,7 +351,6 @@ const closeEditDialog = () => {
 }
 
 const confirmEdit = async () => {
-  // Validate form
   const isValid = await editForm.value.validate()
 
   if (!isValid) {
@@ -329,9 +362,7 @@ const confirmEdit = async () => {
     return
   }
 
-  // Store if editing own account before making the API call
   const editingOwnAccount = isEditingOwnAccount.value
-
   editLoading.value = true
 
   try {
@@ -341,7 +372,6 @@ const confirmEdit = async () => {
       role: editData.value.role
     }
 
-    // Only include password if it's been filled in
     if (editData.value.password && editData.value.password.trim() !== '') {
       payload.password = editData.value.password
     }
@@ -355,10 +385,8 @@ const confirmEdit = async () => {
       message: 'Account Updated Successfully',
       position: 'top'
     })
-    
-    // If editing own account, logout immediately
+
     if (editingOwnAccount) {
-      // Small delay to show the success message
       setTimeout(() => {
         logout()
       }, 1000)
@@ -398,13 +426,11 @@ const createAccount = async () => {
       position: 'top'
     })
 
-    // reset form
     name.value = ''
     password.value = ''
     role.value = null
     createDialogVisible.value = false
 
-    // refresh accounts list
     await fetchAccounts()
 
   } catch (error) {
@@ -422,9 +448,7 @@ const createAccount = async () => {
 const deleteAccount = async () => {
   if (!accountToDelete.value) return
 
-  // Store if deleting own account before making the API call
   const deletingOwnAccount = isDeletingOwnAccount.value
-
   deleteLoading.value = true
 
   try {
@@ -439,10 +463,8 @@ const deleteAccount = async () => {
       message: 'Account Deleted Successfully',
       position: 'top'
     })
-    
-    // If deleting own account, logout immediately
+
     if (deletingOwnAccount) {
-      // Small delay to show the success message
       setTimeout(() => {
         logout()
       }, 1000)
@@ -463,18 +485,16 @@ const deleteAccount = async () => {
 }
 
 const logout = () => {
-  // Clear all session/token data
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   sessionStorage.clear()
-  
+
   $q.notify({
     type: 'info',
     message: 'You have been logged out',
     position: 'top'
   })
-  
-  // Redirect to login page
+
   router.push('/login')
 }
 
@@ -493,7 +513,6 @@ const fetchAccounts = async () => {
 }
 
 const getCurrentUser = () => {
-  // Get current user ID from localStorage, sessionStorage, or Vuex store
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   currentUserId.value = user.id || user.ID || null
 }
@@ -505,9 +524,39 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* =========================
+   PAGE & CARD
+========================= */
 .page-bg {
   background: #ffffff;
   padding: 30px;
+}
+
+/* PARENT CONTAINER */
+.parent-header {
+  display: flex;
+  align-items: center;
+  background-color: #1f8f2e;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  margin-bottom: 0;
+}
+
+.parent-title {
+  font-size: 35px;
+  font-weight: 700;
+  color: #ffffff;
+  padding: 8px 16px;
+  line-height: 1.2;
+}
+
+.parent-container {
+  background: #ffffff;
+  padding: 30px;
+  border: 1px solid #989b98;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
 }
 
 .form-container {
@@ -518,42 +567,38 @@ onMounted(() => {
   padding: 25px 30px 35px;
 }
 
-.form-container h4 {
+/* TITLE */
+.fieldset-title {
+  font-size: 35px;
   font-weight: 700;
-  margin: 5px 0 20px 0;
-  color: #1f8f2e;
+  color: #ffffff;
+  background-color: #1f8f2e;
+  padding: 8px 16px;
+  margin: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  box-sizing: border-box;
+  line-height: 1.2;
 }
 
-.content {
-  padding: 0 10px;
+.fieldset-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -25px -30px 20px -30px;
+  background-color: #1f8f2e;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  padding-right: 16px;
 }
 
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.field label {
+/* =========================
+   FORM LAYOUT
+========================= */
+.form-label {
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
-}
-
-.field label span {
-  color: red;
-}
-
-/* Edit Field Styles */
-.edit-field {
-  margin-bottom: 16px;
-}
-
-.edit-field label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  display: block;
-  color: #333;
 }
 
 .required {
@@ -563,7 +608,7 @@ onMounted(() => {
 /* =========================
    INPUTS & SELECTS
 ========================= */
-:deep(.q-field--outlined .q-field__control) {
+.flat-input :deep(.q-field__control) {
   background-color: #f3f3f3;
   border: 1px solid #bdbdbd;
   border-radius: 3px;
@@ -571,107 +616,33 @@ onMounted(() => {
   box-shadow: none !important;
 }
 
-:deep(.q-field__control:before),
-:deep(.q-field__control:after) {
+.flat-input :deep(.q-field__control:before),
+.flat-input :deep(.q-field__control:after) {
   display: none !important;
 }
 
-:deep(.q-field__native),
-:deep(.q-field__input),
-:deep(input) {
+.flat-input :deep(.q-field__native),
+.flat-input :deep(.q-field__input),
+.flat-input :deep(input) {
   outline: none !important;
   box-shadow: none !important;
   padding: 6px 10px;
   font-weight: 500;
 }
 
-:deep(.q-field--focused .q-field__control) {
+.flat-input :deep(.q-field--focused .q-field__control) {
   border-color: #9e9e9e !important;
   box-shadow: none !important;
 }
 
-:deep(.q-field--readonly .q-field__control) {
-  background-color: #ededed;
-  border-color: #cfcfcf;
-}
-
-:deep(.q-field--disabled .q-field__control) {
-  background-color: #e0e0e0;
-  border-color: #c0c0c0;
-  color: #9e9e9e;
-}
-
-.q-mt-sm {
-  margin-top: 12px;
-}
-
-.q-mt-lg {
-  margin-top: 24px;
-}
-
-.actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.actions .q-btn {
-  font-weight: 600;
-  font-size: 14px;
-  padding: 4px 12px;
-  color: white;
-}
-
-.actions .q-btn:hover {
-  filter: brightness(110%);
-}
-
-.btn-save {
+/* BUTTON COLORS */
+.save-btn {
   background: #0aa64f;
+  color: white;
+  font-weight: bold;
+  border-radius: 5%;
 }
 
-/* Action Buttons in Table */
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Table Styles */
-.budget-table {
-  width: 100%;
-}
-
-.budget-table :deep(thead tr) {
-  background: #1f8f2e;
-}
-
-.budget-table :deep(thead th) {
-  color: #ffffff;
-  font-weight: 600;
-  text-align: center !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-  font-size: 12px;
-}
-
-.budget-table :deep(thead th .q-table__sort-icon) {
-  margin-left: 4px;
-}
-
-.budget-table :deep(td) {
-  text-align: center;
-  vertical-align: middle;
-}
-
-.budget-table :deep(.q-table__title) {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f8f2e;
-}
-
-/* Dialog Styles */
 .dialog-cancel-btn {
   background: #0aa64f !important;
   color: white !important;
@@ -691,6 +662,40 @@ onMounted(() => {
 .dialog-cancel-btn .q-icon,
 .dialog-goback-btn .q-icon {
   margin-right: 6px;
+}
+
+/* =========================
+   TABLE
+========================= */
+.table-wrapper {
+  margin-top: 0;
+}
+
+.table-wrapper :deep(.q-table) {
+  box-shadow: none;
+}
+
+.table-wrapper :deep(thead tr) {
+  background: #f5f5f5;
+}
+
+.table-wrapper :deep(thead th) {
+  font-weight: 600;
+  text-align: center !important;
+  color: #333;
+  font-size: 14px;
+}
+
+.table-wrapper :deep(td) {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Account Info Box */
@@ -714,5 +719,34 @@ onMounted(() => {
 .info-item strong {
   color: #1f8f2e;
   margin-right: 8px;
+}
+
+/* Edit Field Styles */
+.edit-field {
+  margin-bottom: 16px;
+}
+
+.edit-field label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  color: #333;
+}
+
+.edit-field :deep(.q-field__control) {
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  box-shadow: none !important;
+}
+
+.edit-field :deep(.q-field__control:before),
+.edit-field :deep(.q-field__control:after) {
+  display: none !important;
+}
+
+.q-mt-lg {
+  margin-top: 24px;
 }
 </style>

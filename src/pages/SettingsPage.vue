@@ -2,6 +2,7 @@
   <div class="settings-container">
     <EligibilitySettings />
     <AccountManagement />
+    <DropdownOptions />
   </div>
 </template>
 
@@ -11,6 +12,7 @@ import { useRouter } from 'vue-router'
 
 import EligibilitySettings from 'src/components/EligibilitySettings.vue'
 import AccountManagement from 'src/components/AccountManagement.vue'
+import DropdownOptions from 'src/components/DropdownOptions.vue'
 
 const router = useRouter()
 
