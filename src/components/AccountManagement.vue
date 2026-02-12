@@ -199,8 +199,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+//import axios from 'axios'
 import { useQuasar } from 'quasar'
+import { api } from 'src/boot/axios'
+
+const axios = api
 
 const $q = useQuasar()
 const router = useRouter()

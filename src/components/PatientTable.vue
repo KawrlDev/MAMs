@@ -36,7 +36,9 @@
 </template>
 
 <script setup>
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import ActionBtn from './ActionBtn.vue'

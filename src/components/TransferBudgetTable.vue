@@ -31,7 +31,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 
 const rows = ref([])
 

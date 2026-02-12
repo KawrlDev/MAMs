@@ -106,7 +106,9 @@
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router';
-import axios from 'axios';
+import { api } from 'src/boot/axios'
+
+const axios = api
 import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 

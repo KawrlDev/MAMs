@@ -181,7 +181,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useQuasar } from 'quasar'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 
 const $q = useQuasar()
 const rows = ref([])
