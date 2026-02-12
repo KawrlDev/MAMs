@@ -1455,7 +1455,6 @@ const checkBudget = async () => {
     })
 
     if (!res.data.success) {
-      // Calculate what the balance will be after the transaction
       projectedBalance.value = res.data.breakdown.remaining
       showInsufficientFundsDialog.value = true
     } else {
@@ -1470,7 +1469,6 @@ const checkBudget = async () => {
     })
   }
 }
-
 const cancelInsufficientFunds = () => {
   showInsufficientFundsDialog.value = false
   pendingAction.value = null
