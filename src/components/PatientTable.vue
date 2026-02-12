@@ -46,10 +46,21 @@ import ActionBtn from './ActionBtn.vue'
 const router = useRouter()
 const rows = ref([])
 const search = ref('')
+const allSectors = ref([])
+
+const fetchSectors = async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/sectors')
+    allSectors.value = res.data  // [{ id, sector }]
+  } catch (err) {
+    console.error('Failed to fetch sectors:', err)
+  }
+}
 
 const columns = [
   { name: 'name', label: "Patient's Name", field: 'name', align: 'center', sortable: true },
   { name: 'barangay', label: 'Barangay', field: 'barangay', align: 'center', sortable: true },
+  { name: 'sector', label: 'Sector', field: 'sector', align: 'center', sortable: true },
   { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
   { name: 'glNum', label: 'GL No.', field: 'glNum', align: 'center', sortable: true },
   { name: 'date', label: 'Date Issued', field: 'date', align: 'center', sortable: true },
@@ -58,7 +69,10 @@ const columns = [
 
 const STORAGE_KEY = 'patient_list_search'
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch sectors first so mapPatientsToRows can resolve names
+  await fetchSectors()
+
   // Restore saved search filter
   const savedSearch = localStorage.getItem(STORAGE_KEY)
   if (savedSearch && savedSearch !== 'null' && savedSearch !== '') {
@@ -95,6 +109,17 @@ onBeforeUnmount(() => {
   }
 })
 
+const formatSector = (sectorIds) => {
+  if (!sectorIds || !sectorIds.length || !allSectors.value.length) return 'N/A'
+  const names = sectorIds
+    .map(id => {
+      const found = allSectors.value.find(s => s.id === id)
+      return found ? found.sector : null
+    })
+    .filter(Boolean)
+  return names.length ? names.join(', ') : 'N/A'
+}
+
 const mapPatientsToRows = (patients) => {
   return patients.map(patient => {
     const name = [
@@ -108,6 +133,7 @@ const mapPatientsToRows = (patients) => {
       ...patient,
       name,
       barangay: patient.barangay,
+      sector: formatSector(patient.sector_ids),
       category: patient.category,
       glNum: patient.gl_no,
       date: patient.date_issued

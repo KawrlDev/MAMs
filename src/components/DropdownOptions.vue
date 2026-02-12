@@ -23,6 +23,7 @@
               :columns="optionColumns" 
               row-key="id"
               :rows-per-page-options="[0]"
+              :loading="loadingPreferences"
               hide-pagination
               flat
             >
@@ -63,6 +64,7 @@
               :columns="partnerColumnsSimplified" 
               row-key="id"
               :rows-per-page-options="[0]"
+              :loading="loadingPartners"
               hide-pagination
               flat
             >
@@ -90,6 +92,7 @@
               :columns="optionColumns" 
               row-key="id"
               :rows-per-page-options="[0]"
+              :loading="loadingSectors"
               hide-pagination
               flat
             >
@@ -211,7 +214,7 @@
               <strong>Category:</strong> {{ optionToDelete.category }}
             </div>
             <div class="info-item">
-              <strong>Option:</strong> {{ optionToDelete.value }}
+              <strong>Option:</strong> {{ optionToDelete.preference || optionToDelete.partner || optionToDelete.sector }}
             </div>
           </div>
 
@@ -236,9 +239,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
+import { api } from 'src/boot/axios'
 
+const axios = api
 const $q = useQuasar()
 
 // ===================== DATA =====================
@@ -246,37 +251,19 @@ const $q = useQuasar()
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
 const selectedPartnerCategory = ref('MEDICINE') // Default to MEDICINE
 
-const preferenceRows = ref([
-  { id: 1, value: 'N/A' },
-  { id: 2, value: 'Gay' },
-  { id: 3, value: 'Lesbian' },
-])
+const preferenceRows = ref([])
+const partnerRows = ref([])
+const sectorRows = ref([])
 
-const partnerRows = ref([
-  { id: 1, category: 'MEDICINE', value: 'PHARMACITI' },
-  { id: 2, category: 'MEDICINE', value: 'QURESS' },
-  { id: 3, category: 'LABORATORY', value: 'PERPETUAL LAB' },
-  { id: 4, category: 'LABORATORY', value: 'MEDILIFE' },
-  { id: 5, category: 'LABORATORY', value: 'LEXAS' },
-  { id: 6, category: 'LABORATORY', value: 'CITY MED' },
-  { id: 7, category: 'HOSPITAL', value: 'TAGUM GLOBAL' },
-  { id: 8, category: 'HOSPITAL', value: 'CHRIST THE KING' },
-  { id: 9, category: 'HOSPITAL', value: 'MEDICAL MISSION' },
-  { id: 10, category: 'HOSPITAL', value: 'TMC' },
-])
-
-const sectorRows = ref([
-  { id: 1, value: 'Child' },
-  { id: 2, value: 'Adult' },
-  { id: 3, value: 'Senior' },
-  { id: 4, value: 'PWD' },
-  { id: 5, value: 'Solo Parent' },
-])
+// Loading states
+const loadingPreferences = ref(false)
+const loadingPartners = ref(false)
+const loadingSectors = ref(false)
 
 // ===================== COLUMNS =====================
 
 const optionColumns = [
-  { name: 'value', label: 'Option', field: 'value', align: 'left', sortable: true },
+  { name: 'value', label: 'Option', field: row => row.preference || row.sector, align: 'left', sortable: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' },
 ]
 
@@ -288,7 +275,7 @@ const partnerColumns = [
 
 // Simplified partner columns without category
 const partnerColumnsSimplified = [
-  { name: 'value', label: 'Partner Name', field: 'value', align: 'left', sortable: true },
+  { name: 'value', label: 'Partner Name', field: 'partner', align: 'left', sortable: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' },
 ]
 
@@ -325,6 +312,96 @@ const tableLabels = {
 
 const dialogLabel = ref('')
 
+// ===================== API FUNCTIONS =====================
+
+const fetchAllOptions = async () => {
+  try {
+    loadingPreferences.value = true
+    loadingPartners.value = true
+    loadingSectors.value = true
+
+    console.log('Fetching all options from: http://localhost:8000/api/all')
+    const response = await axios.get('http://localhost:8000/api/all')
+    
+    console.log('Response received:', response)
+    console.log('Response data:', response.data)
+    
+    preferenceRows.value = response.data.preferences || []
+    partnerRows.value = response.data.partners || []
+    sectorRows.value = response.data.sectors || []
+
+    console.log('Preferences:', preferenceRows.value)
+    console.log('Partners:', partnerRows.value)
+    console.log('Sectors:', sectorRows.value)
+
+  } catch (error) {
+    console.error('Error fetching options:', error)
+    console.error('Error response:', error.response)
+    console.error('Error data:', error.response?.data)
+    console.error('Error status:', error.response?.status)
+    $q.notify({
+      type: 'negative',
+      message: error.response?.data?.message || error.response?.data?.error || 'Failed to load dropdown options',
+      position: 'top'
+    })
+  } finally {
+    loadingPreferences.value = false
+    loadingPartners.value = false
+    loadingSectors.value = false
+  }
+}
+
+const fetchPreferences = async () => {
+  try {
+    loadingPreferences.value = true
+    const response = await axios.get('http://localhost:8000/api/preferences')
+    preferenceRows.value = response.data || []
+  } catch (error) {
+    console.error('Error fetching preferences:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load preferences',
+      position: 'top'
+    })
+  } finally {
+    loadingPreferences.value = false
+  }
+}
+
+const fetchPartners = async () => {
+  try {
+    loadingPartners.value = true
+    const response = await axios.get('http://localhost:8000/api/partners')
+    partnerRows.value = response.data || []
+  } catch (error) {
+    console.error('Error fetching partners:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load partners',
+      position: 'top'
+    })
+  } finally {
+    loadingPartners.value = false
+  }
+}
+
+const fetchSectors = async () => {
+  try {
+    loadingSectors.value = true
+    const response = await axios.get('http://localhost:8000/api/sectors')
+    sectorRows.value = response.data || []
+  } catch (error) {
+    console.error('Error fetching sectors:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load sectors',
+      position: 'top'
+    })
+  } finally {
+    loadingSectors.value = false
+  }
+}
+
 // ===================== ADD =====================
 
 const openAddDialog = (table) => {
@@ -353,27 +430,51 @@ const doAdd = async () => {
   addLoading.value = true
 
   try {
-    // Simulate async (replace with actual API call)
-    await new Promise(resolve => setTimeout(resolve, 400))
-
-    const nextId = Date.now()
-    const newRow = { id: nextId, value: newOptionValue.value.trim() }
+    let endpoint = ''
+    let payload = {}
 
     if (activeTable.value === 'preference') {
-      preferenceRows.value.push(newRow)
+      endpoint = 'http://localhost:8000/api/preferences'
+      payload = { value: newOptionValue.value.trim() }
     } else if (activeTable.value === 'partner') {
-      partnerRows.value.push({ ...newRow, category: newOptionCategory.value })
+      endpoint = 'http://localhost:8000/api/partners'
+      payload = {
+        category: newOptionCategory.value,
+        value: newOptionValue.value.trim()
+      }
     } else if (activeTable.value === 'sector') {
-      sectorRows.value.push(newRow)
+      endpoint = 'http://localhost:8000/api/sectors'
+      payload = { value: newOptionValue.value.trim() }
+    }
+
+    const response = await axios.post(endpoint, payload)
+
+    // Refresh the specific table data
+    if (activeTable.value === 'preference') {
+      await fetchPreferences()
+    } else if (activeTable.value === 'partner') {
+      await fetchPartners()
+    } else if (activeTable.value === 'sector') {
+      await fetchSectors()
     }
 
     confirmAddDialogVisible.value = false
     newOptionValue.value = ''
     newOptionCategory.value = null
 
-    $q.notify({ type: 'positive', message: 'Option added successfully', position: 'top' })
-  } catch (err) {
-    $q.notify({ type: 'negative', message: 'Failed to add option', position: 'top' })
+    $q.notify({
+      type: 'positive',
+      message: response.data.message || 'Option added successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Error adding option:', error)
+    const errorMessage = error.response?.data?.error || 'Failed to add option'
+    $q.notify({
+      type: 'negative',
+      message: errorMessage,
+      position: 'top'
+    })
   } finally {
     addLoading.value = false
   }
@@ -392,27 +493,53 @@ const doDelete = async () => {
   deleteLoading.value = true
 
   try {
-    // Simulate async (replace with actual API call)
-    await new Promise(resolve => setTimeout(resolve, 400))
+    let endpoint = ''
 
     if (activeTable.value === 'preference') {
-      preferenceRows.value = preferenceRows.value.filter(r => r.id !== optionToDelete.value.id)
+      endpoint = `http://localhost:8000/api/preferences/${optionToDelete.value.id}`
     } else if (activeTable.value === 'partner') {
-      partnerRows.value = partnerRows.value.filter(r => r.id !== optionToDelete.value.id)
+      endpoint = `http://localhost:8000/api/partners/${optionToDelete.value.id}`
     } else if (activeTable.value === 'sector') {
-      sectorRows.value = sectorRows.value.filter(r => r.id !== optionToDelete.value.id)
+      endpoint = `http://localhost:8000/api/sectors/${optionToDelete.value.id}`
+    }
+
+    const response = await axios.delete(endpoint)
+
+    // Refresh the specific table data
+    if (activeTable.value === 'preference') {
+      await fetchPreferences()
+    } else if (activeTable.value === 'partner') {
+      await fetchPartners()
+    } else if (activeTable.value === 'sector') {
+      await fetchSectors()
     }
 
     deleteDialogVisible.value = false
     optionToDelete.value = null
 
-    $q.notify({ type: 'positive', message: 'Option deleted successfully', position: 'top' })
-  } catch (err) {
-    $q.notify({ type: 'negative', message: 'Failed to delete option', position: 'top' })
+    $q.notify({
+      type: 'positive',
+      message: response.data.message || 'Option deleted successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Error deleting option:', error)
+    const errorMessage = error.response?.data?.error || 'Failed to delete option'
+    $q.notify({
+      type: 'negative',
+      message: errorMessage,
+      position: 'top'
+    })
   } finally {
     deleteLoading.value = false
   }
 }
+
+// ===================== LIFECYCLE =====================
+
+onMounted(() => {
+  fetchAllOptions()
+})
 </script>
 
 <style scoped>

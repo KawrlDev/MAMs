@@ -29,8 +29,8 @@
 
             <!-- CATEGORY -->
             <div class="filter-item">
-              <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category"
-                dense outlined clearable @clear="onClearCategory" />
+              <q-select v-model="categoryValue" :options="categoryOptions" label="Category" placeholder="Category" dense
+                outlined clearable @clear="onClearCategory" />
             </div>
 
             <!-- PARTNER -->
@@ -41,8 +41,14 @@
 
             <!-- BARANGAY -->
             <div class="filter-item">
-              <q-select v-model="barangayValue" :options="barangayOptions" label="Barangay" placeholder="Barangay"
-                dense outlined clearable @clear="onClearBarangay" />
+              <q-select v-model="barangayValue" :options="barangayOptions" label="Barangay" placeholder="Barangay" dense
+                outlined clearable @clear="onClearBarangay" />
+            </div>
+
+            <!-- SECTOR -->
+            <div class="filter-item">
+              <q-select v-model="sectorValue" :options="sectorOptions" label="Sector" placeholder="Sector" dense
+                outlined clearable @clear="onClearSector" />
             </div>
           </div>
 
@@ -64,11 +70,11 @@
             <thead>
               <!-- Spacer row when no category - matches month header height -->
               <tr v-if="!categoryValue" class="month-headers">
-                <th colspan="7" class="category-header">&nbsp;</th>
+                <th colspan="8" class="category-header">&nbsp;</th>
               </tr>
               <!-- Category header row - only show if category filter is applied -->
               <tr v-if="categoryValue" class="category-header-row">
-                <th colspan="7" class="category-header">
+                <th colspan="8" class="category-header">
                   {{ categoryValue }}
                 </th>
               </tr>
@@ -93,18 +99,19 @@
                 <th>AGE</th>
                 <th>SEX</th>
                 <th>PREFERENCE</th>
+                <th>SECTOR</th>
               </tr>
             </thead>
             <tbody v-if="loading">
               <tr>
-                <td colspan="7" class="text-center q-pa-lg">
+                <td colspan="8" class="text-center q-pa-lg">
                   <q-spinner color="primary" size="50px" />
                 </td>
               </tr>
             </tbody>
             <tbody v-else-if="filteredRows.length === 0">
               <tr>
-                <td colspan="7" class="text-center q-pa-lg text-grey-6">
+                <td colspan="8" class="text-center q-pa-lg text-grey-6">
                   No records found
                 </td>
               </tr>
@@ -130,10 +137,12 @@
                   <td :rowspan="row.recordsInThisMonth">{{ row.age ?? 'N/A' }}</td>
                   <td :rowspan="row.recordsInThisMonth">{{ row.sex || 'N/A' }}</td>
                   <td :rowspan="row.recordsInThisMonth">{{ row.preference || 'N/A' }}</td>
+                  <td :rowspan="row.recordsInThisMonth">{{ row.sector || 'N/A' }}</td>
                 </template>
 
                 <!-- FOLLOWING ROWS IN SAME MONTH: PLACEHOLDER CELLS -->
                 <template v-else>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -256,13 +265,20 @@ const barangayOptions = [
 const categoryValue = ref(null)
 const partnerValue = ref(null)
 const barangayValue = ref(null)
+const sectorValue = ref(null)
+
+// Dynamic options from backend
+const allPartners = ref([])
+const allPreferences = ref([])
+const allSectors = ref([])
 
 // Storage keys
 const STORAGE_KEYS = {
   DATE_RANGE: 'general_summary_date_range',
   CATEGORY: 'general_summary_category',
   PARTNER: 'general_summary_partner',
-  BARANGAY: 'general_summary_barangay'
+  BARANGAY: 'general_summary_barangay',
+  SECTOR: 'general_summary_sector'
 }
 
 // Column widths for resizable columns
@@ -420,10 +436,21 @@ const monthMapping = computed(() => {
 
 // Computed: Partner options based on category
 const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
+  if (!categoryValue.value) {
+    // If no category selected, show all partners that exist in the summary data
+    return [...new Set(allPartners.value.map(p => p.partner))].sort()
+  }
+
+  // Filter partners by category
+  return allPartners.value
+    .filter(p => p.category === categoryValue.value)
+    .map(p => p.partner)
+    .sort()
+})
+
+// Computed: Sector options from backend
+const sectorOptions = computed(() => {
+  return allSectors.value.map(s => s.sector).sort()
 })
 
 // Computed: Show hospital bill column if category is HOSPITAL or no category filter
@@ -468,6 +495,7 @@ const saveFiltersToStorage = () => {
   localStorage.setItem(STORAGE_KEYS.CATEGORY, JSON.stringify(categoryValue.value))
   localStorage.setItem(STORAGE_KEYS.PARTNER, JSON.stringify(partnerValue.value))
   localStorage.setItem(STORAGE_KEYS.BARANGAY, JSON.stringify(barangayValue.value))
+  localStorage.setItem(STORAGE_KEYS.SECTOR, JSON.stringify(sectorValue.value))
 }
 
 // Load filters from localStorage
@@ -477,18 +505,20 @@ const loadFiltersFromStorage = () => {
     const savedCategory = localStorage.getItem(STORAGE_KEYS.CATEGORY)
     const savedPartner = localStorage.getItem(STORAGE_KEYS.PARTNER)
     const savedBarangay = localStorage.getItem(STORAGE_KEYS.BARANGAY)
+    const savedSector = localStorage.getItem(STORAGE_KEYS.SECTOR)
 
     if (savedDateRange) dateRange.value = JSON.parse(savedDateRange)
     if (savedCategory) categoryValue.value = JSON.parse(savedCategory)
     if (savedPartner) partnerValue.value = JSON.parse(savedPartner)
     if (savedBarangay) barangayValue.value = JSON.parse(savedBarangay)
+    if (savedSector) sectorValue.value = JSON.parse(savedSector)
   } catch (error) {
     console.error('Error loading filters from storage:', error)
   }
 }
 
 // Watch filters and save to localStorage
-watch([dateRange, categoryValue, partnerValue, barangayValue], () => {
+watch([dateRange, categoryValue, partnerValue, barangayValue, sectorValue], () => {
   saveFiltersToStorage()
 })
 
@@ -554,6 +584,18 @@ const formatClientName = (clientData, patientName) => {
   return parts.join(' ')
 }
 
+// Format sector
+const formatSector = (sectorIds, sectorsLookup) => {
+  if (!sectorIds || !sectorIds.length || !sectorsLookup || !sectorsLookup.length) return 'N/A'
+  const names = sectorIds
+    .map(id => {
+      const found = sectorsLookup.find(s => s.id === id)
+      return found ? found.sector : null
+    })
+    .filter(Boolean)
+  return names.length ? names.join(', ') : 'N/A'
+}
+
 const processPatientData = (rawData) => {
   const patientGroups = new Map()
 
@@ -581,7 +623,9 @@ const processPatientData = (rawData) => {
           age: calculateAge(record.birthdate),
           sex: record.sex,
           preference: record.preference,
-          barangay: record.barangay
+          sector: formatSector(record.sector_ids, allSectors.value),
+          barangay: record.barangay,
+          sectorIds: record.sector_ids || [],
         },
         recordsByMonth: new Map()
       })
@@ -699,8 +743,30 @@ const filteredRows = computed(() => {
     filtered = filtered.filter(row => row.barangay === barangayValue.value)
   }
 
+  // Apply sector filter
+  if (sectorValue.value) {
+    filtered = filtered.filter(row => {
+      if (!row.sectorIds || !row.sectorIds.length) return false
+      const matchingSector = allSectors.value.find(s => s.sector === sectorValue.value)
+      if (!matchingSector) return false
+      return row.sectorIds.includes(matchingSector.id)
+    })
+  }
+
   return filtered
 })
+
+// Fetch dropdown options from backend
+const fetchDropdownOptions = async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/all')
+    allPartners.value = res.data.partners
+    allPreferences.value = res.data.preferences
+    allSectors.value = res.data.sectors
+  } catch (err) {
+    console.error('Failed to fetch dropdown options:', err)
+  }
+}
 
 // Fetch patients with optional date filter
 const fetchPatients = async (dateFilter = null) => {
@@ -727,6 +793,29 @@ const fetchPatients = async (dateFilter = null) => {
     }
 
     const res = await axios.get('http://localhost:8000/api/general-summary-records', { params })
+
+    // Extract unique partners from the data to include deleted ones
+    const dataPartners = [...new Set(res.data.map(r => ({ category: r.category, partner: r.partner })))]
+
+    // Merge with backend partners (this ensures deleted partners in data are still available)
+    const mergedPartners = new Map()
+
+    // Add all partners from backend
+    allPartners.value.forEach(p => {
+      const key = `${p.category}-${p.partner}`
+      mergedPartners.set(key, p)
+    })
+
+    // Add any partners from data that aren't in backend (deleted ones)
+    dataPartners.forEach(p => {
+      const key = `${p.category}-${p.partner}`
+      if (!mergedPartners.has(key)) {
+        mergedPartners.set(key, { category: p.category, partner: p.partner })
+      }
+    })
+
+    allPartners.value = Array.from(mergedPartners.values())
+
     allPatients.value = processPatientData(res.data)
   } catch (err) {
     console.error('Failed to fetch patients:', err)
@@ -770,6 +859,10 @@ const onClearPartner = () => {
 
 const onClearBarangay = () => {
   barangayValue.value = null
+}
+
+const onClearSector = () => {
+  sectorValue.value = null
 }
 
 // Column resize functions
@@ -859,7 +952,7 @@ const downloadCSV = () => {
     rows.push(categoryRow)
   }
 
-  const monthHeaders = ['', '', '', '', '', '', '']
+  const monthHeaders = ['', '', '', '', '', '', '', '']
   visibleMonths.value.forEach(monthYear => {
     const colspan = getMonthColspan(monthYear)
     monthHeaders.push(monthYear)
@@ -876,7 +969,8 @@ const downloadCSV = () => {
     'CONTACT NO.',
     'AGE',
     'SEX',
-    'PREFERENCE'
+    'PREFERENCE',
+    'SECTOR'
   ]
 
   visibleMonths.value.forEach(monthYear => {
@@ -906,7 +1000,8 @@ const downloadCSV = () => {
       row.phoneNumber ? `\t${row.phoneNumber}` : 'N/A',
       row.age !== null ? row.age : 'N/A',
       row.sex || 'N/A',
-      row.preference || 'N/A'
+      row.preference || 'N/A',
+      row.sector || 'N/A'
     ]
 
     visibleMonths.value.forEach(monthYear => {
@@ -976,6 +1071,9 @@ const downloadCSV = () => {
   if (barangayValue.value) {
     filename += `-${barangayValue.value.toLowerCase().replace(/\s+/g, '-')}`
   }
+  if (sectorValue.value) {
+    filename += `-${sectorValue.value.toLowerCase().replace(/\s+/g, '-')}`
+  }
   if (dateRange.value) {
     if (typeof dateRange.value === 'string') {
       filename += `-${dateRange.value.replace(/\//g, '-')}`
@@ -995,11 +1093,13 @@ const downloadCSV = () => {
   URL.revokeObjectURL(url)
 }
 
-onMounted(() => {
-  // Load saved filters first
+onMounted(async () => {
+
+  await fetchDropdownOptions()
+
   loadFiltersFromStorage()
-  // Then fetch patients (the watch on dateRange will handle the filter)
-  fetchPatients()
+
+  await fetchPatients()
 })
 
 const getPatientNumber = (patientId) => {
@@ -1060,7 +1160,7 @@ const getPatientNumber = (patientId) => {
 
 .filter-item {
   flex: 1 1 auto;
-  min-width: 180px;
+  min-width: 150px;
 }
 
 .filter-date {
@@ -1100,7 +1200,7 @@ const getPatientNumber = (patientId) => {
 /* Responsive breakpoints */
 @media (max-width: 1400px) {
   .filter-item {
-    min-width: 160px;
+    min-width: 140px;
   }
 
   .filter-date {

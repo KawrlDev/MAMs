@@ -380,6 +380,7 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
+
 // Helper function for currency formatting (for display)
 const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) return '0.00'
@@ -433,6 +434,8 @@ const showPrintConfirmDialog = ref(false)
 const showInsufficientFundsDialog = ref(false)
 const eligibilityCooldownDays = ref(90) // Default to 90, will be fetched from backend
 
+const dynamicPartners = ref([])
+
 const budgetData = ref({
   currentBudget: 0,
   originalAmount: 0,
@@ -469,11 +472,25 @@ const validationErrors = ref({
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
 
 const partnerOptions = computed(() => {
-  if (editData.value.category === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (editData.value.category === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (editData.value.category === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
+  if (!editData.value.category) return []
+  return dynamicPartners.value
+    .filter(p => p.category === editData.value.category)
+    .map(p => p.partner)
 })
+
+const fetchDropdownOptions = async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/all')
+    dynamicPartners.value = res.data.partners
+  } catch (err) {
+    console.error('Failed to fetch dropdown options', err)
+    $q.notify({ 
+      type: 'negative', 
+      message: 'Failed to load dropdown options', 
+      position: 'top' 
+    })
+  }
+}
 
 const columns = [
   { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'right' },
@@ -1033,7 +1050,10 @@ function getDaySuffix(day) {
 }
 
 onMounted(async () => {
-  // Fetch eligibility cooldown first
+  // Fetch dropdown options first
+  await fetchDropdownOptions()
+  
+  // Fetch eligibility cooldown
   await fetchEligibilityCooldown()
 
   // Then load patient history with the correct cooldown

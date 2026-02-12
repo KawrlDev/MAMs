@@ -54,7 +54,6 @@
             <q-input v-model="suffixValue" dense outlined class="flat-input" :readonly="!edit"
               @update:model-value="checkForChanges" />
           </div>
-
           <div class="col-3">
             <label class="form-label">Birthdate <span class="required">*</span></label>
             <q-input v-model="birthdateValue" dense outlined class="flat-input"
@@ -73,8 +72,9 @@
               </template>
             </q-input>
           </div>
+
           <div class="col-3">
-            <label class="form-label">Age </label>
+            <label class="form-label">Age</label>
             <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" class="flat-input" readonly />
           </div>
 
@@ -89,6 +89,17 @@
             <label class="form-label">Preference</label>
             <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input" :disable="!edit"
               @update:model-value="checkForChanges" />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Sector</label>
+            <div class="sector-container">
+              <div v-if="allSectors.length === 0" class="text-grey-6 text-caption q-pa-sm">
+                No sectors available
+              </div>
+              <q-checkbox v-for="sector in allSectors" :key="sector.id" :val="sector.id" v-model="selectedSectorIds"
+                :label="sector.sector" dense :disable="!edit" @update:model-value="checkForChanges" />
+            </div>
           </div>
 
           <div class="col-4">
@@ -115,6 +126,7 @@
               :rules="[val => !!val || 'This field is required']" :readonly="!edit"
               @update:model-value="checkForChanges" />
           </div>
+
           <div class="col-6">
             <label class="form-label">Phone Number <span class="required">*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined class="flat-input" placeholder="09XXXXXXXXX"
@@ -392,31 +404,40 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
+const allSectors = ref([])
+const selectedSectorIds = ref([])
+
 const edit = ref(false)
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
-const options = [['MALE', 'FEMALE'], ['N/A', 'Gay', 'Lesbian'], ["APOKON",
-  "BINCUNGAN",
-  "BUSAON",
-  "CANOCOTAN",
-  "CUAMBOGAN",
-  "LA FILIPINA",
-  "LIBOGANON",
-  "MADAUM",
-  "MAGDUM",
-  "MAGUGPO EAST",
-  "MAGUGPO NORTH",
-  "MAGUGPO POBLACION",
-  "MAGUGPO SOUTH",
-  "MAGUGPO WEST",
-  "MANKILAM",
-  "NEW BALAMBAN",
-  "NUEVA FUERZA",
-  "PAGSABANGAN",
-  "PANDAPAN",
-  "SAN AGUSTIN",
-  "SAN ISIDRO",
-  "SAN MIGUEL (CAMP 4)",
-  "VISAYAN VILLAGE"]]
+// REPLACE the old options array with this:
+const options = [
+  ['MALE', 'FEMALE'],
+  computed(() => dynamicPreferences.value.map(p => p.preference)),
+  ["APOKON",
+    "BINCUNGAN",
+    "BUSAON",
+    "CANOCOTAN",
+    "CUAMBOGAN",
+    "LA FILIPINA",
+    "LIBOGANON",
+    "MADAUM",
+    "MAGDUM",
+    "MAGUGPO EAST",
+    "MAGUGPO NORTH",
+    "MAGUGPO POBLACION",
+    "MAGUGPO SOUTH",
+    "MAGUGPO WEST",
+    "MANKILAM",
+    "NEW BALAMBAN",
+    "NUEVA FUERZA",
+    "PAGSABANGAN",
+    "PANDAPAN",
+    "SAN AGUSTIN",
+    "SAN ISIDRO",
+    "SAN MIGUEL (CAMP 4)",
+    "VISAYAN VILLAGE"
+  ]
+]
 const patientForm = ref(null);
 const patientIDValue = ref(null)
 const categoryValue = ref(null)
@@ -453,11 +474,31 @@ const editActionLoading = ref(false)
 const hasPatientChanges = ref(false)
 const hasTransactionChanges = ref(false)
 
+const dynamicPartners = ref([])
+const dynamicPreferences = ref([])
+
+// Add this function to fetch dropdown options
+const fetchDropdownOptions = async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/all')
+    dynamicPartners.value = res.data.partners
+    dynamicPreferences.value = res.data.preferences
+    allSectors.value = res.data.sectors
+  } catch (err) {
+    console.error('Failed to fetch dropdown options', err)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load dropdown options',
+      position: 'top'
+    })
+  }
+}
+
 const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
+  if (!categoryValue.value) return []
+  return dynamicPartners.value
+    .filter(p => p.category === categoryValue.value)
+    .map(p => p.partner)
 })
 
 const originalPatientData = ref({
@@ -513,7 +554,7 @@ const onPhoneNumberChange = (value) => {
     // Remove all non-digit characters
     const cleaned = value.replace(/\D/g, '')
     phoneNumberValue.value = cleaned
-    
+
     const normalized = normalizePhoneNumber(cleaned)
     if (normalized) {
       phoneNumberValue.value = normalized
@@ -570,7 +611,8 @@ const checkPatientChanges = () => {
     (preferenceValue.value || null) !== (originalPatientData.value.preference || null) ||
     barangayValue.value !== originalPatientData.value.barangay ||
     houseAddressValue.value !== originalPatientData.value.house_address ||
-    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null)
+    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null) ||
+    JSON.stringify([...selectedSectorIds.value].sort()) !== JSON.stringify([...(originalPatientData.value.sector_ids || [])].sort())  // ADD THIS LINE
 }
 
 const checkTransactionChanges = () => {
@@ -725,6 +767,7 @@ const updatePatientInfo = async () => {
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
+  formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
   formData.append('birthdate', mysqlBirthdate)
   formData.append('sex', sexValue.value)
@@ -757,6 +800,7 @@ const updateTransactionDetails = async () => {
   const formData = new FormData()
   formData.append('glNum', glNum.value)
   formData.append('update_transaction_only', '1')
+  formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   formData.append('category', categoryValue.value)
   formData.append('partner', partnerValue.value)
   formData.append('hospital_bill', hospitalBillValue.value || 0)
@@ -775,11 +819,13 @@ const updateTransactionDetails = async () => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch dropdown options first
+  await fetchDropdownOptions()
+
   if (!glNum.value) return
   getPatientDetails(glNum.value)
 })
-
 watch(
   () => route.params.glNum,
   (newGlNum) => {
@@ -840,6 +886,7 @@ const getPatientDetails = async (id) => {
   barangayValue.value = patientDetails.barangay
   houseAddressValue.value = patientDetails.house_address
   phoneNumberValue.value = patientDetails.phone_number
+  selectedSectorIds.value = patientDetails.sector_ids || []
   originalPatientData.value = {
     lastname: patientDetails.patient_lastname,
     firstname: patientDetails.patient_firstname,
@@ -858,6 +905,7 @@ const getPatientDetails = async (id) => {
     partner: patientDetails.partner,
     hospital_bill: patientDetails.hospital_bill,
     issued_amount: patientDetails.issued_amount,
+    sector_ids: patientDetails.sector_ids || [],
     is_checked: patientDetails.client_lastname == null,
     client_lastname: patientDetails.client_lastname,
     client_firstname: patientDetails.client_firstname,
@@ -1208,5 +1256,26 @@ function getDaySuffix(day) {
   font-size: 13px;
   color: #666;
   line-height: 1.4;
+}
+
+.sector-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 8px 10px;
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  align-items: center;
+}
+
+.sector-container :deep(.q-checkbox) {
+  margin-top: 0;
+}
+
+.sector-container :deep(.q-checkbox__label) {
+  font-size: 13px;
+  font-weight: 500;
 }
 </style>

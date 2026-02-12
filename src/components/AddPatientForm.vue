@@ -250,7 +250,7 @@
           </div>
         </div>
 
-        <div class="grid-5">
+        <div class="grid-bio">
           <div class="field">
             <label>Birthdate <span>*</span></label>
             <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
@@ -269,34 +269,35 @@
               </template>
             </q-input>
           </div>
+
           <div class="field">
-            <label>Age </label>
+            <label>Age</label>
             <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" readonly />
           </div>
 
           <div class="field">
             <label>Sex <span>*</span></label>
-            <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex" placeholder="Sex"
+            <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex"
               :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
           </div>
 
           <div class="field">
-  <label>Preference</label>
-  <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
-    outlined @update:model-value="checkForPatientEdits" />
-</div>
+            <label>Preference</label>
+            <q-select v-model="preferenceValue" :options="dynamicPreferences.map(p => p.preference)" label="Preference"
+              dense outlined @update:model-value="checkForPatientEdits" />
+          </div>
 
-<!-- ADD THIS NEW FIELD -->
-<div class="field">
-  <label>Sector</label>
-  <div class="sector-checkboxes">
-    <q-checkbox v-model="isPWD" label="PWD" dense @update:model-value="checkForPatientEdits" />
-    <q-checkbox v-model="isSoloParent" label="Solo Parent" dense @update:model-value="checkForPatientEdits" />
-    <q-checkbox v-model="isSenior" label="Senior" dense @update:model-value="checkForPatientEdits" />
-  </div>
-</div>
+          <div class="field sector-field">
+            <label>Sector</label>
+            <div class="sector-container">
+              <div v-if="dynamicSectors.length === 0" class="text-grey-6 text-caption q-pa-sm">
+                No sectors available
+              </div>
+              <q-checkbox v-for="sector in dynamicSectors" :key="sector.id" :val="sector.id" v-model="selectedSectorIds"
+                :label="sector.sector" dense @update:model-value="checkForPatientEdits" />
+            </div>
+          </div>
         </div>
-
         <div class="grid-5">
           <div class="field">
             <label>Province</label>
@@ -325,8 +326,7 @@
             <label>Phone Number <span>*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
               @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
-              :persistent-hint="true"
-              @keypress="onPhoneNumberKeyPress" />
+              :persistent-hint="true" @keypress="onPhoneNumberKeyPress" />
           </div>
         </div>
 
@@ -342,18 +342,10 @@
           </div>
 
           <div class="field" v-if="categoryValue == 'HOSPITAL'">
-  <label>Hospital Bill <span>*</span></label>
-  <q-input
-    type="text"
-    dense
-    outlined
-    v-model="hospitalBillDisplay"
-    @update:model-value="onHospitalBillInput"
-    @blur="finalizeHospitalBill"
-    placeholder="0.00"
-    :rules="[val => !!val || 'This field is required']"
-  />
-</div>
+            <label>Hospital Bill <span>*</span></label>
+            <q-input type="text" dense outlined v-model="hospitalBillDisplay" @update:model-value="onHospitalBillInput"
+              @blur="finalizeHospitalBill" placeholder="0.00" :rules="[val => !!val || 'This field is required']" />
+          </div>
 
           <div class="field">
             <label>Issued Amount <span>*</span></label>
@@ -436,7 +428,8 @@
 
           <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
             <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
-            <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithInsufficientFunds" />
+            <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn"
+              @click="proceedWithInsufficientFunds" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -928,7 +921,7 @@
 import { api } from 'src/boot/axios'
 
 const axios = api
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { date, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
@@ -944,9 +937,15 @@ const router = useRouter()
 const $q = useQuasar()
 
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
+
+// Dynamic options from backend
+const dynamicSectors = ref([])       // [{ id, sector }]
+const dynamicPreferences = ref([])   // [{ id, preference }]
+const dynamicPartners = ref([])      // [{ id, category, partner }]
+
 const options = [
   ['MALE', 'FEMALE'],
-  ['N/A', 'Gay', 'Lesbian'],
+  computed(() => dynamicPreferences.value.map(p => p.preference)),
   [
     "APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA", "LIBOGANON", "MADAUM",
     "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH", "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST",
@@ -954,6 +953,25 @@ const options = [
     "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"
   ]
 ]
+
+
+const selectedSectorIds = ref([])
+
+const fetchDropdownOptions = async () => {
+  try {
+    const res = await axios.get('http://localhost:8000/api/all')
+    dynamicPreferences.value = res.data.preferences
+    dynamicPartners.value = res.data.partners
+    dynamicSectors.value = res.data.sectors
+  } catch (err) {
+    console.error('Failed to fetch dropdown options', err)
+    $q.notify({ type: 'negative', message: 'Failed to load dropdown options', position: 'top' })
+  }
+}
+
+onMounted(() => {
+  fetchDropdownOptions()
+});
 
 const patientForm = ref(null);
 
@@ -993,9 +1011,6 @@ const relationshipValue = ref(null)
 const dateToday = ref(null)
 
 // Auto-search related refs
-const isPWD = ref(false)
-const isSoloParent = ref(false)
-const isSenior = ref(false)
 const showPatientDropdown = ref(false)
 const searchingPatients = ref(false)
 const patientSearchResults = ref([])
@@ -1012,13 +1027,13 @@ const usedBrowserPatient = ref(false)
 const browserPatientEdited = ref(false)
 
 const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
+  if (!categoryValue.value) return []
+  return dynamicPartners.value
+    .filter(p => p.category === categoryValue.value)
+    .map(p => p.partner)
 })
 const hospitalBillDisplay = ref('');
- 
+
 const issuedAmountDisplay = ref('');
 const issuedAmountValue = ref(null);
 
@@ -1028,7 +1043,7 @@ function formatInputWithComma(value) {
   let cleaned = value.replace(/,/g, '');
   // Keep only digits and dot
   cleaned = cleaned.replace(/[^\d.]/g, '');
-  
+
   // Split integer and decimal parts
   const parts = cleaned.split('.');
   if (parts.length > 2) {
@@ -1041,7 +1056,7 @@ function formatInputWithComma(value) {
   // Add commas
   integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  const displayValue = decimal !== null ? `${integer}.${decimal.slice(0,2)}` : integer;
+  const displayValue = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer;
   return { displayValue, numericValue: parseFloat(cleaned) || 0 };
 }
 
@@ -1173,15 +1188,12 @@ const filteredSearchResults = computed(() => {
 })
 
 const sectorValue = computed(() => {
-  const sectors = []
-
-  if (isSenior.value) sectors.push('Senior')
-  if (isPWD.value) sectors.push('PWD')
-  if (isSoloParent.value) sectors.push('Solo Parent')
-
-  return sectors.length ? sectors.join(', ') : 'N/A'
+  if (!selectedSectorIds.value.length) return 'N/A'
+  return dynamicSectors.value
+    .filter(s => selectedSectorIds.value.includes(s.id))
+    .map(s => s.sector)
+    .join(', ')
 })
-
 const showCancelDialog = ref(false)
 const showExistingDialog = ref(false)
 const showEligibilityWarning = ref(false)
@@ -1435,10 +1447,7 @@ const selectPatientFromDropdown = (patient) => {
   })
   phoneNumberValue.value = patient.phone_number
 
-  // Add these lines:
-  isPWD.value = patient.is_pwd || false
-  isSoloParent.value = patient.is_solo_parent || false
-  isSenior.value = patient.is_senior || false
+  selectedSectorIds.value = patient.sector_ids || []
 
   $q.notify({
     type: 'positive',
@@ -1470,10 +1479,8 @@ const checkForPatientEdits = () => {
     (preferenceValue.value || null) !== (originalBrowserPatient.value.preference || null) ||
     barangayValue.value !== originalBrowserPatient.value.barangay ||
     houseAddressValue.value !== originalBrowserPatient.value.house_address
-    houseAddressValue.value !== originalBrowserPatient.value.house_address ||
-    isPWD.value !== (originalBrowserPatient.value.is_pwd || false) ||
-    isSoloParent.value !== (originalBrowserPatient.value.is_solo_parent || false) ||
-    isSenior.value !== (originalBrowserPatient.value.is_senior || false)
+  houseAddressValue.value !== originalBrowserPatient.value.house_address ||
+    JSON.stringify([...selectedSectorIds.value].sort()) !== JSON.stringify([...(originalBrowserPatient.value.sector_ids || [])].sort())
 
   browserPatientEdited.value = edited
 }
@@ -1677,17 +1684,12 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   }
 
   const formData = new FormData()
-    formData.append('phone_number', phoneNumberValue.value || '')
-  formData.append('partner', partnerValue.value)
   formData.append('category', categoryValue.value)
   formData.append('lastname', lastNameValue.value)
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
-  formData.append('is_pwd', isPWD.value ? 1 : 0)
-  formData.append('is_solo_parent', isSoloParent.value ? 1 : 0)
-  formData.append('is_senior', isSenior.value ? 1 : 0)
-  formData.append('hospital_bill', hospitalBillValue.value || 0)
+  formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   formData.append('birthdate', mysqlBirthdate)
   formData.append('sex', sexValue.value)
   formData.append('preference', preferenceValue.value || '')
@@ -2351,18 +2353,36 @@ label span {
   color: #666;
   line-height: 1.4;
 }
-.sector-checkboxes {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  padding-top: 4px;
+
+.grid-bio {
+  display: grid;
+  grid-template-columns: 1.2fr 0.6fr 0.8fr 1fr 2fr;
+  gap: 16px;
+  margin-bottom: -14px;
+  align-items: start;
 }
 
-:deep(.sector-checkboxes .q-checkbox) {
+.sector-field {
+  grid-column: 5;
+}
+
+.sector-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 8px 10px;
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  align-items: center;
+}
+
+:deep(.sector-container .q-checkbox) {
   margin-top: 0;
 }
 
-:deep(.sector-checkboxes .q-checkbox__label) {
+:deep(.sector-container .q-checkbox__label) {
   font-size: 13px;
   font-weight: 500;
 }
