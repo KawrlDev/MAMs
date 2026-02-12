@@ -250,7 +250,7 @@
           </div>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-5">
           <div class="field">
             <label>Birthdate <span>*</span></label>
             <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
@@ -281,10 +281,20 @@
           </div>
 
           <div class="field">
-            <label>Preference</label>
-            <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
-              outlined @update:model-value="checkForPatientEdits" />
-          </div>
+  <label>Preference</label>
+  <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
+    outlined @update:model-value="checkForPatientEdits" />
+</div>
+
+<!-- ADD THIS NEW FIELD -->
+<div class="field">
+  <label>Sector</label>
+  <div class="sector-checkboxes">
+    <q-checkbox v-model="isPWD" label="PWD" dense @update:model-value="checkForPatientEdits" />
+    <q-checkbox v-model="isSoloParent" label="Solo Parent" dense @update:model-value="checkForPatientEdits" />
+    <q-checkbox v-model="isSenior" label="Senior" dense @update:model-value="checkForPatientEdits" />
+  </div>
+</div>
         </div>
 
         <div class="grid-5">
@@ -720,6 +730,9 @@
                   <div class="info-item">
                     <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
                   </div>
+                  <div class="info-item">
+                    <strong>Sector:</strong> {{ sectorValue }}
+                  </div>
                   <div class="info-item info-item-full">
                     <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
                       provinceValue
@@ -980,6 +993,9 @@ const relationshipValue = ref(null)
 const dateToday = ref(null)
 
 // Auto-search related refs
+const isPWD = ref(false)
+const isSoloParent = ref(false)
+const isSenior = ref(false)
 const showPatientDropdown = ref(false)
 const searchingPatients = ref(false)
 const patientSearchResults = ref([])
@@ -1154,6 +1170,16 @@ const filteredSearchResults = computed(() => {
       }
       return a.lastname.localeCompare(b.lastname)
     })
+})
+
+const sectorValue = computed(() => {
+  const sectors = []
+
+  if (isSenior.value) sectors.push('Senior')
+  if (isPWD.value) sectors.push('PWD')
+  if (isSoloParent.value) sectors.push('Solo Parent')
+
+  return sectors.length ? sectors.join(', ') : 'N/A'
 })
 
 const showCancelDialog = ref(false)
@@ -1407,6 +1433,18 @@ const selectPatientFromDropdown = (patient) => {
     message: 'Patient information loaded. Fill in the remaining details.',
     position: 'top'
   })
+  phoneNumberValue.value = patient.phone_number
+
+  // Add these lines:
+  isPWD.value = patient.is_pwd || false
+  isSoloParent.value = patient.is_solo_parent || false
+  isSenior.value = patient.is_senior || false
+
+  $q.notify({
+    type: 'positive',
+    message: 'Patient information loaded. Fill in the remaining details.',
+    position: 'top'
+  })
 }
 
 const dateOptions = (date) => {
@@ -1432,6 +1470,10 @@ const checkForPatientEdits = () => {
     (preferenceValue.value || null) !== (originalBrowserPatient.value.preference || null) ||
     barangayValue.value !== originalBrowserPatient.value.barangay ||
     houseAddressValue.value !== originalBrowserPatient.value.house_address
+    houseAddressValue.value !== originalBrowserPatient.value.house_address ||
+    isPWD.value !== (originalBrowserPatient.value.is_pwd || false) ||
+    isSoloParent.value !== (originalBrowserPatient.value.is_solo_parent || false) ||
+    isSenior.value !== (originalBrowserPatient.value.is_senior || false)
 
   browserPatientEdited.value = edited
 }
@@ -1635,11 +1677,17 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   }
 
   const formData = new FormData()
+    formData.append('phone_number', phoneNumberValue.value || '')
+  formData.append('partner', partnerValue.value)
   formData.append('category', categoryValue.value)
   formData.append('lastname', lastNameValue.value)
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
+  formData.append('is_pwd', isPWD.value ? 1 : 0)
+  formData.append('is_solo_parent', isSoloParent.value ? 1 : 0)
+  formData.append('is_senior', isSenior.value ? 1 : 0)
+  formData.append('hospital_bill', hospitalBillValue.value || 0)
   formData.append('birthdate', mysqlBirthdate)
   formData.append('sex', sexValue.value)
   formData.append('preference', preferenceValue.value || '')
@@ -2302,5 +2350,20 @@ label span {
   font-size: 13px;
   color: #666;
   line-height: 1.4;
+}
+.sector-checkboxes {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+:deep(.sector-checkboxes .q-checkbox) {
+  margin-top: 0;
+}
+
+:deep(.sector-checkboxes .q-checkbox__label) {
+  font-size: 13px;
+  font-weight: 500;
 }
 </style>
