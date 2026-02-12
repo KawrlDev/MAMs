@@ -572,13 +572,13 @@ const doDelete = async () => {
 }
 
 .table-wrapper :deep(thead tr) {
-  background: #f5f5f5;
+  background: #1f8f2e;
 }
 
 .table-wrapper :deep(thead th) {
   font-weight: 600;
   text-align: center !important;
-  color: #333;
+  color: #ffffff;
   font-size: 14px;
 }
 
