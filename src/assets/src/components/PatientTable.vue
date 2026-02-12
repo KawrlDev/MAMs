@@ -114,21 +114,23 @@ const mapPatientsToRows = (patients) => {
     }
   })
 }
-
 watch(search, async (val) => {
-  // Save to localStorage whenever search changes (only if not empty)
   if (val && val !== '') {
     localStorage.setItem(STORAGE_KEY, val)
   } else {
     localStorage.removeItem(STORAGE_KEY)
   }
-  
-  const res = await axios.get(
-    'http://localhost:8000/api/patients/search',
-    { params: { q: val || '' } }
-  )
 
-  rows.value = mapPatientsToRows(res.data)
+  if (!val || val.trim() === '') {
+    const res = await axios.get('http://localhost:8000/api/patients')
+    rows.value = mapPatientsToRows(res.data)
+  } else {
+    const res = await axios.get(
+      'http://localhost:8000/api/patients/search',
+      { params: { q: val } }
+    )
+    rows.value = mapPatientsToRows(res.data)
+  }
 })
 </script>
 
