@@ -595,7 +595,7 @@ const checkForChanges = () => {
 const handleDelete = async () => {
   deleteLoading.value = true
   try {
-    await axios.delete(`http://localhost:8000/api/patient-details/delete/${glNum.value}`)
+    await axios.post(`http://localhost:8000/api/patient-details/delete/${glNum.value}`)
     $q.notify({
       type: 'positive',
       message: 'Patient record deleted successfully',
