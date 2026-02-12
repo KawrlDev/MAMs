@@ -4,19 +4,28 @@
 
     <q-card-section class="text-center card-content">
       <div class="charts-container">
-        <div class="chart-wrapper chart-medium">
-          <p>PER CATEGORY</p>
-          <canvas ref="perCategoryChart" />
+        <div class="chart-column">
+          <div class="chart-wrapper chart-medium">
+            <p>PER CATEGORY</p>
+            <canvas ref="perCategoryChart" />
+          </div>
+
+          <div class="chart-wrapper chart-large">
+            <p>PER AGE BRACKET</p>
+            <canvas ref="perAgeBracketChart" />
+          </div>
         </div>
 
-        <div class="chart-wrapper chart-small">
-          <p>PER SEX</p>
-          <canvas ref="perSexChart" />
-        </div>
+        <div class="chart-column">
+          <div class="chart-wrappers chart-small">
+            <p>PER SEX</p>
+            <canvas ref="perSexChart" />
+          </div>
 
-        <div class="chart-wrapper chart-large">
-          <p>PER AGE BRACKET</p>
-          <canvas ref="perAgeBracketChart" />
+          <div class="chart-wrapper chart-mediums">
+            <p>PER SECTOR</p>
+            <canvas ref="perSectorChart" />
+          </div>
         </div>
       </div>
 
@@ -89,6 +98,7 @@ Chart.register(ChartDataLabels, BarElement, CategoryScale, LinearScale, Tooltip,
 const perCategoryChart = ref(null)
 const perSexChart = ref(null)
 const perAgeBracketChart = ref(null)
+const perSectorChart = ref(null)
 const rows = ref([])
 const pagination = ref({ rowsPerPage: 5, page: 1 })
 
@@ -185,6 +195,19 @@ onMounted(async () => {
       ],
       ['#FF6B6B', '#FFA07A', '#FFD93D', '#6BCF7F', '#4ECDC4', '#45B7D1', '#9B59B6']
     )
+
+    // New Per Sector Chart
+    createDoughnut(
+      perSectorChart,
+      ['Senior', 'PWD', 'Solo Parent', 'N/A'],
+      [
+        parseFloat(chartData.senior) || 1000,
+        parseFloat(chartData.pwd) || 1500,
+        parseFloat(chartData.soloParent) || 1200,
+        parseFloat(chartData.na) || 1100
+      ],
+      ['#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9']
+    )
   } catch (err) {
     console.error('Error loading data:', err)
   }
@@ -204,7 +227,7 @@ onMounted(async () => {
   margin: 10px 0;
   overflow: hidden;
   margin-bottom: -2%;
-  max-height: 980px;
+  max-height: 1580px;
 }
 
 .amount-title {
@@ -240,11 +263,20 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 20px;
+  gap: 30px;
   margin-bottom: 40px;
   padding: 0 10px;
   margin-top: 30px;
   flex-wrap: wrap;
+}
+
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  max-width: 400px;
+  min-width: 280px;
 }
 
 .chart-wrapper {
@@ -253,6 +285,25 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
+}
+.chart-wrappers {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+.chart-wrappers p {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 15px;
+  letter-spacing: 0.3px;
+  min-height: 25px;
+  margin-bottom: 40px;
+  margin-top: -2px;
 }
 
 .chart-wrapper p {
@@ -270,6 +321,7 @@ onMounted(async () => {
     height: 190px !important;
   max-width: 190px;
   min-width: 200px;
+  margin-left: 100px;
 }
 .chart-medium {
     flex: 1 1 200px;
@@ -277,11 +329,20 @@ onMounted(async () => {
   max-width: 310px;
   min-width: 200px;
 }
+.chart-mediums {
+     flex: 1 1 200px;
+  height: 250px !important;
+  max-width: 310px;
+  min-width: 250px;
+  margin-top: 70px;
+  margin-left: 50px;
+}
 .chart-large {
   flex: 1 1 200px;
   height: 270px !important;
   max-width: 310px;
   min-width: 250px;
+  margin-top: 50px;
 }
 
 .chart-small canvas,
@@ -365,10 +426,16 @@ onMounted(async () => {
     margin-top: 15px;
     margin-bottom: 20px;
     padding: 0 5px;
+    flex-direction: column;
+  }
+
+  .chart-column {
+    gap: 15px;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .chart-wrapper {
-    flex: 1 1 100%;
     max-width: 100%;
     min-width: 0;
   }
@@ -425,10 +492,15 @@ onMounted(async () => {
     gap: 18px;
     margin-top: 20px;
     margin-bottom: 25px;
+    flex-direction: column;
+  }
+
+  .chart-column {
+    gap: 18px;
+    max-width: 100%;
   }
 
   .chart-wrapper {
-    flex: 1 1 100%;
     max-width: 100%;
   }
 
@@ -480,14 +552,14 @@ onMounted(async () => {
   }
 
   .charts-container {
-    gap: 18px;
+    gap: 20px;
     margin-top: 25px;
     margin-bottom: 30px;
   }
 
-  .chart-wrapper {
-    flex: 1 1 45%;
-    max-width: 280px;
+  .chart-column {
+    gap: 18px;
+    max-width: 350px;
   }
 
   .chart-wrapper p {
@@ -538,14 +610,14 @@ onMounted(async () => {
   }
 
   .charts-container {
-    gap: 20px;
+    gap: 25px;
     margin-top: 28px;
     margin-bottom: 35px;
   }
 
-  .chart-wrapper {
-    flex: 1 1 30%;
-    max-width: 280px;
+  .chart-column {
+    gap: 20px;
+    max-width: 380px;
   }
 
   .chart-wrapper p {
@@ -596,14 +668,14 @@ onMounted(async () => {
   }
 
   .charts-container {
-    gap: 10px;
+    gap: 25px;
     margin-top: 28px;
     margin-bottom: 38px;
   }
 
-  .chart-wrapper {
-    flex: 1 1 30%;
-    max-width: 280px;
+  .chart-column {
+    gap: 20px;
+    max-width: 400px;
   }
 
   .chart-wrapper p {
@@ -654,14 +726,14 @@ onMounted(async () => {
   }
 
   .charts-container {
-    gap: 20px;
+    gap: 30px;
     margin-top: 30px;
     margin-bottom: 40px;
   }
 
-  .chart-wrapper {
-    flex: 1 1 30%;
-    max-width: 290px;
+  .chart-column {
+    gap: 20px;
+    max-width: 420px;
   }
 
   .chart-wrapper p {
@@ -712,14 +784,14 @@ onMounted(async () => {
   }
 
   .charts-container {
-    gap: 20px;
+    gap: 30px;
     margin-top: 30px;
     margin-bottom: 40px;
   }
 
-  .chart-wrapper {
-    flex: 1 1 30%;
-    max-width: 300px;
+  .chart-column {
+    gap: 20px;
+    max-width: 450px;
   }
 
   .chart-wrapper p {
@@ -770,14 +842,14 @@ onMounted(async () => {
   }
 
   .charts-container {
-    gap: 25px;
+    gap: 35px;
     margin-top: 35px;
     margin-bottom: 45px;
   }
 
-  .chart-wrapper {
-    flex: 1 1 30%;
-    max-width: 320px;
+  .chart-column {
+    gap: 25px;
+    max-width: 500px;
   }
 
   .chart-wrapper p {
