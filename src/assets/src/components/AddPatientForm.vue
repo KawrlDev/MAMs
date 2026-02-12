@@ -1448,14 +1448,15 @@ const proceedWithFinalConfirm = () => {
 
 const checkBudget = async () => {
   try {
-    // Fetch current budget from your API
-    const res = await axios.get('http://localhost:8000/api/budget/current')
-    currentBudget.value = parseFloat(res.data.amount || 0)
+    const res = await axios.post('http://localhost:8000/api/validate-transfer', {
+      year: new Date().getFullYear(),
+      category: categoryValue.value,
+      amount: parseFloat(issuedAmountValue.value || 0)
+    })
 
-    const requestedAmount = parseFloat(issuedAmountValue.value || 0)
-    projectedBalance.value = currentBudget.value - requestedAmount
-
-    if (projectedBalance.value < 0) {
+    if (!res.data.success) {
+      // Calculate what the balance will be after the transaction
+      projectedBalance.value = res.data.breakdown.remaining
       showInsufficientFundsDialog.value = true
     } else {
       showAreYouSureDialog.value = true
