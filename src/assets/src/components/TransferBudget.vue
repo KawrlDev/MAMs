@@ -117,7 +117,9 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 
 const router = useRouter()
 const $q = useQuasar()

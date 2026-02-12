@@ -375,7 +375,9 @@
 
 <script setup>
 // Script remains exactly the same - no changes needed
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'

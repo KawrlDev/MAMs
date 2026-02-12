@@ -80,7 +80,9 @@
 import { ref, onMounted, nextTick, computed } from 'vue'
 import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 
 Chart.register(ChartDataLabels, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 

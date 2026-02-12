@@ -55,7 +55,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 import ActionBtn from './ActionBtn.vue'
 
 const rows = ref([])

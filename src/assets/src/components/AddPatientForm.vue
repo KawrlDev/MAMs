@@ -912,7 +912,9 @@
 </template>
 
 <script setup>
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 import { ref, computed, watch } from 'vue';
 import { date, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';

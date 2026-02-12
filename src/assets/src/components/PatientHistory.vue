@@ -365,7 +365,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
+import { api } from 'src/boot/axios'
+
+const axios = api
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'

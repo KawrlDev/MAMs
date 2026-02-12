@@ -54,7 +54,9 @@
 </template>
 
 <script setup>
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 import { ref, onMounted } from 'vue'
 
 

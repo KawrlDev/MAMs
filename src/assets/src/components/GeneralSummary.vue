@@ -231,7 +231,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 

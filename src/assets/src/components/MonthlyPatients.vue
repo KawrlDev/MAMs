@@ -21,7 +21,9 @@ import {
   Tooltip,
   Legend
 } from 'chart.js/auto'
-import axios from 'axios'
+import { api } from 'src/boot/axios'
+
+const axios = api
 
 Chart.register(
   LineElement,
