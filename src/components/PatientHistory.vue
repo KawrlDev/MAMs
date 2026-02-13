@@ -70,6 +70,10 @@
                   <span class="info-value">{{ selectedRecord?.partner }}</span>
                 </div>
                 <div class="info-item">
+                  <span class="info-label">Issued Date:</span>
+                  <span class="info-value">{{ formatDisplayDate(selectedRecord?.issuedDate) }}</span>
+                </div>
+                <div class="info-item">
                   <span class="info-label">Issued By:</span>
                   <span class="info-value">{{ selectedRecord?.issuedBy }}</span>
                 </div>
@@ -134,9 +138,49 @@
                   <q-select v-model="editData.partner" :options="partnerOptions" dense outlined class="edit-input"
                     :error="validationErrors.partner" error-message="Partner is required" />
                 </div>
+                
+                <!-- ADMIN-ONLY FIELDS -->
                 <div class="edit-item">
-                  <label class="edit-label">Issued By:</label>
-                  <q-input v-model="editData.issuedBy" dense outlined readonly class="edit-input" />
+                  <label class="edit-label">Issued Date: <span v-if="isAdmin" class="required">*</span></label>
+                  <q-input 
+                    v-model="editData.issuedDate" 
+                    dense 
+                    outlined 
+                    placeholder="YYYY-MM-DD"
+                    class="edit-input"
+                    :disable="!isAdmin"
+                    :error="validationErrors.issuedDate"
+                    error-message="Issued Date is required"
+                    :hint="!isAdmin ? 'Cannot be edited!' : ''"
+                    :persistent-hint="!isAdmin"
+                    mask="####-##-##"
+                  >
+                    <template #append>
+                      <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': !isAdmin }">
+                        <q-popup-proxy v-if="isAdmin" cover transition-show="scale" transition-hide="scale">
+                          <q-date v-model="editData.issuedDate" mask="YYYY-MM-DD" emit-immediately>
+                            <div class="row items-center justify-end">
+                              <q-btn v-close-popup label="Close" color="primary" flat />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
+                </div>
+                <div class="edit-item">
+                  <label class="edit-label">Issued By: <span v-if="isAdmin" class="required">*</span></label>
+                  <q-input 
+                    v-model="editData.issuedBy" 
+                    dense 
+                    outlined 
+                    class="edit-input" 
+                    :disable="!isAdmin"
+                    :error="validationErrors.issuedBy"
+                    error-message="Issued By is required"
+                    :hint="!isAdmin ? 'Cannot be edited!' : ''"
+                    :persistent-hint="!isAdmin"
+                  />
                 </div>
 
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
@@ -266,17 +310,9 @@
               <q-icon name="account_balance_wallet" color="orange" />
             </template>
             <div>
-              <div class="text-weight-bold q-mb-xs">Current Budget: ₱{{ formatCurrency(budgetData.currentBudget) }}</div>
-              <div class="text-weight-bold q-mb-xs">Original Amount: ₱{{ formatCurrency(budgetData.originalAmount) }}</div>
-              <div class="text-weight-bold q-mb-xs">New Amount: ₱{{ formatCurrency(budgetData.newAmount) }}</div>
-              <div class="text-weight-bold q-mb-xs">Difference: ₱{{ formatCurrency(budgetData.difference) }}</div>
               <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance) }}</div>
             </div>
           </q-banner>
-
-          <div class="text-body2 text-grey-8">
-            You do not have sufficient funds in your budget for this update. Do you still want to proceed?
-          </div>
         </q-card-section>
 
         <q-separator />
@@ -325,18 +361,101 @@
 
     <!-- SAVE CONFIRMATION DIALOG -->
     <q-dialog v-model="showSaveConfirmDialog">
-      <q-card style="min-width: 350px">
+      <q-card style="min-width: 600px; max-width: 700px;">
+        <q-card-section class="bg-orange-6 text-white">
+          <div class="text-h6">
+            <q-icon name="edit" size="sm" class="q-mr-sm" />
+            Transaction Details Changed
+          </div>
+        </q-card-section>
+
         <q-card-section>
-          <div class="text-h6">Save Changes?</div>
+          <div class="text-subtitle1 q-mb-md">
+            You have modified the transaction details. Are you sure you want to update?
+          </div>
+
+          <!-- Show original record info -->
+          <div class="patient-info-box q-mb-md">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Original Transaction Information:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>GL Number:</strong> {{ selectedRecord?.glNum }}
+              </div>
+              <div class="info-item">
+                <strong>Category:</strong> {{ selectedRecord?.category }}
+              </div>
+              <div class="info-item">
+                <strong>Partner:</strong> {{ selectedRecord?.partner }}
+              </div>
+              <div class="info-item" v-if="isAdmin">
+                <strong>Issued Date:</strong> {{ formatDisplayDate(selectedRecord?.issuedDate) }}
+              </div>
+              <div class="info-item" v-if="isAdmin">
+                <strong>Issued By:</strong> {{ selectedRecord?.issuedBy }}
+              </div>
+              <div class="info-item" v-if="selectedRecord?.category === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> {{ selectedRecord?.hospitalBill ? '₱' + formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Issued Amount:</strong> ₱{{ formatCurrency(selectedRecord?.issuedAmount) }}
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong> 
+                {{ selectedRecord?.rawData?.client_lastname ? 
+                   `${selectedRecord.rawData.client_lastname}, ${selectedRecord.rawData.client_firstname}` + 
+                   (selectedRecord.rawData.client_middlename ? ` ${selectedRecord.rawData.client_middlename}` : '') +
+                   (selectedRecord.rawData.client_suffix ? ` ${selectedRecord.rawData.client_suffix}` : '') : 'N/A' }}
+              </div>
+              <div class="info-item" v-if="selectedRecord?.rawData?.client_lastname">
+                <strong>Relationship:</strong> {{ selectedRecord?.rawData?.relationship || 'N/A' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Show current form values -->
+          <div class="patient-info-box">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Current Form Values:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>GL Number:</strong> {{ editData.glNum }}
+              </div>
+              <div class="info-item">
+                <strong>Category:</strong> {{ editData.category }}
+              </div>
+              <div class="info-item">
+                <strong>Partner:</strong> {{ editData.partner }}
+              </div>
+              <div class="info-item" v-if="isAdmin">
+                <strong>Issued Date:</strong> {{ formatDisplayDate(editData.issuedDate) }}
+              </div>
+              <div class="info-item" v-if="isAdmin">
+                <strong>Issued By:</strong> {{ editData.issuedBy }}
+              </div>
+              <div class="info-item" v-if="editData.category === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) : 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Issued Amount:</strong> ₱{{ formatCurrency(editData.issuedAmount) }}
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong> 
+                {{ editData.clientLastName ? 
+                   `${editData.clientLastName}, ${editData.clientFirstName}` + 
+                   (editData.clientMiddleName ? ` ${editData.clientMiddleName}` : '') +
+                   (editData.clientSuffix ? ` ${editData.clientSuffix}` : '') : 'N/A' }}
+              </div>
+              <div class="info-item" v-if="editData.clientLastName">
+                <strong>Relationship:</strong> {{ editData.relationship || 'N/A' }}
+              </div>
+            </div>
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          Are you sure you want to save these changes to GL Number {{ editData.glNum }}?
-        </q-card-section>
+        <q-separator />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmSave"
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-confirm-btn" @click="confirmSave"
             :loading="saveLoading" />
         </q-card-actions>
       </q-card>
@@ -380,6 +499,15 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
+// Get user role from localStorage
+const userData = JSON.parse(localStorage.getItem('user') || '{}')
+const isAdmin = computed(() => userData?.ROLE === 'ADMIN')
+
+// Helper function to format date for display
+const formatDisplayDate = (date) => {
+  if (!date) return 'N/A'
+  return dayjs(date).format('YYYY-MM-DD')
+}
 
 // Helper function for currency formatting (for display)
 const formatCurrency = (amount) => {
@@ -449,6 +577,7 @@ const editData = ref({
   category: null,
   partner: null,
   issuedBy: null,
+  issuedDate: null,
   issuedAmount: null,
   hospitalBill: null,
   clientLastName: null,
@@ -462,6 +591,8 @@ const editData = ref({
 const validationErrors = ref({
   category: false,
   partner: false,
+  issuedBy: false,
+  issuedDate: false,
   issuedAmount: false,
   hospitalBill: false,
   clientLastName: false,
@@ -476,6 +607,40 @@ const partnerOptions = computed(() => {
   return dynamicPartners.value
     .filter(p => p.category === editData.value.category)
     .map(p => p.partner)
+})
+
+const hasChanges = computed(() => {
+  if (!selectedRecord.value) return false
+  
+  return selectedRecord.value.category !== editData.value.category ||
+    selectedRecord.value.partner !== editData.value.partner ||
+    (isAdmin.value && selectedRecord.value.issuedDate !== editData.value.issuedDate) ||
+    (isAdmin.value && selectedRecord.value.issuedBy !== editData.value.issuedBy) ||
+    selectedRecord.value.issuedAmount !== editData.value.issuedAmount ||
+    (editData.value.category === 'HOSPITAL' && selectedRecord.value.hospitalBill !== editData.value.hospitalBill) ||
+    clientInfoChanged.value
+})
+
+const clientInfoChanged = computed(() => {
+  if (!selectedRecord.value) return false
+  
+  const originalData = selectedRecord.value.rawData
+  const originalHasClient = !!originalData.client_lastname
+  const currentHasClient = !editData.value.isChecked
+  
+  // Check if client existence changed
+  if (originalHasClient !== currentHasClient) return true
+  
+  // If both have clients, check if details changed
+  if (currentHasClient) {
+    return (originalData.client_lastname || '') !== (editData.value.clientLastName || '') ||
+      (originalData.client_firstname || '') !== (editData.value.clientFirstName || '') ||
+      (originalData.client_middlename || '') !== (editData.value.clientMiddleName || '') ||
+      (originalData.client_suffix || '') !== (editData.value.clientSuffix || '') ||
+      (originalData.relationship || '') !== (editData.value.relationship || '')
+  }
+  
+  return false
 })
 
 const fetchDropdownOptions = async () => {
@@ -519,6 +684,8 @@ const resetValidationErrors = () => {
   validationErrors.value = {
     category: false,
     partner: false,
+    issuedBy: false,
+    issuedDate: false,
     issuedAmount: false,
     hospitalBill: false,
     clientLastName: false,
@@ -540,6 +707,18 @@ const validateForm = () => {
   // Validate Partner
   if (!editData.value.partner) {
     validationErrors.value.partner = true
+    isValid = false
+  }
+
+  // Validate Issued By (only if admin)
+  if (isAdmin.value && (!editData.value.issuedBy || editData.value.issuedBy.trim() === '')) {
+    validationErrors.value.issuedBy = true
+    isValid = false
+  }
+
+  // Validate Issued Date (only if admin)
+  if (isAdmin.value && !editData.value.issuedDate) {
+    validationErrors.value.issuedDate = true
     isValid = false
   }
 
@@ -656,6 +835,7 @@ const viewDetails = async (glNumber) => {
       category: data.category,
       partner: data.partner,
       issuedBy: data.issued_by,
+      issuedDate: data.date_issued,
       issuedAmount: data.issued_amount,
       hospitalBill: data.hospital_bill,
       clientName: clientName,
@@ -687,6 +867,7 @@ const enterEditMode = () => {
     category: selectedRecord.value.category,
     partner: selectedRecord.value.partner,
     issuedBy: selectedRecord.value.issuedBy,
+    issuedDate: selectedRecord.value.issuedDate,
     issuedAmount: selectedRecord.value.issuedAmount,
     hospitalBill: selectedRecord.value.hospitalBill,
     clientLastName: data.client_lastname || null,
@@ -720,6 +901,7 @@ const confirmCancel = () => {
     category: null,
     partner: null,
     issuedBy: null,
+    issuedDate: null,
     issuedAmount: null,
     hospitalBill: null,
     clientLastName: null,
@@ -836,6 +1018,12 @@ const confirmSave = async () => {
     formData.append('hospital_bill', editData.value.hospitalBill || 0)
     formData.append('issued_amount', editData.value.issuedAmount)
     formData.append('is_checked', editData.value.isChecked ? 1 : 0)
+
+    // Include issued_by and date_issued if admin
+    if (isAdmin.value) {
+      formData.append('issued_by', editData.value.issuedBy)
+      formData.append('date_issued', editData.value.issuedDate)
+    }
 
     // Send individual client fields
     formData.append('client_lastname', editData.value.clientLastName || '')
@@ -1276,6 +1464,17 @@ onMounted(async () => {
   color: #757575 !important;
 }
 
+.edit-input :deep(.q-field--disabled .q-field__control) {
+  background-color: #e0e0e0;
+  border-color: #c0c0c0;
+  color: #9e9e9e;
+}
+
+.edit-input :deep(.q-field--disabled .q-field__native),
+.edit-input :deep(.q-field--disabled .q-field__input) {
+  color: #9e9e9e !important;
+}
+
 /* Error state styles */
 .edit-input :deep(.q-field--error .q-field__control) {
   border-color: #c10015 !important;
@@ -1285,6 +1484,12 @@ onMounted(async () => {
   color: #c10015;
   font-size: 12px;
   padding-top: 4px;
+}
+
+/* Hint text styling - override error color for hints */
+.edit-input :deep(.q-field__bottom .q-field__messages:not(.q-field__error)) {
+  color: #757575 !important;
+  font-size: 11px;
 }
 
 /* Checkbox Styles */
@@ -1303,5 +1508,54 @@ onMounted(async () => {
 
 .form-checkbox :deep(.q-checkbox--disabled .q-checkbox__bg) {
   border-color: #757575;
+}
+
+/* Date picker icon styles */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.disabled-icon {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+/* Patient info box - matching patient details */
+.patient-info-box {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Changes list - matching patient details */
+.changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.change-item {
+  font-size: 13px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.change-item strong {
+  color: #1976d2;
+  min-width: 140px;
+}
+
+.old-value {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.new-value {
+  color: #388e3c;
+  font-weight: 600;
 }
 </style>
