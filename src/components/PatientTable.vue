@@ -6,7 +6,7 @@
 
         <!-- SEARCH -->
         <div class="col-10">
-          <q-input v-model="search" placeholder="Search by name, barangay, sector, category, GL no., or date (YYYY-MM-DD)"
+          <q-input v-model="search" placeholder="Search by name, barangay, sector, category, UUID, GL no., or date (YYYY-MM-DD)"
             outlined dense clearable>
             <template #prepend>
               <q-icon name="search" />
@@ -27,7 +27,7 @@
   </div>
   <br>
   <div class="budget-table table-scroll">
-    <q-table title="Patient's Record" :rows="rows" :columns="columns" row-key="glNum">
+    <q-table title="Patient's Record" :rows="rows" :columns="columns" row-key="uuid">
       <template #body-cell-action="props">
         <ActionBtn :row="props.row" />
       </template>
@@ -62,6 +62,7 @@ const columns = [
   { name: 'barangay', label: 'Barangay', field: 'barangay', align: 'center', sortable: true },
   { name: 'sector', label: 'Sector', field: 'sector', align: 'center', sortable: true },
   { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
+  { name: 'uuid', label: 'UUID', field: 'uuid', align: 'center', sortable: true }, // Added UUID column
   { name: 'glNum', label: 'GL No.', field: 'glNum', align: 'center', sortable: true },
   { name: 'date', label: 'Date Issued', field: 'date', align: 'center', sortable: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
@@ -131,11 +132,12 @@ const mapPatientsToRows = (patients) => {
 
     return {
       ...patient,
+      uuid: patient.uuid, // UUID for display and row-key
       name,
       barangay: patient.barangay,
       sector: formatSector(patient.sector_ids),
       category: patient.category,
-      glNum: patient.gl_no,
+      glNum: patient.gl_no, // Display GL number to user
       date: patient.date_issued
     }
   })

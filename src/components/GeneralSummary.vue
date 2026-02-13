@@ -163,6 +163,7 @@
         </div>
 
         <!-- RIGHT SECTION (Monthly Records) -->
+        <!-- RIGHT SECTION (Monthly Records) -->
         <div class="right-section" :style="{ width: sectionWidths.right + '%' }">
           <div class="horizontal-scroll">
             <table class="data-table">
@@ -177,6 +178,7 @@
                 <!-- Column headers -->
                 <tr>
                   <template v-for="monthYear in visibleMonths" :key="`cols-${monthYear}`">
+                    <th>UUID</th>
                     <th>GL NO.</th>
                     <th v-if="!categoryValue && !partnerValue">CATEGORY</th>
                     <th v-if="!partnerValue">PARTNER</th>
@@ -206,6 +208,7 @@
                 <tr v-for="row in filteredRows" :key="row.rowId">
                   <template v-for="monthYear in visibleMonths" :key="`${row.glNum}-${monthYear}`">
                     <template v-if="row.monthlyRecords[monthMapping.get(monthYear)]">
+                      <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].uuid }}</td>
                       <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].glNo }}</td>
                       <td v-if="!categoryValue && !partnerValue">{{
                         row.monthlyRecords[monthMapping.get(monthYear)].category }}</td>
@@ -218,6 +221,7 @@
                       <td>{{ row.monthlyRecords[monthMapping.get(monthYear)].issuedBy }}</td>
                     </template>
                     <template v-else>
+                      <td>-</td>
                       <td>-</td>
                       <td v-if="!categoryValue && !partnerValue">-</td>
                       <td v-if="!partnerValue">-</td>
@@ -460,7 +464,7 @@ const showHospitalBill = computed(() => {
 
 // Computed: Get colspan for each month header
 const getMonthColspan = (monthYear) => {
-  let cols = 5 // GL NO., CLIENT'S NAME, DATE ISSUED, AMOUNT, ISSUED BY
+  let cols = 6 // UUID, GL NO., CLIENT'S NAME, DATE ISSUED, AMOUNT, ISSUED BY
 
   if (!categoryValue.value && !partnerValue.value) {
     cols += 1 // CATEGORY
@@ -683,6 +687,7 @@ const processPatientData = (rawData) => {
           const record = recordsInMonth[rowIndex]
 
           monthlyRecords[monthYear] = {
+            uuid: record.uuid, // Added UUID
             glNo: record.gl_no,
             category: record.category,
             partner: record.partner,
@@ -713,7 +718,6 @@ const processPatientData = (rawData) => {
 
   return allRows
 }
-
 // Computed: Filtered rows
 const filteredRows = computed(() => {
   let filtered = allPatients.value
@@ -974,6 +978,7 @@ const downloadCSV = () => {
   ]
 
   visibleMonths.value.forEach(monthYear => {
+    columnHeaders.push('UUID')
     columnHeaders.push('GL NO.')
     if (!categoryValue.value && !partnerValue.value) {
       columnHeaders.push('CATEGORY')
@@ -1008,6 +1013,7 @@ const downloadCSV = () => {
       const dataKey = monthMapping.value.get(monthYear)
       const record = row.monthlyRecords[dataKey]
       if (record) {
+        dataRow.push(record.uuid)
         dataRow.push(record.glNo)
         if (!categoryValue.value && !partnerValue.value) {
           dataRow.push(record.category)
@@ -1025,6 +1031,7 @@ const downloadCSV = () => {
         dataRow.push(`\t${amount}`)
         dataRow.push(record.issuedBy)
       } else {
+        dataRow.push('-')
         dataRow.push('-')
         if (!categoryValue.value && !partnerValue.value) {
           dataRow.push('-')
