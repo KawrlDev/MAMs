@@ -17,11 +17,11 @@
         <div class="row q-col-gutter-md q-mb-lg">
           <div class="col-4">
             <label class="form-label">Name / Username <span class="required">*</span></label>
-            <q-input 
-              v-model="name" 
-              type="text" 
-              dense 
-              outlined 
+            <q-input
+              v-model="name"
+              type="text"
+              dense
+              outlined
               class="flat-input"
               placeholder="Enter username"
               :rules="[val => !!val || 'This field is required']"
@@ -30,11 +30,11 @@
 
           <div class="col-4">
             <label class="form-label">Password <span class="required">*</span></label>
-            <q-input 
-              v-model="password" 
-              type="password" 
-              dense 
-              outlined 
+            <q-input
+              v-model="password"
+              type="password"
+              dense
+              outlined
               class="flat-input"
               placeholder="Enter password"
               :rules="[val => !!val || 'This field is required']"
@@ -43,11 +43,11 @@
 
           <div class="col-4">
             <label class="form-label">Role <span class="required">*</span></label>
-            <q-select 
-              v-model="role" 
-              :options="roles" 
-              dense 
-              outlined 
+            <q-select
+              v-model="role"
+              :options="roles"
+              dense
+              outlined
               class="flat-input"
               placeholder="Select role"
               :rules="[val => !!val || 'This field is required']"
@@ -70,9 +70,9 @@
       </div>
 
       <div class="table-wrapper">
-        <q-table 
-          :rows="accountRows" 
-          :columns="accountColumns" 
+        <q-table
+          :rows="accountRows"
+          :columns="accountColumns"
           row-key="id"
           :rows-per-page-options="[0]"
           hide-pagination
@@ -676,13 +676,13 @@ onMounted(() => {
 }
 
 .table-wrapper :deep(thead tr) {
-  background: #f5f5f5;
+  background: #1f8f2e;
 }
 
 .table-wrapper :deep(thead th) {
   font-weight: 600;
   text-align: center !important;
-  color: #333;
+  color: #ffffff;
   font-size: 14px;
 }
 
