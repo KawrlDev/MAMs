@@ -33,17 +33,8 @@
 
       <div class="table-container">
         <div class="table-scroll-wrapper">
-          <q-table
-            class="budget-table"
-            :rows="rows"
-            row-key="num"
-            flat
-            bordered
-            dense
-            :pagination="pagination"
-            @update:pagination="updatePagination"
-            :rows-per-page-options="[5, 10, 15, 23]"
-          >
+          <q-table class="budget-table" :rows="rows" row-key="num" flat bordered dense :pagination="pagination"
+            @update:pagination="updatePagination" :rows-per-page-options="[5, 10, 15, 23]">
             <template v-slot:header>
               <tr class="sticky-header">
                 <th rowspan="2">#</th>
@@ -197,16 +188,20 @@ onMounted(async () => {
     )
 
     // New Per Sector Chart
+    const sectorPalette = ['#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9', '#45B7D1', '#FFD93D', '#FF9800', '#9B59B6']
+
+    const sectorEntries = Object.entries(chartData)
+      .filter(([key]) => key.startsWith('sector_'))
+      .map(([key, val]) => ({
+        label: key.replace('sector_', ''),
+        value: parseFloat(val) || 0
+      }))
+
     createDoughnut(
       perSectorChart,
-      ['Senior', 'PWD', 'Solo Parent', 'N/A'],
-      [
-        parseFloat(chartData.senior) || 1000,
-        parseFloat(chartData.pwd) || 1500,
-        parseFloat(chartData.soloParent) || 1200,
-        parseFloat(chartData.na) || 1100
-      ],
-      ['#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9']
+      sectorEntries.map(e => e.label),
+      sectorEntries.map(e => e.value),
+      sectorPalette.slice(0, sectorEntries.length)
     )
   } catch (err) {
     console.error('Error loading data:', err)
@@ -287,6 +282,7 @@ onMounted(async () => {
   justify-content: flex-start;
   width: 100%;
 }
+
 .chart-wrappers {
   text-align: center;
   display: flex;
@@ -295,6 +291,7 @@ onMounted(async () => {
   justify-content: flex-start;
   width: 100%;
 }
+
 .chart-wrappers p {
   font-size: 20px;
   font-weight: 700;
@@ -317,26 +314,29 @@ onMounted(async () => {
 
 /* Chart Sizes - Consistent across all charts */
 .chart-small {
-    flex: 1 1 200px;
-    height: 190px !important;
+  flex: 1 1 200px;
+  height: 190px !important;
   max-width: 190px;
   min-width: 200px;
   margin-left: 100px;
 }
+
 .chart-medium {
-    flex: 1 1 200px;
-    height: 220px !important;
+  flex: 1 1 200px;
+  height: 220px !important;
   max-width: 310px;
   min-width: 200px;
 }
+
 .chart-mediums {
-     flex: 1 1 200px;
+  flex: 1 1 200px;
   height: 250px !important;
   max-width: 310px;
   min-width: 250px;
   margin-top: 70px;
   margin-left: 50px;
 }
+
 .chart-large {
   flex: 1 1 200px;
   height: 270px !important;

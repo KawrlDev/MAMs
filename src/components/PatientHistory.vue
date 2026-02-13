@@ -42,15 +42,18 @@
 
     <!-- DETAILS DIALOG -->
     <q-dialog v-model="showDetailsDialog" persistent>
-      <q-card style="min-width: 650px; max-width: 750px;">
-        <q-card-section class="bg-orange-6 text-white q-pa-md">
+      <q-card style="min-width: 650px; max-width: 750px; max-height: 90vh; display: flex; flex-direction: column;">
+
+        <!-- HEADER - stays at top -->
+        <q-card-section class="bg-orange-6 text-white q-pa-md" style="flex-shrink: 0;">
           <div class="text-h6">
             <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
             Record Details - GL No: {{ selectedRecord?.glNum }}
           </div>
         </q-card-section>
 
-        <q-card-section>
+        <!-- BODY - scrollable -->
+        <q-card-section style="flex: 1; overflow-y: auto;">
           <div class="info-section q-mb-md">
             <div class="section-title">Transaction Details</div>
 
@@ -138,14 +141,14 @@
                   <q-select v-model="editData.partner" :options="partnerOptions" dense outlined class="edit-input"
                     :error="validationErrors.partner" error-message="Partner is required" />
                 </div>
-                
+
                 <!-- ADMIN-ONLY FIELDS -->
                 <div class="edit-item">
                   <label class="edit-label">Issued Date: <span v-if="isAdmin" class="required">*</span></label>
-                  <q-input 
-                    v-model="editData.issuedDate" 
-                    dense 
-                    outlined 
+                  <q-input
+                    v-model="editData.issuedDate"
+                    dense
+                    outlined
                     placeholder="YYYY-MM-DD"
                     class="edit-input"
                     :disable="!isAdmin"
@@ -170,11 +173,11 @@
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Issued By: <span v-if="isAdmin" class="required">*</span></label>
-                  <q-input 
-                    v-model="editData.issuedBy" 
-                    dense 
-                    outlined 
-                    class="edit-input" 
+                  <q-input
+                    v-model="editData.issuedBy"
+                    dense
+                    outlined
+                    class="edit-input"
                     :disable="!isAdmin"
                     :error="validationErrors.issuedBy"
                     error-message="Issued By is required"
@@ -186,15 +189,15 @@
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                  <q-input 
-                    :model-value="formatInputCurrency(editData.issuedAmount)" 
+                  <q-input
+                    :model-value="formatInputCurrency(editData.issuedAmount)"
                     @update:model-value="updateIssuedAmount"
-                    dense 
-                    outlined 
-                    class="edit-input" 
+                    dense
+                    outlined
+                    class="edit-input"
                     prefix="₱"
                     :error="validationErrors.issuedAmount"
-                    error-message="Issued Amount is required and must be greater than 0" 
+                    error-message="Issued Amount is required and must be greater than 0"
                   />
                 </div>
 
@@ -202,28 +205,28 @@
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
-                    <q-input 
-                      :model-value="formatInputCurrency(editData.hospitalBill)" 
+                    <q-input
+                      :model-value="formatInputCurrency(editData.hospitalBill)"
                       @update:model-value="updateHospitalBill"
-                      dense 
-                      outlined 
-                      class="edit-input" 
+                      dense
+                      outlined
+                      class="edit-input"
                       prefix="₱"
                       :error="validationErrors.hospitalBill"
-                      error-message="Hospital Bill is required and must be greater than 0" 
+                      error-message="Hospital Bill is required and must be greater than 0"
                     />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                    <q-input 
-                      :model-value="formatInputCurrency(editData.issuedAmount)" 
+                    <q-input
+                      :model-value="formatInputCurrency(editData.issuedAmount)"
                       @update:model-value="updateIssuedAmount"
-                      dense 
-                      outlined 
-                      class="edit-input" 
+                      dense
+                      outlined
+                      class="edit-input"
                       prefix="₱"
                       :error="validationErrors.issuedAmount"
-                      error-message="Issued Amount is required and must be greater than 0" 
+                      error-message="Issued Amount is required and must be greater than 0"
                     />
                   </div>
                 </template>
@@ -268,14 +271,15 @@
           </div>
         </q-card-section>
 
-        <q-separator />
+        <!-- SEPARATOR - pinned -->
+        <q-separator style="flex-shrink: 0;" />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+        <!-- FOOTER - pinned at bottom -->
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md" style="flex-shrink: 0;">
           <!-- VIEW MODE BUTTONS -->
           <template v-if="!editMode">
-            <q-btn label="CLOSE" icon="close" unelevated class="dialog-close-btn"
+            <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn"
               @click="showCloseConfirmDialog = true" />
-
             <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
             <q-btn label="PRINT PDF" icon="print" unelevated class="dialog-print-btn"
               @click="showPrintConfirmDialog = true" :loading="pdfLoading" />
@@ -283,10 +287,11 @@
 
           <!-- EDIT MODE BUTTONS -->
           <template v-else>
-            <q-btn label="CANCEL" icon="close" unelevated class="dialog-close-btn" @click="cancelEdit" />
-            <q-btn label="SAVE" icon="save" unelevated class="dialog-save-btn" @click="handleSaveClick" />
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelEdit" />
+            <q-btn label="SAVE" icon="save" unelevated class="dialog-cancel-btn" @click="handleSaveClick" />
           </template>
         </q-card-actions>
+
       </q-card>
     </q-dialog>
 
@@ -319,11 +324,12 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
-          <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-confirm-btn" @click="proceedWithInsufficientFunds" />
+          <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithInsufficientFunds" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
+    <!-- CLOSE CONFIRM DIALOG -->
     <q-dialog v-model="showCloseConfirmDialog">
       <q-card style="min-width: 350px">
         <q-card-section>
@@ -336,11 +342,12 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmClose" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmClose" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
+    <!-- PRINT CONFIRM DIALOG -->
     <q-dialog v-model="showPrintConfirmDialog">
       <q-card style="min-width: 350px">
         <q-card-section>
@@ -353,7 +360,7 @@
 
         <q-card-actions align="right">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="print" label="YES" class="dialog-confirm-btn" @click="confirmPrint"
+          <q-btn unelevated icon="print" label="YES" class="dialog-cancel-btn" @click="confirmPrint"
             :loading="pdfLoading" />
         </q-card-actions>
       </q-card>
@@ -361,15 +368,18 @@
 
     <!-- SAVE CONFIRMATION DIALOG -->
     <q-dialog v-model="showSaveConfirmDialog">
-      <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-orange-6 text-white">
+      <q-card style="min-width: 600px; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column;">
+
+        <!-- HEADER - pinned -->
+        <q-card-section class="bg-orange-6 text-white" style="flex-shrink: 0;">
           <div class="text-h6">
             <q-icon name="edit" size="sm" class="q-mr-sm" />
             Transaction Details Changed
           </div>
         </q-card-section>
 
-        <q-card-section>
+        <!-- BODY - scrollable -->
+        <q-card-section style="flex: 1; overflow-y: auto;">
           <div class="text-subtitle1 q-mb-md">
             You have modified the transaction details. Are you sure you want to update?
           </div>
@@ -400,9 +410,9 @@
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(selectedRecord?.issuedAmount) }}
               </div>
               <div class="info-item info-item-full">
-                <strong>Client Name:</strong> 
-                {{ selectedRecord?.rawData?.client_lastname ? 
-                   `${selectedRecord.rawData.client_lastname}, ${selectedRecord.rawData.client_firstname}` + 
+                <strong>Client Name:</strong>
+                {{ selectedRecord?.rawData?.client_lastname ?
+                   `${selectedRecord.rawData.client_lastname}, ${selectedRecord.rawData.client_firstname}` +
                    (selectedRecord.rawData.client_middlename ? ` ${selectedRecord.rawData.client_middlename}` : '') +
                    (selectedRecord.rawData.client_suffix ? ` ${selectedRecord.rawData.client_suffix}` : '') : 'N/A' }}
               </div>
@@ -438,9 +448,9 @@
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(editData.issuedAmount) }}
               </div>
               <div class="info-item info-item-full">
-                <strong>Client Name:</strong> 
-                {{ editData.clientLastName ? 
-                   `${editData.clientLastName}, ${editData.clientFirstName}` + 
+                <strong>Client Name:</strong>
+                {{ editData.clientLastName ?
+                   `${editData.clientLastName}, ${editData.clientFirstName}` +
                    (editData.clientMiddleName ? ` ${editData.clientMiddleName}` : '') +
                    (editData.clientSuffix ? ` ${editData.clientSuffix}` : '') : 'N/A' }}
               </div>
@@ -451,13 +461,16 @@
           </div>
         </q-card-section>
 
-        <q-separator />
+        <!-- SEPARATOR - pinned -->
+        <q-separator style="flex-shrink: 0;" />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+        <!-- FOOTER - pinned at bottom -->
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md" style="flex-shrink: 0;">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
-          <q-btn label="UPDATE" icon="check" unelevated class="dialog-confirm-btn" @click="confirmSave"
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
             :loading="saveLoading" />
         </q-card-actions>
+
       </q-card>
     </q-dialog>
 
@@ -474,7 +487,7 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md">
           <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="check" label="YES" class="dialog-confirm-btn" @click="confirmCancel" />
+          <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="confirmCancel" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -534,7 +547,6 @@ const formatInputCurrency = (amount) => {
 // Helper function to parse formatted currency back to number
 const parseCurrency = (formattedValue) => {
   if (!formattedValue) return null
-  // Remove commas and parse to float
   const cleaned = formattedValue.replace(/,/g, '')
   const num = parseFloat(cleaned)
   return isNaN(num) ? null : num
@@ -560,7 +572,7 @@ const showCancelConfirmDialog = ref(false)
 const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
 const showInsufficientFundsDialog = ref(false)
-const eligibilityCooldownDays = ref(90) // Default to 90, will be fetched from backend
+const eligibilityCooldownDays = ref(90)
 
 const dynamicPartners = ref([])
 
@@ -611,7 +623,7 @@ const partnerOptions = computed(() => {
 
 const hasChanges = computed(() => {
   if (!selectedRecord.value) return false
-  
+
   return selectedRecord.value.category !== editData.value.category ||
     selectedRecord.value.partner !== editData.value.partner ||
     (isAdmin.value && selectedRecord.value.issuedDate !== editData.value.issuedDate) ||
@@ -623,15 +635,13 @@ const hasChanges = computed(() => {
 
 const clientInfoChanged = computed(() => {
   if (!selectedRecord.value) return false
-  
+
   const originalData = selectedRecord.value.rawData
   const originalHasClient = !!originalData.client_lastname
   const currentHasClient = !editData.value.isChecked
-  
-  // Check if client existence changed
+
   if (originalHasClient !== currentHasClient) return true
-  
-  // If both have clients, check if details changed
+
   if (currentHasClient) {
     return (originalData.client_lastname || '') !== (editData.value.clientLastName || '') ||
       (originalData.client_firstname || '') !== (editData.value.clientFirstName || '') ||
@@ -639,7 +649,7 @@ const clientInfoChanged = computed(() => {
       (originalData.client_suffix || '') !== (editData.value.clientSuffix || '') ||
       (originalData.relationship || '') !== (editData.value.relationship || '')
   }
-  
+
   return false
 })
 
@@ -649,10 +659,10 @@ const fetchDropdownOptions = async () => {
     dynamicPartners.value = res.data.partners
   } catch (err) {
     console.error('Failed to fetch dropdown options', err)
-    $q.notify({ 
-      type: 'negative', 
-      message: 'Failed to load dropdown options', 
-      position: 'top' 
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load dropdown options',
+      position: 'top'
     })
   }
 }
@@ -663,9 +673,9 @@ const columns = [
   { name: 'Issued At', label: 'Date Issued', field: 'issuedAt' },
   { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate' },
   { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
-  { 
-    name: 'Issued Amount', 
-    label: 'Issued Amount', 
+  {
+    name: 'Issued Amount',
+    label: 'Issued Amount',
     field: 'issuedAmount',
     format: val => `₱${formatCurrency(val)}`
   },
@@ -698,37 +708,31 @@ const validateForm = () => {
   resetValidationErrors()
   let isValid = true
 
-  // Validate Category
   if (!editData.value.category) {
     validationErrors.value.category = true
     isValid = false
   }
 
-  // Validate Partner
   if (!editData.value.partner) {
     validationErrors.value.partner = true
     isValid = false
   }
 
-  // Validate Issued By (only if admin)
   if (isAdmin.value && (!editData.value.issuedBy || editData.value.issuedBy.trim() === '')) {
     validationErrors.value.issuedBy = true
     isValid = false
   }
 
-  // Validate Issued Date (only if admin)
   if (isAdmin.value && !editData.value.issuedDate) {
     validationErrors.value.issuedDate = true
     isValid = false
   }
 
-  // Validate Issued Amount
   if (!editData.value.issuedAmount || editData.value.issuedAmount <= 0) {
     validationErrors.value.issuedAmount = true
     isValid = false
   }
 
-  // Validate Hospital Bill for HOSPITAL category
   if (editData.value.category === 'HOSPITAL') {
     if (!editData.value.hospitalBill || editData.value.hospitalBill <= 0) {
       validationErrors.value.hospitalBill = true
@@ -736,7 +740,6 @@ const validateForm = () => {
     }
   }
 
-  // Validate Client Information if patient is NOT same as client
   if (!editData.value.isChecked) {
     if (!editData.value.clientLastName || editData.value.clientLastName.trim() === '') {
       validationErrors.value.clientLastName = true
@@ -755,18 +758,15 @@ const validateForm = () => {
   return isValid
 }
 
-// Fetch eligibility cooldown from backend
 const fetchEligibilityCooldown = async () => {
   try {
     const res = await axios.get('http://localhost:8000/api/get-eligibility-cooldown')
     eligibilityCooldownDays.value = res.data.days
   } catch (err) {
     console.error('Error fetching eligibility cooldown:', err)
-    // Keep default value of 90 if fetch fails
   }
 }
 
-// Calculate eligibility info based on date issued and cooldown
 const calculateEligibility = (dateIssued) => {
   const today = dayjs().startOf('day')
   const eligibilityDate = dayjs(dateIssued).add(eligibilityCooldownDays.value, 'day')
@@ -784,10 +784,10 @@ const checkBudget = async (originalAmount, newAmount) => {
   try {
     const res = await axios.get('http://localhost:8000/api/budget/current')
     const currentBudget = parseFloat(res.data.amount || 0)
-    
+
     const difference = newAmount - originalAmount
     const projectedBalance = currentBudget - difference
-    
+
     budgetData.value = {
       currentBudget,
       originalAmount,
@@ -795,7 +795,7 @@ const checkBudget = async (originalAmount, newAmount) => {
       difference,
       projectedBalance
     }
-    
+
     return projectedBalance >= 0
   } catch (error) {
     console.error('Failed to fetch budget:', error)
@@ -804,7 +804,7 @@ const checkBudget = async (originalAmount, newAmount) => {
       message: 'Failed to check budget',
       position: 'top'
     })
-    return true // Allow to proceed if budget check fails
+    return true
   }
 }
 
@@ -822,7 +822,6 @@ const viewDetails = async (glNumber) => {
     const res = await axios.get(`http://localhost:8000/api/patient-details/${glNumber}`)
     const data = res.data
 
-    // Format client name if exists
     let clientName = null
     if (data.client_lastname) {
       clientName = `${data.client_lastname}, ${data.client_firstname}` +
@@ -840,13 +839,10 @@ const viewDetails = async (glNumber) => {
       hospitalBill: data.hospital_bill,
       clientName: clientName,
       relationship: data.relationship,
-      // Store raw data for PDF generation
       rawData: data
     }
 
-    // Reset edit mode
     editMode.value = false
-
     showDetailsDialog.value = true
   } catch (err) {
     console.error('Error fetching details:', err)
@@ -861,7 +857,6 @@ const viewDetails = async (glNumber) => {
 const enterEditMode = () => {
   const data = selectedRecord.value.rawData
 
-  // Copy current data to edit data
   editData.value = {
     glNum: selectedRecord.value.glNum,
     category: selectedRecord.value.category,
@@ -875,7 +870,6 @@ const enterEditMode = () => {
     clientMiddleName: data.client_middlename || null,
     clientSuffix: data.client_suffix || null,
     relationship: selectedRecord.value.relationship,
-    // If client data doesn't exist, patient is same as client
     isChecked: !data.client_lastname
   }
 
@@ -920,18 +914,14 @@ const closeDialog = () => {
 }
 
 const onCategoryChange = () => {
-  // Reset partner when category changes
   editData.value.partner = null
-  // Clear partner validation error
   validationErrors.value.partner = false
-  // Clear hospital bill validation when switching away from HOSPITAL
   if (editData.value.category !== 'HOSPITAL') {
     validationErrors.value.hospitalBill = false
   }
 }
 
 const onCheckboxChange = () => {
-  // If checked (patient is same as client), clear client data
   if (editData.value.isChecked) {
     editData.value.clientLastName = null
     editData.value.clientFirstName = null
@@ -939,7 +929,6 @@ const onCheckboxChange = () => {
     editData.value.clientSuffix = null
     editData.value.relationship = null
 
-    // Clear client validation errors
     validationErrors.value.clientLastName = false
     validationErrors.value.clientFirstName = false
     validationErrors.value.relationship = false
@@ -955,32 +944,28 @@ const confirmClose = () => {
 }
 
 const handleSaveClick = async () => {
-  // Validate form before checking budget
   if (!validateForm()) {
     return
   }
 
-  // Check budget if issued amount has changed
   const originalAmount = parseFloat(selectedRecord.value.issuedAmount)
   const newAmount = parseFloat(editData.value.issuedAmount)
 
   if (originalAmount !== newAmount) {
     const hasSufficientBudget = await checkBudget(originalAmount, newAmount)
-    
+
     if (!hasSufficientBudget) {
       showInsufficientFundsDialog.value = true
       return
     }
   }
 
-  // If validation passes and budget is sufficient, show confirmation dialog
   showSaveConfirmDialog.value = true
 }
 
 const loadPatientHistory = async () => {
   try {
     const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
-    const today = dayjs().startOf('day')
 
     rows.value = res.data.history.map(item => {
       const eligibility = calculateEligibility(item.date_issued)
@@ -1009,7 +994,6 @@ const loadPatientHistory = async () => {
 const confirmSave = async () => {
   saveLoading.value = true
   try {
-    // Prepare form data for update
     const formData = new FormData()
     formData.append('glNum', editData.value.glNum)
     formData.append('update_transaction_only', '1')
@@ -1019,13 +1003,11 @@ const confirmSave = async () => {
     formData.append('issued_amount', editData.value.issuedAmount)
     formData.append('is_checked', editData.value.isChecked ? 1 : 0)
 
-    // Include issued_by and date_issued if admin
     if (isAdmin.value) {
       formData.append('issued_by', editData.value.issuedBy)
       formData.append('date_issued', editData.value.issuedDate)
     }
 
-    // Send individual client fields
     formData.append('client_lastname', editData.value.clientLastName || '')
     formData.append('client_firstname', editData.value.clientFirstName || '')
     formData.append('client_middlename', editData.value.clientMiddleName || '')
@@ -1042,10 +1024,7 @@ const confirmSave = async () => {
 
     showSaveConfirmDialog.value = false
 
-    // Refresh the data
     await viewDetails(editData.value.glNum)
-
-    // Refresh the table
     await loadPatientHistory()
 
     editMode.value = false
@@ -1106,98 +1085,45 @@ const generatePDF = async () => {
     const age = calculateAge(data.birthdate)
 
     page.drawText(data.gl_no + ' / ' + data.partner, {
-      x: 600,
-      y: 489,
-      size: 14,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 600, y: 489, size: 14, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(fullNameValue.toUpperCase(), {
-      x: 140,
-      y: 375,
-      size: 10,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 140, y: 375, size: 10, color: rgb(0, 0, 0), font: boldFont,
     })
 
     if (age !== null) {
       page.drawText(String(age), {
-        x: 400,
-        y: 375,
-        size: 12,
-        color: rgb(0, 0, 0),
-        font: boldFont,
+        x: 400, y: 375, size: 12, color: rgb(0, 0, 0), font: boldFont,
       })
     }
 
     page.drawText(data.sex.toUpperCase(), {
-      x: 455,
-      y: 375,
-      size: 10,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 455, y: 375, size: 10, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(fullAddressValue.toUpperCase(), {
-      x: 95,
-      y: 350,
-      size: 10,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 95, y: 350, size: 10, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(clientValue.toUpperCase(), {
-      x: 70,
-      y: 300,
-      size: 10,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 70, y: 300, size: 10, color: rgb(0, 0, 0), font: boldFont,
     })
 
     if (data.category == 'MEDICINE') {
-      page.drawText(amountWords, {
-        x: 245,
-        y: 273,
-        size: 10,
-        color: rgb(0, 0, 0),
-        font: boldFont,
-      })
+      page.drawText(amountWords, { x: 245, y: 273, size: 10, color: rgb(0, 0, 0), font: boldFont })
     } else {
-      page.drawText(amountWords, {
-        x: 260,
-        y: 273,
-        size: 10,
-        color: rgb(0, 0, 0),
-        font: boldFont,
-      })
+      page.drawText(amountWords, { x: 260, y: 273, size: 10, color: rgb(0, 0, 0), font: boldFont })
     }
 
-    // Use formatCurrency for the PDF amount display
     page.drawText(formatCurrency(data.issued_amount), {
-      x: 90,
-      y: 248,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 90, y: 248, size: 12, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(dayNum, {
-      x: 137,
-      y: 197,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 137, y: 197, size: 12, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(monthName.toUpperCase(), {
-      x: 225,
-      y: 197,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 225, y: 197, size: 12, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(data.issued_by.toUpperCase(), {
-      x: 340,
-      y: 65,
-      size: 12,
-      color: rgb(0, 0, 0),
-      font: boldFont,
+      x: 340, y: 65, size: 12, color: rgb(0, 0, 0), font: boldFont,
     })
 
     const pdfBytes = await pdfDoc.save()
@@ -1206,18 +1132,10 @@ const generatePDF = async () => {
 
     window.open(url)
 
-    $q.notify({
-      type: 'positive',
-      message: 'PDF generated successfully',
-      position: 'top'
-    })
+    $q.notify({ type: 'positive', message: 'PDF generated successfully', position: 'top' })
   } catch (error) {
     console.error('PDF generation error:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to generate PDF',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: 'Failed to generate PDF', position: 'top' })
   } finally {
     pdfLoading.value = false
   }
@@ -1226,36 +1144,21 @@ const generatePDF = async () => {
 function getDaySuffix(day) {
   if (day > 3 && day < 21) return 'th'
   switch (day % 10) {
-    case 1:
-      return 'st'
-    case 2:
-      return 'nd'
-    case 3:
-      return 'rd'
-    default:
-      return 'th'
+    case 1: return 'st'
+    case 2: return 'nd'
+    case 3: return 'rd'
+    default: return 'th'
   }
 }
 
 onMounted(async () => {
-  // Fetch dropdown options first
   await fetchDropdownOptions()
-  
-  // Fetch eligibility cooldown
   await fetchEligibilityCooldown()
-
-  // Then load patient history with the correct cooldown
   await loadPatientHistory()
 })
 </script>
 
 <style scoped>
-.cancel-btn {
-  background: #ff3b3b;
-  color: white;
-  font-weight: bold;
-}
-
 .budget-table :deep(thead tr) {
   background: #1f8f2e;
 }
@@ -1305,7 +1208,9 @@ onMounted(async () => {
   justify-content: center;
 }
 
-/* Dialog Styling */
+/* ========================
+   DIALOG STYLES
+======================== */
 .info-section {
   background: #f5f5f5;
   border-radius: 8px;
@@ -1347,31 +1252,10 @@ onMounted(async () => {
   font-size: 14px;
 }
 
-.dialog-close-btn {
-  background: #ff3b3b !important;
-  color: white !important;
-  font-weight: 600;
-  padding: 8px 20px;
-  border-radius: 4px;
-}
-
-.dialog-print-btn {
-  background: #0aa64f !important;
-  color: white !important;
-  font-weight: 600;
-  padding: 8px 20px;
-  border-radius: 4px;
-}
-
-.dialog-edit-btn {
-  background: #ff9800 !important;
-  color: white !important;
-  font-weight: 600;
-  padding: 8px 20px;
-  border-radius: 4px;
-}
-
-.dialog-save-btn {
+/* ========================
+   BUTTON STYLES — matches PatientDetails exactly
+======================== */
+.dialog-cancel-btn {
   background: #0aa64f !important;
   color: white !important;
   font-weight: 600;
@@ -1387,7 +1271,15 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
-.dialog-confirm-btn {
+.dialog-edit-btn {
+  background: #ff9800 !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-print-btn {
   background: #0aa64f !important;
   color: white !important;
   font-weight: 600;
@@ -1395,7 +1287,9 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
-/* Edit Mode Styles */
+/* ========================
+   EDIT MODE STYLES
+======================== */
 .edit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1475,7 +1369,6 @@ onMounted(async () => {
   color: #9e9e9e !important;
 }
 
-/* Error state styles */
 .edit-input :deep(.q-field--error .q-field__control) {
   border-color: #c10015 !important;
 }
@@ -1486,13 +1379,14 @@ onMounted(async () => {
   padding-top: 4px;
 }
 
-/* Hint text styling - override error color for hints */
 .edit-input :deep(.q-field__bottom .q-field__messages:not(.q-field__error)) {
   color: #757575 !important;
   font-size: 11px;
 }
 
-/* Checkbox Styles */
+/* ========================
+   CHECKBOX STYLES
+======================== */
 .form-checkbox :deep(.q-checkbox__bg) {
   border: 2px solid #000;
   border-radius: 2px;
@@ -1510,7 +1404,9 @@ onMounted(async () => {
   border-color: #757575;
 }
 
-/* Date picker icon styles */
+/* ========================
+   DATE PICKER ICON
+======================== */
 .cursor-pointer {
   cursor: pointer;
 }
@@ -1520,7 +1416,9 @@ onMounted(async () => {
   cursor: not-allowed !important;
 }
 
-/* Patient info box - matching patient details */
+/* ========================
+   PATIENT INFO BOX
+======================== */
 .patient-info-box {
   background: #f5f5f5;
   border: 1px solid #e0e0e0;
@@ -1528,7 +1426,6 @@ onMounted(async () => {
   padding: 16px;
 }
 
-/* Changes list - matching patient details */
 .changes-list {
   display: flex;
   flex-direction: column;
