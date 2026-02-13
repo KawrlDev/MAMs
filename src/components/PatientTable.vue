@@ -6,7 +6,7 @@
 
         <!-- SEARCH -->
         <div class="col-10">
-          <q-input v-model="search" placeholder="Search by name, category, GL No., barangay, or date (YYYY-MM-DD)"
+          <q-input v-model="search" placeholder="Search by name, barangay, sector, category, GL no., or date (YYYY-MM-DD)"
             outlined dense clearable>
             <template #prepend>
               <q-icon name="search" />
