@@ -367,19 +367,16 @@
     </q-dialog>
 
     <!-- SAVE CONFIRMATION DIALOG -->
-    <q-dialog v-model="showSaveConfirmDialog">
-      <q-card style="min-width: 600px; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column;">
-
-        <!-- HEADER - pinned -->
-        <q-card-section class="bg-orange-6 text-white" style="flex-shrink: 0;">
+    <q-dialog v-model="showSaveConfirmDialog" persistent>
+      <q-card style="min-width: 600px; max-width: 700px;">
+        <q-card-section class="bg-orange-6 text-white">
           <div class="text-h6">
-            <q-icon name="edit" size="sm" class="q-mr-sm" />
+            <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
             Transaction Details Changed
           </div>
         </q-card-section>
 
-        <!-- BODY - scrollable -->
-        <q-card-section style="flex: 1; overflow-y: auto;">
+        <q-card-section>
           <div class="text-subtitle1 q-mb-md">
             You have modified the transaction details. Are you sure you want to update?
           </div>
@@ -406,15 +403,17 @@
               <div class="info-item" v-if="selectedRecord?.category === 'HOSPITAL'">
                 <strong>Hospital Bill:</strong> {{ selectedRecord?.hospitalBill ? '₱' + formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}
               </div>
-              <div class="info-item">
+              <div class="info-item" :class="{ 'info-item-full': selectedRecord?.category !== 'HOSPITAL' }">
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(selectedRecord?.issuedAmount) }}
               </div>
               <div class="info-item info-item-full">
                 <strong>Client Name:</strong>
-                {{ selectedRecord?.rawData?.client_lastname ?
-                   `${selectedRecord.rawData.client_lastname}, ${selectedRecord.rawData.client_firstname}` +
-                   (selectedRecord.rawData.client_middlename ? ` ${selectedRecord.rawData.client_middlename}` : '') +
-                   (selectedRecord.rawData.client_suffix ? ` ${selectedRecord.rawData.client_suffix}` : '') : 'N/A' }}
+                <span v-if="selectedRecord?.rawData?.client_lastname">
+                  {{ selectedRecord.rawData.client_lastname }}, {{ selectedRecord.rawData.client_firstname }}
+                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename }}</span>
+                  <span v-if="selectedRecord.rawData.client_suffix"> {{ selectedRecord.rawData.client_suffix }}</span>
+                </span>
+                <span v-else>N/A</span>
               </div>
               <div class="info-item" v-if="selectedRecord?.rawData?.client_lastname">
                 <strong>Relationship:</strong> {{ selectedRecord?.rawData?.relationship || 'N/A' }}
@@ -444,15 +443,17 @@
               <div class="info-item" v-if="editData.category === 'HOSPITAL'">
                 <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) : 'N/A' }}
               </div>
-              <div class="info-item">
+              <div class="info-item" :class="{ 'info-item-full': editData.category !== 'HOSPITAL' }">
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(editData.issuedAmount) }}
               </div>
               <div class="info-item info-item-full">
                 <strong>Client Name:</strong>
-                {{ editData.clientLastName ?
-                   `${editData.clientLastName}, ${editData.clientFirstName}` +
-                   (editData.clientMiddleName ? ` ${editData.clientMiddleName}` : '') +
-                   (editData.clientSuffix ? ` ${editData.clientSuffix}` : '') : 'N/A' }}
+                <span v-if="editData.clientLastName">
+                  {{ editData.clientLastName }}, {{ editData.clientFirstName }}
+                  <span v-if="editData.clientMiddleName"> {{ editData.clientMiddleName }}</span>
+                  <span v-if="editData.clientSuffix"> {{ editData.clientSuffix }}</span>
+                </span>
+                <span v-else>N/A</span>
               </div>
               <div class="info-item" v-if="editData.clientLastName">
                 <strong>Relationship:</strong> {{ editData.relationship || 'N/A' }}
@@ -461,16 +462,13 @@
           </div>
         </q-card-section>
 
-        <!-- SEPARATOR - pinned -->
-        <q-separator style="flex-shrink: 0;" />
+        <q-separator />
 
-        <!-- FOOTER - pinned at bottom -->
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md" style="flex-shrink: 0;">
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
           <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
             :loading="saveLoading" />
         </q-card-actions>
-
       </q-card>
     </q-dialog>
 
@@ -1424,6 +1422,26 @@ onMounted(async () => {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
+}
+
+.patient-info-box .info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.patient-info-box .info-item {
+  font-size: 13px;
+  color: #333;
+}
+
+.patient-info-box .info-item strong {
+  color: #1f8f2e;
+  font-weight: 600;
+}
+
+.patient-info-box .info-item-full {
+  grid-column: 1 / -1;
 }
 
 .changes-list {
