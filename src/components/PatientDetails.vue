@@ -287,7 +287,7 @@
     <!-- TRANSACTION/CLIENT DETAILS EDIT CONFIRMATION DIALOG -->
     <q-dialog v-model="showTransactionEditDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-blue-6 text-white">
+        <q-card-section class="bg-orange-6 text-white">
           <div class="text-h6">
             <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
             Transaction/Client Details Changed
@@ -296,87 +296,77 @@
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You have modified the transaction or client details for this record.
+            You have modified the transaction or client details for this record. Are you sure you want to update?
           </div>
 
-          <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="info" color="blue" />
-            </template>
-            These changes will only affect this specific GL Number record ({{ glNum }}).
-          </q-banner>
-
-          <!-- Show changed fields -->
+          <!-- Show original transaction info -->
           <div class="patient-info-box q-mb-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm">Changed Fields:</div>
-            <div class="changes-list">
-              <div v-if="partnerValue !== originalPatientData.partner" class="change-item">
-                <strong>Partner:</strong>
-                <span class="old-value">{{ originalPatientData.partner }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ partnerValue }}</span>
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Original Transaction Information:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Category:</strong> {{ originalPatientData.category || 'N/A' }}
               </div>
-              <div v-if="hospitalBillValue !== originalPatientData.hospital_bill" class="change-item">
-                <strong>Hospital Bill:</strong>
-                <span class="old-value">{{ originalPatientData.hospital_bill || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ hospitalBillValue }}</span>
+              <div class="info-item">
+                <strong>Partner:</strong> {{ originalPatientData.partner || 'N/A' }}
               </div>
-              <div v-if="issuedAmountValue !== originalPatientData.issued_amount" class="change-item">
-                <strong>Issued Amount:</strong>
-                <span class="old-value">{{ originalPatientData.issued_amount }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ issuedAmountValue }}</span>
+              <div class="info-item" v-if="originalPatientData.category === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> {{ originalPatientData.hospital_bill || 'N/A' }}
               </div>
-              <div v-if="clientLastNameValue !== originalPatientData.client_lastname" class="change-item">
-                <strong>Client Last Name:</strong>
-                <span class="old-value">{{ originalPatientData.client_lastname || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientLastNameValue || 'N/A' }}</span>
+              <div class="info-item" :class="{ 'info-item-full': originalPatientData.category !== 'HOSPITAL' }">
+                <strong>Issued Amount:</strong> {{ originalPatientData.issued_amount || 'N/A' }}
               </div>
-              <div v-if="clientFirstNameValue !== originalPatientData.client_firstname" class="change-item">
-                <strong>Client First Name:</strong>
-                <span class="old-value">{{ originalPatientData.client_firstname || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientFirstNameValue || 'N/A' }}</span>
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong>
+                <span v-if="originalPatientData.client_lastname">
+                  {{ originalPatientData.client_lastname }}, {{ originalPatientData.client_firstname }}
+                  <span v-if="originalPatientData.client_middlename"> {{ originalPatientData.client_middlename }}</span>
+                  <span v-if="originalPatientData.client_suffix"> {{ originalPatientData.client_suffix }}</span>
+                </span>
+                <span v-else>N/A</span>
               </div>
-              <div v-if="(clientMiddleNameValue || null) !== (originalPatientData.client_middlename || null)"
-                class="change-item">
-                <strong>Client Middle Name:</strong>
-                <span class="old-value">{{ originalPatientData.client_middlename || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientMiddleNameValue || 'N/A' }}</span>
-              </div>
-              <div v-if="(clientSuffixValue || null) !== (originalPatientData.client_suffix || null)"
-                class="change-item">
-                <strong>Client Suffix:</strong>
-                <span class="old-value">{{ originalPatientData.client_suffix || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientSuffixValue || 'N/A' }}</span>
-              </div>
-              <div v-if="(relationshipValue || null) !== (originalPatientData.relationship || null)"
-                class="change-item">
-                <strong>Relationship:</strong>
-                <span class="old-value">{{ originalPatientData.relationship || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ relationshipValue || 'N/A' }}</span>
+              <div class="info-item" v-if="originalPatientData.client_lastname">
+                <strong>Relationship:</strong> {{ originalPatientData.relationship || 'N/A' }}
               </div>
             </div>
           </div>
 
-          <q-banner class="bg-grey-2 text-grey-8">
-            <template v-slot:avatar>
-              <q-icon name="check_circle" color="green" />
-            </template>
-            Click "CONFIRM" to save these changes to GL Number {{ glNum }}.
-          </q-banner>
+          <!-- Show current form values -->
+          <div class="patient-info-box">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Current Form Values:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Category:</strong> {{ categoryValue || 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Partner:</strong> {{ partnerValue || 'N/A' }}
+              </div>
+              <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> {{ hospitalBillValue || 'N/A' }}
+              </div>
+              <div class="info-item" :class="{ 'info-item-full': categoryValue !== 'HOSPITAL' }">
+                <strong>Issued Amount:</strong> {{ issuedAmountValue || 'N/A' }}
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong>
+                <span v-if="clientLastNameValue">
+                  {{ clientLastNameValue }}, {{ clientFirstNameValue }}
+                  <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
+                  <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
+                </span>
+                <span v-else>N/A</span>
+              </div>
+              <div class="info-item" v-if="clientLastNameValue">
+                <strong>Relationship:</strong> {{ relationshipValue || 'N/A' }}
+              </div>
+            </div>
+          </div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelTransactionEdit" />
-          <q-btn label="CONFIRM" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithTransactionUpdate"
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithTransactionUpdate"
             :loading="editActionLoading" />
         </q-card-actions>
       </q-card>
