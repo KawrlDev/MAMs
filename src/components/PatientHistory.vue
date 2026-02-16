@@ -1,6 +1,6 @@
 <template>
   <div class="budget-table">
-    <q-table :rows="rows" :columns="columns" row-key="glNum">
+    <q-table :rows="rows" :columns="columns" row-key="uuid">
       <!-- TOP BAR -->
       <template #top>
         <div class="row items-center full-width">
@@ -32,7 +32,7 @@
       <!-- ACTION COLUMN -->
       <template #body-cell-action="props">
         <q-td class="action-cell">
-          <q-btn icon="visibility" color="primary" flat round dense @click="viewDetails(props.row.glNum)">
+          <q-btn icon="visibility" color="primary" flat round dense @click="viewDetails(props.row.uuid)">
             <q-tooltip>View Details</q-tooltip>
           </q-btn>
         </q-td>
@@ -48,7 +48,7 @@
         <q-card-section class="bg-orange-6 text-white q-pa-md" style="flex-shrink: 0;">
           <div class="text-h6">
             <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
-            Record Details - GL No: {{ selectedRecord?.glNum }}
+            Record Details - UUID: {{ selectedRecord?.uuid }}
           </div>
         </q-card-section>
 
@@ -60,6 +60,10 @@
             <!-- VIEW MODE -->
             <div v-if="!editMode">
               <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">UUID:</span>
+                  <span class="info-value">{{ selectedRecord?.uuid }}</span>
+                </div>
                 <div class="info-item">
                   <span class="info-label">GL Number:</span>
                   <span class="info-value">{{ selectedRecord?.glNum }}</span>
@@ -127,8 +131,23 @@
             <div v-else>
               <div class="edit-grid">
                 <div class="edit-item">
-                  <label class="edit-label">GL Number:</label>
-                  <q-input v-model="editData.glNum" dense outlined readonly class="edit-input" />
+                  <label class="edit-label">UUID:</label>
+                  <q-input v-model="editData.uuid" dense outlined readonly class="edit-input" />
+                </div>
+                <div class="edit-item">
+                  <label class="edit-label">GL Number: <span v-if="isAdmin" class="required">*</span></label>
+                  <q-input
+                    v-model.number="editData.glNum"
+                    dense
+                    outlined
+                    class="edit-input"
+                    type="number"
+                    :disable="!isAdmin"
+                    :error="validationErrors.glNum"
+                    error-message="GL Number is required and must be greater than 0"
+                    :hint="!isAdmin ? 'Cannot be edited!' : ''"
+                    :persistent-hint="!isAdmin"
+                  />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Category: <span class="required">*</span></label>
@@ -386,6 +405,9 @@
             <div class="text-subtitle2 text-weight-bold q-mb-sm">Original Transaction Information:</div>
             <div class="info-grid">
               <div class="info-item">
+                <strong>UUID:</strong> {{ selectedRecord?.uuid }}
+              </div>
+              <div class="info-item">
                 <strong>GL Number:</strong> {{ selectedRecord?.glNum }}
               </div>
               <div class="info-item">
@@ -425,6 +447,9 @@
           <div class="patient-info-box">
             <div class="text-subtitle2 text-weight-bold q-mb-sm">Current Form Values:</div>
             <div class="info-grid">
+              <div class="info-item">
+                <strong>UUID:</strong> {{ editData.uuid }}
+              </div>
               <div class="info-item">
                 <strong>GL Number:</strong> {{ editData.glNum }}
               </div>
@@ -508,7 +533,7 @@ dayjs.extend(isSameOrAfter)
 
 const route = useRoute()
 const $q = useQuasar()
-const glNum = computed(() => route.params.glNum)
+const identifier = computed(() => route.params.glNum) // This receives UUID from the route
 
 // Get user role from localStorage
 const userData = JSON.parse(localStorage.getItem('user') || '{}')
@@ -583,6 +608,7 @@ const budgetData = ref({
 })
 
 const editData = ref({
+  uuid: null,
   glNum: null,
   category: null,
   partner: null,
@@ -599,6 +625,7 @@ const editData = ref({
 })
 
 const validationErrors = ref({
+  glNum: false,
   category: false,
   partner: false,
   issuedBy: false,
@@ -622,7 +649,8 @@ const partnerOptions = computed(() => {
 const hasChanges = computed(() => {
   if (!selectedRecord.value) return false
 
-  return selectedRecord.value.category !== editData.value.category ||
+  return selectedRecord.value.glNum !== editData.value.glNum ||
+    selectedRecord.value.category !== editData.value.category ||
     selectedRecord.value.partner !== editData.value.partner ||
     (isAdmin.value && selectedRecord.value.issuedDate !== editData.value.issuedDate) ||
     (isAdmin.value && selectedRecord.value.issuedBy !== editData.value.issuedBy) ||
@@ -666,15 +694,17 @@ const fetchDropdownOptions = async () => {
 }
 
 const columns = [
-  { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'right' },
-  { name: 'Category', label: 'Category', field: 'category' },
-  { name: 'Issued At', label: 'Date Issued', field: 'issuedAt' },
-  { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate' },
-  { name: 'Issued By', label: 'Issued By', field: 'issuedBy' },
+  { name: 'UUID', label: 'UUID', field: 'uuid', align: 'center' },
+  { name: 'GL No.', label: 'GL No.', field: 'glNum', align: 'center' },
+  { name: 'Category', label: 'Category', field: 'category', align: 'center' },
+  { name: 'Issued At', label: 'Date Issued', field: 'issuedAt', align: 'center' },
+  { name: 'eligibilityDate', label: 'Eligibility Date', field: 'eligibilityDate', align: 'center' },
+  { name: 'Issued By', label: 'Issued By', field: 'issuedBy', align: 'center' },
   {
     name: 'Issued Amount',
     label: 'Issued Amount',
     field: 'issuedAmount',
+    align: 'center',
     format: val => `₱${formatCurrency(val)}`
   },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
@@ -690,6 +720,7 @@ const calculateAge = (birthdate) => {
 
 const resetValidationErrors = () => {
   validationErrors.value = {
+    glNum: false,
     category: false,
     partner: false,
     issuedBy: false,
@@ -705,6 +736,11 @@ const resetValidationErrors = () => {
 const validateForm = () => {
   resetValidationErrors()
   let isValid = true
+
+  if (isAdmin.value && (!editData.value.glNum || editData.value.glNum <= 0)) {
+    validationErrors.value.glNum = true
+    isValid = false
+  }
 
   if (!editData.value.category) {
     validationErrors.value.category = true
@@ -815,9 +851,9 @@ const proceedWithInsufficientFunds = () => {
   showSaveConfirmDialog.value = true
 }
 
-const viewDetails = async (glNumber) => {
+const viewDetails = async (uuidOrGlNo) => {
   try {
-    const res = await axios.get(`http://localhost:8000/api/patient-details/${glNumber}`)
+    const res = await axios.get(`http://localhost:8000/api/patient-details/${uuidOrGlNo}`)
     const data = res.data
 
     let clientName = null
@@ -828,7 +864,8 @@ const viewDetails = async (glNumber) => {
     }
 
     selectedRecord.value = {
-      glNum: glNumber,
+      uuid: data.uuid,
+      glNum: data.gl_no,
       category: data.category,
       partner: data.partner,
       issuedBy: data.issued_by,
@@ -856,6 +893,7 @@ const enterEditMode = () => {
   const data = selectedRecord.value.rawData
 
   editData.value = {
+    uuid: selectedRecord.value.uuid,
     glNum: selectedRecord.value.glNum,
     category: selectedRecord.value.category,
     partner: selectedRecord.value.partner,
@@ -889,6 +927,7 @@ const confirmCancel = () => {
   editMode.value = false
   resetValidationErrors()
   editData.value = {
+    uuid: null,
     glNum: null,
     category: null,
     partner: null,
@@ -963,12 +1002,13 @@ const handleSaveClick = async () => {
 
 const loadPatientHistory = async () => {
   try {
-    const res = await axios.get(`http://localhost:8000/api/patient-history/${glNum.value}`)
+    const res = await axios.get(`http://localhost:8000/api/patient-history/${identifier.value}`)
 
     rows.value = res.data.history.map(item => {
       const eligibility = calculateEligibility(item.date_issued)
 
       return {
+        uuid: item.uuid,
         glNum: item.gl_no,
         category: item.category,
         issuedAt: item.date_issued,
@@ -993,7 +1033,7 @@ const confirmSave = async () => {
   saveLoading.value = true
   try {
     const formData = new FormData()
-    formData.append('glNum', editData.value.glNum)
+    formData.append('identifier', editData.value.uuid) // Use UUID as identifier
     formData.append('update_transaction_only', '1')
     formData.append('category', editData.value.category)
     formData.append('partner', editData.value.partner)
@@ -1002,6 +1042,7 @@ const confirmSave = async () => {
     formData.append('is_checked', editData.value.isChecked ? 1 : 0)
 
     if (isAdmin.value) {
+      formData.append('gl_no', editData.value.glNum)
       formData.append('issued_by', editData.value.issuedBy)
       formData.append('date_issued', editData.value.issuedDate)
     }
@@ -1022,7 +1063,7 @@ const confirmSave = async () => {
 
     showSaveConfirmDialog.value = false
 
-    await viewDetails(editData.value.glNum)
+    await viewDetails(editData.value.uuid)
     await loadPatientHistory()
 
     editMode.value = false
