@@ -1127,42 +1127,42 @@ const generatePDF = async () => {
       x: 600, y: 489, size: 14, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(fullNameValue.toUpperCase(), {
-      x: 140, y: 375, size: 10, color: rgb(0, 0, 0), font: boldFont,
+      x: 160, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
 
     if (age !== null) {
       page.drawText(String(age), {
-        x: 400, y: 375, size: 12, color: rgb(0, 0, 0), font: boldFont,
+        x: 545, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont,
       })
     }
 
     page.drawText(data.sex.toUpperCase(), {
-      x: 455, y: 375, size: 10, color: rgb(0, 0, 0), font: boldFont,
+      x: 630, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(fullAddressValue.toUpperCase(), {
-      x: 95, y: 350, size: 10, color: rgb(0, 0, 0), font: boldFont,
+      x: 120, y: 350, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(clientValue.toUpperCase(), {
-      x: 70, y: 300, size: 10, color: rgb(0, 0, 0), font: boldFont,
+      x: 70, y: 300, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
 
     if (data.category == 'MEDICINE') {
-      page.drawText(amountWords, { x: 245, y: 273, size: 10, color: rgb(0, 0, 0), font: boldFont })
+      page.drawText(amountWords, { x: 310, y: 270, size: 13, color: rgb(0, 0, 0), font: boldFont })
     } else {
-      page.drawText(amountWords, { x: 260, y: 273, size: 10, color: rgb(0, 0, 0), font: boldFont })
+      page.drawText(amountWords, { x: 360, y: 270, size: 13, color: rgb(0, 0, 0), font: boldFont })
     }
 
     page.drawText(formatCurrency(data.issued_amount), {
-      x: 90, y: 248, size: 12, color: rgb(0, 0, 0), font: boldFont,
+      x: 340, y: 242, size: 14, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(dayNum, {
-      x: 137, y: 197, size: 12, color: rgb(0, 0, 0), font: boldFont,
+      x: 170, y: 191, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(monthName.toUpperCase(), {
-      x: 225, y: 197, size: 12, color: rgb(0, 0, 0), font: boldFont,
+      x: 315, y: 191, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
     page.drawText(data.issued_by.toUpperCase(), {
-      x: 340, y: 65, size: 12, color: rgb(0, 0, 0), font: boldFont,
+      x: 340, y: 65, size: 13, color: rgb(0, 0, 0), font: boldFont,
     })
 
     const pdfBytes = await pdfDoc.save()
