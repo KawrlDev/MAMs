@@ -87,8 +87,8 @@
 
           <div class="col-3">
             <label class="form-label">Preference</label>
-            <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input" :disable="!edit"
-              @update:model-value="checkForChanges" />
+            <q-select v-model="preferenceValue" :options="preferenceOptions" dense outlined class="flat-input"
+              :disable="!edit" @update:model-value="checkForChanges" />
           </div>
 
           <div class="col-12">
@@ -398,11 +398,17 @@ const allSectors = ref([])
 const selectedSectorIds = ref([])
 
 const edit = ref(false)
+
+const dynamicPartners = ref([])
+const dynamicPreferences = ref([])
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
-// REPLACE the old options array with this:
+const preferenceOptions = computed(() =>
+  dynamicPreferences.value.map(p => p.preference)
+)
+
 const options = [
   ['MALE', 'FEMALE'],
-  computed(() => dynamicPreferences.value.map(p => p.preference)),
+  preferenceOptions,
   ["APOKON",
     "BINCUNGAN",
     "BUSAON",
@@ -464,8 +470,6 @@ const editActionLoading = ref(false)
 const hasPatientChanges = ref(false)
 const hasTransactionChanges = ref(false)
 
-const dynamicPartners = ref([])
-const dynamicPreferences = ref([])
 
 // Add this function to fetch dropdown options
 const fetchDropdownOptions = async () => {

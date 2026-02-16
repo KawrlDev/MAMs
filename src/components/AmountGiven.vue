@@ -120,6 +120,10 @@ onMounted(async () => {
       totalAmount: item.totalAmount
     }))
 
+    // Fetch all sectors from the database
+    const resSectors = await axios.get('http://localhost:8000/api/sectors')
+    const allSectors = resSectors.data // Array of { id, sector }
+
     // Fetch chart data
     const resChart = await axios.get('http://localhost:8000/api/amount-given')
     const chartData = resChart.data
@@ -141,8 +145,11 @@ onMounted(async () => {
             legend: { display: true, position: 'top' },
             datalabels: {
               color: '#000',
-              formatter: (v, c) =>
-                ((v / c.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100).toFixed(1) + '%',
+              formatter: (v, c) => {
+                const total = c.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)
+                if (total === 0) return '0%'
+                return ((v / total) * 100).toFixed(1) + '%'
+              },
               font: { size: 12 }
             }
           }
@@ -187,21 +194,26 @@ onMounted(async () => {
       ['#FF6B6B', '#FFA07A', '#FFD93D', '#6BCF7F', '#4ECDC4', '#45B7D1', '#9B59B6']
     )
 
-    // New Per Sector Chart
-    const sectorPalette = ['#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9', '#45B7D1', '#FFD93D', '#FF9800', '#9B59B6']
+    // ✅ NEW: Per Sector Chart - Include ALL sectors even with 0 data
+    const sectorPalette = ['#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9', '#45B7D1', '#FFD93D', '#FF9800', '#9B59B6', '#E74C3C', '#3498DB']
 
-    const sectorEntries = Object.entries(chartData)
-      .filter(([key]) => key.startsWith('sector_'))
-      .map(([key, val]) => ({
-        label: key.replace('sector_', ''),
-        value: parseFloat(val) || 0
-      }))
+    // Map all sectors to their data (0 if no data)
+    const sectorData = allSectors.map(sector => {
+      const dataKey = `sector_${sector.sector}` // Match the key from backend
+      return {
+        label: sector.sector,
+        value: parseFloat(chartData[dataKey]) || 0
+      }
+    })
+
+    // Sort by value (optional - shows highest first)
+    sectorData.sort((a, b) => b.value - a.value)
 
     createDoughnut(
       perSectorChart,
-      sectorEntries.map(e => e.label),
-      sectorEntries.map(e => e.value),
-      sectorPalette.slice(0, sectorEntries.length)
+      sectorData.map(s => s.label),
+      sectorData.map(s => s.value),
+      sectorPalette.slice(0, sectorData.length)
     )
   } catch (err) {
     console.error('Error loading data:', err)

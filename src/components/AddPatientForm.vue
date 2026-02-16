@@ -943,15 +943,18 @@ const dynamicSectors = ref([])       // [{ id, sector }]
 const dynamicPreferences = ref([])   // [{ id, preference }]
 const dynamicPartners = ref([])      // [{ id, category, partner }]
 
+const preferenceOptions = computed(() => 
+  dynamicPreferences.value.map(p => p.preference)
+)
+
 const options = [
   ['MALE', 'FEMALE'],
-  computed(() => dynamicPreferences.value.map(p => p.preference)),
-  [
-    "APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA", "LIBOGANON", "MADAUM",
-    "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH", "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST",
-    "MANKILAM", "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN", "SAN ISIDRO",
-    "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"
-  ]
+  preferenceOptions,  // ✅ Use the computed ref
+  ["APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA", 
+   "LIBOGANON", "MADAUM", "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH", 
+   "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST", "MANKILAM", 
+   "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN", 
+   "SAN ISIDRO", "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"]
 ]
 
 
