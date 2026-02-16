@@ -2,7 +2,7 @@ import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '',
+  baseURL: 'http://localhost:8000',
   withCredentials: true,
   withXSRFToken: true, // Add this
   headers: {
