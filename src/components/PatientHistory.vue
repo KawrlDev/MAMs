@@ -96,7 +96,8 @@
                 <template v-if="selectedRecord?.category === 'HOSPITAL'">
                   <div class="info-item">
                     <span class="info-label">Hospital Bill:</span>
-                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' + formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}</span>
+                    <span class="info-value">{{ selectedRecord?.hospitalBill ? '₱' +
+                      formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}</span>
                   </div>
                   <div class="info-item">
                     <span class="info-label">Issued Amount:</span>
@@ -136,18 +137,10 @@
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">GL Number: <span v-if="isAdmin" class="required">*</span></label>
-                  <q-input
-                    v-model.number="editData.glNum"
-                    dense
-                    outlined
-                    class="edit-input"
-                    type="number"
-                    :disable="!isAdmin"
-                    :error="validationErrors.glNum"
+                  <q-input v-model.number="editData.glNum" dense outlined class="edit-input" type="number"
+                    :disable="!isAdmin" :error="validationErrors.glNum"
                     error-message="GL Number is required and must be greater than 0"
-                    :hint="!isAdmin ? 'Cannot be edited!' : ''"
-                    :persistent-hint="!isAdmin"
-                  />
+                    :hint="!isAdmin ? 'Cannot be edited!' : ''" :persistent-hint="!isAdmin" />
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Category: <span class="required">*</span></label>
@@ -164,19 +157,9 @@
                 <!-- ADMIN-ONLY FIELDS -->
                 <div class="edit-item">
                   <label class="edit-label">Issued Date: <span v-if="isAdmin" class="required">*</span></label>
-                  <q-input
-                    v-model="editData.issuedDate"
-                    dense
-                    outlined
-                    placeholder="YYYY-MM-DD"
-                    class="edit-input"
-                    :disable="!isAdmin"
-                    :error="validationErrors.issuedDate"
-                    error-message="Issued Date is required"
-                    :hint="!isAdmin ? 'Cannot be edited!' : ''"
-                    :persistent-hint="!isAdmin"
-                    mask="####-##-##"
-                  >
+                  <q-input v-model="editData.issuedDate" dense outlined placeholder="YYYY-MM-DD" class="edit-input"
+                    :disable="!isAdmin" :error="validationErrors.issuedDate" error-message="Issued Date is required"
+                    :hint="!isAdmin ? 'Cannot be edited!' : ''" :persistent-hint="!isAdmin" mask="####-##-##">
                     <template #append>
                       <q-icon name="event" class="cursor-pointer" :class="{ 'disabled-icon': !isAdmin }">
                         <q-popup-proxy v-if="isAdmin" cover transition-show="scale" transition-hide="scale">
@@ -192,61 +175,35 @@
                 </div>
                 <div class="edit-item">
                   <label class="edit-label">Issued By: <span v-if="isAdmin" class="required">*</span></label>
-                  <q-input
-                    v-model="editData.issuedBy"
-                    dense
-                    outlined
-                    class="edit-input"
-                    :disable="!isAdmin"
-                    :error="validationErrors.issuedBy"
-                    error-message="Issued By is required"
-                    :hint="!isAdmin ? 'Cannot be edited!' : ''"
-                    :persistent-hint="!isAdmin"
-                  />
+                  <q-input v-model="editData.issuedBy" dense outlined class="edit-input" :disable="!isAdmin"
+                    :error="validationErrors.issuedBy" error-message="Issued By is required"
+                    :hint="!isAdmin ? 'Cannot be edited!' : ''" :persistent-hint="!isAdmin" />
                 </div>
 
                 <!-- MEDICINE & LABORATORY: Only show Issued Amount -->
                 <div v-if="editData.category === 'MEDICINE' || editData.category === 'LABORATORY'" class="edit-item">
                   <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                  <q-input
-                    :model-value="formatInputCurrency(editData.issuedAmount)"
-                    @update:model-value="updateIssuedAmount"
-                    dense
-                    outlined
-                    class="edit-input"
-                    prefix="₱"
+                  <q-input :model-value="formatInputCurrency(editData.issuedAmount)"
+                    @update:model-value="updateIssuedAmount" dense outlined class="edit-input" prefix="₱"
                     :error="validationErrors.issuedAmount"
-                    error-message="Issued Amount is required and must be greater than 0"
-                  />
+                    error-message="Issued Amount is required and must be greater than 0" />
                 </div>
 
                 <!-- HOSPITAL: Show both Hospital Bill and Issued Amount -->
                 <template v-if="editData.category === 'HOSPITAL'">
                   <div class="edit-item">
                     <label class="edit-label">Hospital Bill:<span class="required">*</span></label>
-                    <q-input
-                      :model-value="formatInputCurrency(editData.hospitalBill)"
-                      @update:model-value="updateHospitalBill"
-                      dense
-                      outlined
-                      class="edit-input"
-                      prefix="₱"
+                    <q-input :model-value="formatInputCurrency(editData.hospitalBill)"
+                      @update:model-value="updateHospitalBill" dense outlined class="edit-input" prefix="₱"
                       :error="validationErrors.hospitalBill"
-                      error-message="Hospital Bill is required and must be greater than 0"
-                    />
+                      error-message="Hospital Bill is required and must be greater than 0" />
                   </div>
                   <div class="edit-item">
                     <label class="edit-label">Issued Amount: <span class="required">*</span></label>
-                    <q-input
-                      :model-value="formatInputCurrency(editData.issuedAmount)"
-                      @update:model-value="updateIssuedAmount"
-                      dense
-                      outlined
-                      class="edit-input"
-                      prefix="₱"
+                    <q-input :model-value="formatInputCurrency(editData.issuedAmount)"
+                      @update:model-value="updateIssuedAmount" dense outlined class="edit-input" prefix="₱"
                       :error="validationErrors.issuedAmount"
-                      error-message="Issued Amount is required and must be greater than 0"
-                    />
+                      error-message="Issued Amount is required and must be greater than 0" />
                   </div>
                 </template>
 
@@ -297,11 +254,10 @@
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md" style="flex-shrink: 0;">
           <!-- VIEW MODE BUTTONS -->
           <template v-if="!editMode">
-            <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn"
-              @click="showCloseConfirmDialog = true" />
+            <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closeDialog" />
             <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
             <q-btn label="PRINT PDF" icon="print" unelevated class="dialog-print-btn"
-              @click="showPrintConfirmDialog = true" :loading="pdfLoading" />
+              @click="generatePDF" :loading="pdfLoading" />
           </template>
 
           <!-- EDIT MODE BUTTONS -->
@@ -334,7 +290,9 @@
               <q-icon name="account_balance_wallet" color="orange" />
             </template>
             <div>
-              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance) }}</div>
+              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance)
+              }}
+              </div>
             </div>
           </q-banner>
         </q-card-section>
@@ -343,7 +301,8 @@
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
-          <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithInsufficientFunds" />
+          <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn"
+            @click="proceedWithInsufficientFunds" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -423,7 +382,8 @@
                 <strong>Issued By:</strong> {{ selectedRecord?.issuedBy }}
               </div>
               <div class="info-item" v-if="selectedRecord?.category === 'HOSPITAL'">
-                <strong>Hospital Bill:</strong> {{ selectedRecord?.hospitalBill ? '₱' + formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}
+                <strong>Hospital Bill:</strong> {{ selectedRecord?.hospitalBill ? '₱' +
+                  formatCurrency(selectedRecord.hospitalBill) : 'N/A' }}
               </div>
               <div class="info-item" :class="{ 'info-item-full': selectedRecord?.category !== 'HOSPITAL' }">
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(selectedRecord?.issuedAmount) }}
@@ -432,7 +392,8 @@
                 <strong>Client Name:</strong>
                 <span v-if="selectedRecord?.rawData?.client_lastname">
                   {{ selectedRecord.rawData.client_lastname }}, {{ selectedRecord.rawData.client_firstname }}
-                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename }}</span>
+                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename
+                  }}</span>
                   <span v-if="selectedRecord.rawData.client_suffix"> {{ selectedRecord.rawData.client_suffix }}</span>
                 </span>
                 <span v-else>N/A</span>
@@ -466,7 +427,8 @@
                 <strong>Issued By:</strong> {{ editData.issuedBy }}
               </div>
               <div class="info-item" v-if="editData.category === 'HOSPITAL'">
-                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) : 'N/A' }}
+                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) :
+                  'N/A' }}
               </div>
               <div class="info-item" :class="{ 'info-item-full': editData.category !== 'HOSPITAL' }">
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(editData.issuedAmount) }}
