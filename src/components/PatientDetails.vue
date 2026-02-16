@@ -760,7 +760,7 @@ const proceedWithTransactionUpdate = async () => {
 
 const updatePatientInfo = async () => {
   const formData = new FormData()
-  formData.append('glNum', glNum.value)
+  formData.append('identifier', glNum.value)
   formData.append('update_patient_info', '1')
   formData.append('category', categoryValue.value)
   formData.append('lastname', lastNameValue.value)
@@ -798,7 +798,7 @@ const updatePatientInfo = async () => {
 
 const updateTransactionDetails = async () => {
   const formData = new FormData()
-  formData.append('glNum', glNum.value)
+  formData.append('identifier', glNum.value)
   formData.append('update_transaction_only', '1')
   formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   formData.append('category', categoryValue.value)
