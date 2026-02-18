@@ -1031,27 +1031,19 @@ const hospitalBillDisplay = ref('');
 const issuedAmountDisplay = ref('');
 const issuedAmountValue = ref(null);
 
-// Function to format input live
-function formatInputWithComma(value) {
-  // Remove all commas
-  let cleaned = value.replace(/,/g, '');
-  // Keep only digits and dot
-  cleaned = cleaned.replace(/[^\d.]/g, '');
-
-  // Split integer and decimal parts
-  const parts = cleaned.split('.');
-  if (parts.length > 2) {
-    cleaned = parts[0] + '.' + parts.slice(1).join('');
+function formatWithLiveCommas(value) {
+  let cleaned = value.replace(/[^\d.]/g, '')
+  const dotIndex = cleaned.indexOf('.')
+  if (dotIndex !== -1) {
+    cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, '')
   }
+  const [integer, decimal] = cleaned.split('.')
+  const formattedInteger = (integer || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  const display = decimal !== undefined
+    ? `${formattedInteger}.${decimal.slice(0, 2)}`
+    : formattedInteger
 
-  let integer = parts[0] || '';
-  let decimal = parts[1] ?? null;
-
-  // Add commas
-  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-  const displayValue = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer;
-  return { displayValue, numericValue: parseFloat(cleaned) || 0 };
+  return { display, numeric: parseFloat(cleaned) || 0 }
 }
 
 const onHospitalBillInput = (value) => {
