@@ -12,7 +12,7 @@
 
         <!-- Edit Mode Buttons -->
         <template v-if="edit">
-          <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="showCancelDialog = true" dense />
+          <q-btn label="Cancel" icon="close" class="action-btn cancel-btn" @click="handleCancel" dense />
           <q-btn label="Save" icon="save" class="action-btn save-btn" @click="handleSaveClick" dense />
         </template>
       </div>
