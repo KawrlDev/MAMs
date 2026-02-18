@@ -744,12 +744,14 @@ const confirmAddBudget = async () => {
   border-top-right-radius: 4px;
 }
 
-.budget-table :deep(.q-table__title) {  font-size: 30px;
+.budget-table :deep(.q-table__title) {
+  font-size: 30px;
   font-weight: 700;
   color: #ffffff;
   padding: 12px 16px;
   margin: 0;
   flex: 1;
+  gap: 10px;
 }
 
 .budget-table :deep(thead tr) {
@@ -812,25 +814,41 @@ const confirmAddBudget = async () => {
   margin: 0;
   color: white;
   font-size: 20px;
+  margin-top: -10px;
 }
 
 .transfer-content {
-  padding: 20px;
+  padding: 4px 20px 12px 20px;
+}
+
+/* ── REDUCED GAPS IN BUDGET FORM ── */
+.budget-block {
+  margin-bottom: 8px;
+}
+
+.budget-block:first-of-type {
+  margin-top: 0;
+}
+
+.budget-block:first-of-type h3 {
+  margin-top: 7px;
 }
 
 .budget-block h3 {
   font-size: 19px;
   font-weight: bold;
-  margin-bottom: 0px;
-  margin-top: 12px;
+  margin-top: 15px;
+  margin-bottom: 2px;
+  line-height: 1.2;
 }
 
 .budget-block label {
   display: block;
   font-weight: bold;
-  margin-bottom: 6px;
-  margin-left: 0px;
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 4px;
+  margin-left: 0;
+  line-height: 1.2;
 }
 
 .budget-block label span {
@@ -908,7 +926,8 @@ const confirmAddBudget = async () => {
 .section-header {
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: 8px;
-  margin-top: 0px;
+  margin-bottom: 0;
+  margin-top: 0;
+  line-height: 1.2;
 }
 </style>
