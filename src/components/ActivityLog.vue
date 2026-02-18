@@ -19,10 +19,6 @@
             </template>
           </q-input>
 
-          <!-- ACTION FILTER -->
-          <q-select v-model="filterAction" :options="actionFilterOptions" dense outlined emit-value map-options
-            style="min-width: 220px" @update:model-value="fetchLogs" />
-
           <!-- REFRESH -->
           <q-btn icon="refresh" label="Refresh" flat dense color="white" @click="refreshAll" />
         </div>
