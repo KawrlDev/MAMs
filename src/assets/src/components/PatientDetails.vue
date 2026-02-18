@@ -54,7 +54,6 @@
             <q-input v-model="suffixValue" dense outlined class="flat-input" :readonly="!edit"
               @update:model-value="checkForChanges" />
           </div>
-
           <div class="col-3">
             <label class="form-label">Birthdate <span class="required">*</span></label>
             <q-input v-model="birthdateValue" dense outlined class="flat-input"
@@ -73,8 +72,9 @@
               </template>
             </q-input>
           </div>
+
           <div class="col-3">
-            <label class="form-label">Age </label>
+            <label class="form-label">Age</label>
             <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" class="flat-input" readonly />
           </div>
 
@@ -87,8 +87,24 @@
 
           <div class="col-3">
             <label class="form-label">Preference</label>
-            <q-select v-model="preferenceValue" :options="options[1]" dense outlined class="flat-input" :disable="!edit"
-              @update:model-value="checkForChanges" />
+            <q-select v-model="preferenceValue" :options="preferenceOptions" dense outlined class="flat-input"
+              :disable="!edit" @update:model-value="checkForChanges" />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Sector</label>
+            <div class="sector-container">
+              <div v-if="allSectors.length === 0" class="text-grey-6 text-caption q-pa-sm">
+                No sectors available
+              </div>
+              <q-checkbox v-for="sector in allSectors" :key="sector.id" :val="sector.id" v-model="selectedSectorIds"
+                :label="sector.sector" dense :disable="!edit || !sector.is_active"
+                @update:model-value="checkForChanges">
+                <q-tooltip v-if="!sector.is_active" :delay="300" class="text-body2">
+                  This sector is deactivated and cannot be changed
+                </q-tooltip>
+              </q-checkbox>
+            </div>
           </div>
 
           <div class="col-4">
@@ -115,6 +131,7 @@
               :rules="[val => !!val || 'This field is required']" :readonly="!edit"
               @update:model-value="checkForChanges" />
           </div>
+
           <div class="col-6">
             <label class="form-label">Phone Number <span class="required">*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined class="flat-input" placeholder="09XXXXXXXXX"
@@ -174,9 +191,9 @@
           Are you sure you want to save these changes?
         </q-card-section>
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
-          <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelPatientEdit" />
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
             :loading="editActionLoading" />
         </q-card-actions>
       </q-card>
@@ -226,6 +243,12 @@
               <div class="info-item">
                 <strong>Phone:</strong> {{ formatPhoneNumber(originalPatientData.phone_number) }}
               </div>
+              <div class="info-item info-item-full">
+                <strong>Sectors:</strong>
+                {{(originalPatientData.sector_ids || []).length
+                  ? allSectors.filter(s => (originalPatientData.sector_ids || []).includes(s.id)).map(s =>
+                    s.sector).join(',') : 'None'}}
+              </div>
             </div>
           </div>
 
@@ -258,6 +281,11 @@
               <div class="info-item">
                 <strong>Phone:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
               </div>
+              <div class="info-item info-item-full">
+                <strong>Sectors:</strong>
+                {{selectedSectorIds.length
+                  ? allSectors.filter(s => selectedSectorIds.includes(s.id)).map(s => s.sector).join(', ') : 'None'}}
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -275,7 +303,7 @@
     <!-- TRANSACTION/CLIENT DETAILS EDIT CONFIRMATION DIALOG -->
     <q-dialog v-model="showTransactionEditDialog" persistent>
       <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-blue-6 text-white">
+        <q-card-section class="bg-orange-6 text-white">
           <div class="text-h6">
             <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
             Transaction/Client Details Changed
@@ -284,87 +312,77 @@
 
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">
-            You have modified the transaction or client details for this record.
+            You have modified the transaction or client details for this record. Are you sure you want to update?
           </div>
 
-          <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
-            <template v-slot:avatar>
-              <q-icon name="info" color="blue" />
-            </template>
-            These changes will only affect this specific GL Number record ({{ glNum }}).
-          </q-banner>
-
-          <!-- Show changed fields -->
+          <!-- Show original transaction info -->
           <div class="patient-info-box q-mb-md">
-            <div class="text-subtitle2 text-weight-bold q-mb-sm">Changed Fields:</div>
-            <div class="changes-list">
-              <div v-if="partnerValue !== originalPatientData.partner" class="change-item">
-                <strong>Partner:</strong>
-                <span class="old-value">{{ originalPatientData.partner }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ partnerValue }}</span>
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Original Transaction Information:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Category:</strong> {{ originalPatientData.category || 'N/A' }}
               </div>
-              <div v-if="hospitalBillValue !== originalPatientData.hospital_bill" class="change-item">
-                <strong>Hospital Bill:</strong>
-                <span class="old-value">{{ originalPatientData.hospital_bill || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ hospitalBillValue }}</span>
+              <div class="info-item">
+                <strong>Partner:</strong> {{ originalPatientData.partner || 'N/A' }}
               </div>
-              <div v-if="issuedAmountValue !== originalPatientData.issued_amount" class="change-item">
-                <strong>Issued Amount:</strong>
-                <span class="old-value">{{ originalPatientData.issued_amount }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ issuedAmountValue }}</span>
+              <div class="info-item" v-if="originalPatientData.category === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> {{ originalPatientData.hospital_bill || 'N/A' }}
               </div>
-              <div v-if="clientLastNameValue !== originalPatientData.client_lastname" class="change-item">
-                <strong>Client Last Name:</strong>
-                <span class="old-value">{{ originalPatientData.client_lastname || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientLastNameValue || 'N/A' }}</span>
+              <div class="info-item" :class="{ 'info-item-full': originalPatientData.category !== 'HOSPITAL' }">
+                <strong>Issued Amount:</strong> {{ originalPatientData.issued_amount || 'N/A' }}
               </div>
-              <div v-if="clientFirstNameValue !== originalPatientData.client_firstname" class="change-item">
-                <strong>Client First Name:</strong>
-                <span class="old-value">{{ originalPatientData.client_firstname || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientFirstNameValue || 'N/A' }}</span>
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong>
+                <span v-if="originalPatientData.client_lastname">
+                  {{ originalPatientData.client_lastname }}, {{ originalPatientData.client_firstname }}
+                  <span v-if="originalPatientData.client_middlename"> {{ originalPatientData.client_middlename }}</span>
+                  <span v-if="originalPatientData.client_suffix"> {{ originalPatientData.client_suffix }}</span>
+                </span>
+                <span v-else>N/A</span>
               </div>
-              <div v-if="(clientMiddleNameValue || null) !== (originalPatientData.client_middlename || null)"
-                class="change-item">
-                <strong>Client Middle Name:</strong>
-                <span class="old-value">{{ originalPatientData.client_middlename || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientMiddleNameValue || 'N/A' }}</span>
-              </div>
-              <div v-if="(clientSuffixValue || null) !== (originalPatientData.client_suffix || null)"
-                class="change-item">
-                <strong>Client Suffix:</strong>
-                <span class="old-value">{{ originalPatientData.client_suffix || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ clientSuffixValue || 'N/A' }}</span>
-              </div>
-              <div v-if="(relationshipValue || null) !== (originalPatientData.relationship || null)"
-                class="change-item">
-                <strong>Relationship:</strong>
-                <span class="old-value">{{ originalPatientData.relationship || 'N/A' }}</span>
-                <q-icon name="arrow_forward" size="xs" class="q-mx-sm" />
-                <span class="new-value">{{ relationshipValue || 'N/A' }}</span>
+              <div class="info-item" v-if="originalPatientData.client_lastname">
+                <strong>Relationship:</strong> {{ originalPatientData.relationship || 'N/A' }}
               </div>
             </div>
           </div>
 
-          <q-banner class="bg-grey-2 text-grey-8">
-            <template v-slot:avatar>
-              <q-icon name="check_circle" color="green" />
-            </template>
-            Click "CONFIRM" to save these changes to GL Number {{ glNum }}.
-          </q-banner>
+          <!-- Show current form values -->
+          <div class="patient-info-box">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">Current Form Values:</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Category:</strong> {{ categoryValue || 'N/A' }}
+              </div>
+              <div class="info-item">
+                <strong>Partner:</strong> {{ partnerValue || 'N/A' }}
+              </div>
+              <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
+                <strong>Hospital Bill:</strong> {{ hospitalBillValue || 'N/A' }}
+              </div>
+              <div class="info-item" :class="{ 'info-item-full': categoryValue !== 'HOSPITAL' }">
+                <strong>Issued Amount:</strong> {{ issuedAmountValue || 'N/A' }}
+              </div>
+              <div class="info-item info-item-full">
+                <strong>Client Name:</strong>
+                <span v-if="clientLastNameValue">
+                  {{ clientLastNameValue }}, {{ clientFirstNameValue }}
+                  <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
+                  <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
+                </span>
+                <span v-else>N/A</span>
+              </div>
+              <div class="info-item" v-if="clientLastNameValue">
+                <strong>Relationship:</strong> {{ relationshipValue || 'N/A' }}
+              </div>
+            </div>
+          </div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelTransactionEdit" />
-          <q-btn label="CONFIRM" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithTransactionUpdate"
+          <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithTransactionUpdate"
             :loading="editActionLoading" />
         </q-card-actions>
       </q-card>
@@ -392,31 +410,46 @@ const route = useRoute()
 const $q = useQuasar()
 const glNum = computed(() => route.params.glNum)
 
+const allSectors = ref([])
+const selectedSectorIds = ref([])
+
 const edit = ref(false)
+
+const dynamicPartners = ref([])
+const dynamicPreferences = ref([])
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
-const options = [['MALE', 'FEMALE'], ['N/A', 'Gay', 'Lesbian'], ["APOKON",
-  "BINCUNGAN",
-  "BUSAON",
-  "CANOCOTAN",
-  "CUAMBOGAN",
-  "LA FILIPINA",
-  "LIBOGANON",
-  "MADAUM",
-  "MAGDUM",
-  "MAGUGPO EAST",
-  "MAGUGPO NORTH",
-  "MAGUGPO POBLACION",
-  "MAGUGPO SOUTH",
-  "MAGUGPO WEST",
-  "MANKILAM",
-  "NEW BALAMBAN",
-  "NUEVA FUERZA",
-  "PAGSABANGAN",
-  "PANDAPAN",
-  "SAN AGUSTIN",
-  "SAN ISIDRO",
-  "SAN MIGUEL (CAMP 4)",
-  "VISAYAN VILLAGE"]]
+const preferenceOptions = computed(() =>
+  dynamicPreferences.value.map(p => p.preference)
+)
+
+const options = [
+  ['MALE', 'FEMALE'],
+  preferenceOptions,
+  ["APOKON",
+    "BINCUNGAN",
+    "BUSAON",
+    "CANOCOTAN",
+    "CUAMBOGAN",
+    "LA FILIPINA",
+    "LIBOGANON",
+    "MADAUM",
+    "MAGDUM",
+    "MAGUGPO EAST",
+    "MAGUGPO NORTH",
+    "MAGUGPO POBLACION",
+    "MAGUGPO SOUTH",
+    "MAGUGPO WEST",
+    "MANKILAM",
+    "NEW BALAMBAN",
+    "NUEVA FUERZA",
+    "PAGSABANGAN",
+    "PANDAPAN",
+    "SAN AGUSTIN",
+    "SAN ISIDRO",
+    "SAN MIGUEL (CAMP 4)",
+    "VISAYAN VILLAGE"
+  ]
+]
 const patientForm = ref(null);
 const patientIDValue = ref(null)
 const categoryValue = ref(null)
@@ -453,11 +486,24 @@ const editActionLoading = ref(false)
 const hasPatientChanges = ref(false)
 const hasTransactionChanges = ref(false)
 
+const fetchDropdownOptions = async () => {
+  try {
+    const res = await axios.get('/api/all')
+    dynamicPartners.value = res.data.partners
+    dynamicPreferences.value = res.data.preferences
+    const sectorsRes = await axios.get('/api/sectors/all')
+    allSectors.value = sectorsRes.data
+  } catch (err) {
+    console.error('Failed to fetch dropdown options', err)
+    $q.notify({ type: 'negative', message: 'Failed to load dropdown options', position: 'top' })
+  }
+}
+
 const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
+  if (!categoryValue.value) return []
+  return dynamicPartners.value
+    .filter(p => p.category === categoryValue.value)
+    .map(p => p.partner)
 })
 
 const originalPatientData = ref({
@@ -513,7 +559,7 @@ const onPhoneNumberChange = (value) => {
     // Remove all non-digit characters
     const cleaned = value.replace(/\D/g, '')
     phoneNumberValue.value = cleaned
-    
+
     const normalized = normalizePhoneNumber(cleaned)
     if (normalized) {
       phoneNumberValue.value = normalized
@@ -570,7 +616,8 @@ const checkPatientChanges = () => {
     (preferenceValue.value || null) !== (originalPatientData.value.preference || null) ||
     barangayValue.value !== originalPatientData.value.barangay ||
     houseAddressValue.value !== originalPatientData.value.house_address ||
-    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null)
+    (phoneNumberValue.value || null) !== (originalPatientData.value.phone_number || null) ||
+    JSON.stringify([...selectedSectorIds.value].sort()) !== JSON.stringify([...(originalPatientData.value.sector_ids || [])].sort())  // ADD THIS LINE
 }
 
 const checkTransactionChanges = () => {
@@ -718,13 +765,14 @@ const proceedWithTransactionUpdate = async () => {
 
 const updatePatientInfo = async () => {
   const formData = new FormData()
-  formData.append('glNum', glNum.value)
+  formData.append('identifier', glNum.value)
   formData.append('update_patient_info', '1')
   formData.append('category', categoryValue.value)
   formData.append('lastname', lastNameValue.value)
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
+  formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
   formData.append('birthdate', mysqlBirthdate)
   formData.append('sex', sexValue.value)
@@ -755,8 +803,9 @@ const updatePatientInfo = async () => {
 
 const updateTransactionDetails = async () => {
   const formData = new FormData()
-  formData.append('glNum', glNum.value)
+  formData.append('identifier', glNum.value)
   formData.append('update_transaction_only', '1')
+  formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   formData.append('category', categoryValue.value)
   formData.append('partner', partnerValue.value)
   formData.append('hospital_bill', hospitalBillValue.value || 0)
@@ -775,11 +824,13 @@ const updateTransactionDetails = async () => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch dropdown options first
+  await fetchDropdownOptions()
+
   if (!glNum.value) return
   getPatientDetails(glNum.value)
 })
-
 watch(
   () => route.params.glNum,
   (newGlNum) => {
@@ -803,11 +854,6 @@ const confirmSave = async () => {
       hasTransactionChanges.value = false
       await getPatientDetails(glNum.value)
     }
-    $q.notify({
-      type: 'positive',
-      message: 'Changes saved successfully',
-      position: 'top'
-    })
   } catch (error) {
     console.error('Save failed:', error)
     $q.notify({
@@ -840,6 +886,7 @@ const getPatientDetails = async (id) => {
   barangayValue.value = patientDetails.barangay
   houseAddressValue.value = patientDetails.house_address
   phoneNumberValue.value = patientDetails.phone_number
+  selectedSectorIds.value = patientDetails.sector_ids || []
   originalPatientData.value = {
     lastname: patientDetails.patient_lastname,
     firstname: patientDetails.patient_firstname,
@@ -858,6 +905,7 @@ const getPatientDetails = async (id) => {
     partner: patientDetails.partner,
     hospital_bill: patientDetails.hospital_bill,
     issued_amount: patientDetails.issued_amount,
+    sector_ids: patientDetails.sector_ids || [],
     is_checked: patientDetails.client_lastname == null,
     client_lastname: patientDetails.client_lastname,
     client_firstname: patientDetails.client_firstname,
@@ -1208,5 +1256,26 @@ function getDaySuffix(day) {
   font-size: 13px;
   color: #666;
   line-height: 1.4;
+}
+
+.sector-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 8px 10px;
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  align-items: center;
+}
+
+.sector-container :deep(.q-checkbox) {
+  margin-top: 0;
+}
+
+.sector-container :deep(.q-checkbox__label) {
+  font-size: 13px;
+  font-weight: 500;
 }
 </style>

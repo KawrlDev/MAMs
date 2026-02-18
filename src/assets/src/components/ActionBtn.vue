@@ -1,7 +1,7 @@
 <template>
   <div class="action-cell">
     <q-btn
-      :to="`/patient-details/${row.glNum}`"
+      :to="`/patient-details/${row.uuid}`"
       flat
       round
       dense
@@ -21,7 +21,6 @@ const props = defineProps({
 
 const { row } = props
 </script>
-
 
 <style scoped>
 .link-icon {

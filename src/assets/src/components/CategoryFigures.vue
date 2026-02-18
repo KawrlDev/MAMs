@@ -356,6 +356,7 @@ onMounted(async () => {
   padding: 0;
   margin-bottom: -8.5%;
   margin-top: 2%;
+  height: auto;
 }
 
 .chart-header {
@@ -374,7 +375,7 @@ onMounted(async () => {
 }
 
 .chart-container {
-  height: 280px;
+  height: 400px;
   position: relative;
   padding: 16px;
 }
@@ -465,7 +466,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 180px;
+    height: 250px;
     padding: 10px;
   }
 }
@@ -549,7 +550,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 200px;
+    height: 280px;
     padding: 12px;
   }
 }
@@ -625,7 +626,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 220px;
+    height: 300px;
     padding: 13px;
   }
 }
@@ -701,7 +702,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 240px;
+    height: 320px;
     padding: 14px;
   }
 }
@@ -777,7 +778,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 260px;
+    height: 350px;
     padding: 15px;
   }
 }
@@ -853,7 +854,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 270px;
+    height: 380px;
     padding: 16px;
   }
 }
@@ -929,7 +930,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 280px;
+    height: 400px;
     padding: 16px;
   }
 }
@@ -1005,7 +1006,7 @@ onMounted(async () => {
   }
 
   .chart-container {
-    height: 320px;
+    height: 460px;
     padding: 17px;
   }
 }

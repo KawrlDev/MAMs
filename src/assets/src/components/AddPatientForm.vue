@@ -250,7 +250,7 @@
           </div>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-bio">
           <div class="field">
             <label>Birthdate <span>*</span></label>
             <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
@@ -269,24 +269,35 @@
               </template>
             </q-input>
           </div>
+
           <div class="field">
-            <label>Age </label>
+            <label>Age</label>
             <q-input v-model="ageValue" dense outlined placeholder="Auto-calculated" readonly />
           </div>
 
           <div class="field">
             <label>Sex <span>*</span></label>
-            <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex" placeholder="Sex"
+            <q-select v-model="sexValue" dense outlined :options="options[0]" label="Sex"
               :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
           </div>
 
           <div class="field">
             <label>Preference</label>
-            <q-select v-model="preferenceValue" :options="options[1]" label="Preference" placeholder="Preference" dense
-              outlined @update:model-value="checkForPatientEdits" />
+            <q-select v-model="preferenceValue" :options="dynamicPreferences.map(p => p.preference)" label="Preference"
+              dense outlined @update:model-value="checkForPatientEdits" />
+          </div>
+
+          <div class="field sector-field">
+            <label>Sector</label>
+            <div class="sector-container">
+              <div v-if="dynamicSectors.length === 0" class="text-grey-6 text-caption q-pa-sm">
+                No sectors available
+              </div>
+              <q-checkbox v-for="sector in dynamicSectors" :key="sector.id" :val="sector.id" v-model="selectedSectorIds"
+                :label="sector.sector" dense @update:model-value="checkForPatientEdits" />
+            </div>
           </div>
         </div>
-
         <div class="grid-5">
           <div class="field">
             <label>Province</label>
@@ -315,8 +326,7 @@
             <label>Phone Number <span>*</span></label>
             <q-input v-model="phoneNumberValue" dense outlined placeholder="09XXXXXXXXX" :rules="[validatePhoneNumber]"
               @update:model-value="onPhoneNumberChange" maxlength="11" hint="Format: 09XXXXXXXXX (11 digits)"
-              :persistent-hint="true"
-              @keypress="onPhoneNumberKeyPress" />
+              :persistent-hint="true" @keypress="onPhoneNumberKeyPress" />
           </div>
         </div>
 
@@ -332,18 +342,10 @@
           </div>
 
           <div class="field" v-if="categoryValue == 'HOSPITAL'">
-  <label>Hospital Bill <span>*</span></label>
-  <q-input
-    type="text"
-    dense
-    outlined
-    v-model="hospitalBillDisplay"
-    @update:model-value="onHospitalBillInput"
-    @blur="finalizeHospitalBill"
-    placeholder="0.00"
-    :rules="[val => !!val || 'This field is required']"
-  />
-</div>
+            <label>Hospital Bill <span>*</span></label>
+            <q-input type="text" dense outlined v-model="hospitalBillDisplay" @update:model-value="onHospitalBillInput"
+              @blur="finalizeHospitalBill" placeholder="0.00" :rules="[val => !!val || 'This field is required']" />
+          </div>
 
           <div class="field">
             <label>Issued Amount <span>*</span></label>
@@ -426,7 +428,8 @@
 
           <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
             <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="cancelInsufficientFunds" />
-            <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn" @click="proceedWithInsufficientFunds" />
+            <q-btn label="PROCEED ANYWAY" icon="check" unelevated class="dialog-cancel-btn"
+              @click="proceedWithInsufficientFunds" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -684,110 +687,102 @@
           <q-card-section class="bg-blue-6 text-white">
             <div class="text-h6">
               <q-icon name="info" size="sm" class="q-mr-sm" />
-              {{ pendingAction === 'print' ? 'Save and Print Form?' : 'Save Form?' }}
+              Confirm Patient Information
             </div>
           </q-card-section>
 
           <q-card-section>
-            <!-- Show details if user did NOT select from dropdown (manual entry) -->
-            <div v-if="!usedBrowserPatient">
-              <div class="text-subtitle1 q-mb-md">
-                Please review the information before proceeding.
-              </div>
+            <div class="text-subtitle1 q-mb-md">
+              Please review the patient information before proceeding.
+            </div>
 
-              <!-- Patient Information -->
-              <div class="patient-info-box">
-                <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
-                  <q-icon name="person" size="sm" class="q-mr-xs" />
-                  Patient Information:
-                </div>
-                <div class="info-grid">
-                  <div class="info-item info-item-full">
-                    <strong>Name:</strong>
-                    {{ lastNameValue }}, {{ firstNameValue }}
-                    <span v-if="middleNameValue"> {{ middleNameValue }}</span>
-                    <span v-if="suffixValue"> {{ suffixValue }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Age:</strong> {{ calculateAgeFromBirthdate(birthdateValue) }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Sex:</strong> {{ sexValue || 'N/A' }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
-                  </div>
-                  <div class="info-item info-item-full">
-                    <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
-                      provinceValue
-                    }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
-                  </div>
-                </div>
+            <!-- Patient Information -->
+            <div class="patient-info-box">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-blue-8">
+                <q-icon name="person" size="sm" class="q-mr-xs" />
+                Patient Information:
               </div>
-
-              <!-- Transaction Details -->
-              <div class="patient-info-box q-mt-md">
-                <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
-                  <q-icon name="receipt" size="sm" class="q-mr-xs" />
-                  Transaction Details:
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Name:</strong>
+                  {{ lastNameValue }}, {{ firstNameValue }}
+                  <span v-if="middleNameValue"> {{ middleNameValue }}</span>
+                  <span v-if="suffixValue"> {{ suffixValue }}</span>
                 </div>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>Category:</strong> {{ categoryValue }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Partner:</strong> {{ partnerValue }}
-                  </div>
-                  <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
-                    <strong>Hospital Bill:</strong> ₱{{ formatCurrency(hospitalBillValue) }}
-                  </div>
-                  <div class="info-item">
-                    <strong>Issued Amount:</strong> ₱{{ formatCurrency(issuedAmountValue) }}
-                  </div>
+                <div class="info-item">
+                  <strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}
                 </div>
-              </div>
-
-              <!-- Client Details -->
-              <div v-if="!isChecked" class="patient-info-box q-mt-md">
-                <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-                  <q-icon name="person_outline" size="sm" class="q-mr-xs" />
-                  Client Information:
+                <div class="info-item">
+                  <strong>Age:</strong> {{ calculateAgeFromBirthdate(birthdateValue) }}
                 </div>
-                <div class="info-grid">
-                  <div class="info-item info-item-full">
-                    <strong>Client Name:</strong>
-                    {{ clientLastNameValue }}, {{ clientFirstNameValue }}
-                    <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
-                    <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
-                  </div>
-                  <div class="info-item info-item-full">
-                    <strong>Relationship to Patient:</strong> {{ relationshipValue }}
-                  </div>
+                <div class="info-item">
+                  <strong>Sex:</strong> {{ sexValue || 'N/A' }}
                 </div>
-              </div>
-              <div v-else class="patient-info-box q-mt-md">
-                <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
-                  <q-icon name="person_outline" size="sm" class="q-mr-xs" />
-                  Client Information:
+                <div class="info-item">
+                  <strong>Preference:</strong> {{ preferenceValue || 'N/A' }}
                 </div>
-                <div class="info-grid">
-                  <div class="info-item info-item-full">
-                    <strong>Client:</strong> Same as patient
-                  </div>
+                <div class="info-item">
+                  <strong>Sector:</strong> {{ sectorValue }}
+                </div>
+                <div class="info-item info-item-full">
+                  <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                    provinceValue }}
+                </div>
+                <div class="info-item">
+                  <strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}
                 </div>
               </div>
             </div>
 
-            <!-- Simple text if user selected from dropdown -->
-            <div v-else>
-              <div class="text-body1">
-                Are you sure you want to {{ pendingAction === 'print' ? 'save and print' : 'save' }} this record?
+            <!-- Transaction Details -->
+            <div class="patient-info-box q-mt-md">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-green-8">
+                <q-icon name="receipt" size="sm" class="q-mr-xs" />
+                Transaction Details:
+              </div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Category:</strong> {{ categoryValue }}
+                </div>
+                <div class="info-item">
+                  <strong>Partner:</strong> {{ partnerValue }}
+                </div>
+                <div class="info-item" v-if="categoryValue === 'HOSPITAL'">
+                  <strong>Hospital Bill:</strong> ₱{{ formatCurrency(hospitalBillValue) }}
+                </div>
+                <div class="info-item">
+                  <strong>Issued Amount:</strong> ₱{{ formatCurrency(issuedAmountValue) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Client Details -->
+            <div v-if="!isChecked" class="patient-info-box q-mt-md">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+                Client Information:
+              </div>
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Client Name:</strong>
+                  {{ clientLastNameValue }}, {{ clientFirstNameValue }}
+                  <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
+                  <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
+                </div>
+                <div class="info-item info-item-full">
+                  <strong>Relationship to Patient:</strong> {{ relationshipValue }}
+                </div>
+              </div>
+            </div>
+            <div v-else class="patient-info-box q-mt-md">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm text-purple-8">
+                <q-icon name="person_outline" size="sm" class="q-mr-xs" />
+                Client Information:
+              </div>
+              <div class="info-grid">
+                <div class="info-item info-item-full">
+                  <strong>Client:</strong> Same as patient
+                </div>
               </div>
             </div>
           </q-card-section>
@@ -795,9 +790,10 @@
           <q-separator />
 
           <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md dialog-actions-sticky">
-            <q-btn label="NO" icon="close" unelevated class="dialog-goback-btn" @click="showAreYouSureDialog = false" />
-            <q-btn label="YES" icon="check" unelevated class="dialog-cancel-btn" @click="confirmAreYouSure"
-              :loading="areYouSureLoading" />
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn"
+              @click="showAreYouSureDialog = false" />
+            <q-btn :label="browserPatientEdited ? 'UPDATE' : 'PROCEED'" icon="check" unelevated
+              class="dialog-cancel-btn" @click="confirmAreYouSure" :loading="areYouSureLoading" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -915,7 +911,7 @@
 import { api } from 'src/boot/axios'
 
 const axios = api
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { date, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
@@ -931,17 +927,46 @@ const router = useRouter()
 const $q = useQuasar()
 
 const categoryOptions = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
+
+// Dynamic options from backend
+const dynamicSectors = ref([])       // [{ id, sector }]
+const dynamicPreferences = ref([])   // [{ id, preference }]
+const dynamicPartners = ref([])      // [{ id, category, partner }]
+
+const preferenceOptions = computed(() =>
+  dynamicPreferences.value.map(p => p.preference)
+)
+
 const options = [
   ['MALE', 'FEMALE'],
-  ['N/A', 'Gay', 'Lesbian'],
-  [
-    "APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA", "LIBOGANON", "MADAUM",
-    "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH", "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST",
-    "MANKILAM", "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN", "SAN ISIDRO",
-    "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"
-  ]
+  preferenceOptions,  // ✅ Use the computed ref
+  ["APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA",
+    "LIBOGANON", "MADAUM", "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH",
+    "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST", "MANKILAM",
+    "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN",
+    "SAN ISIDRO", "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"]
 ]
 
+
+const selectedSectorIds = ref([])
+
+const fetchDropdownOptions = async () => {
+  try {
+    const res = await axios.get('/api/all')
+    dynamicPreferences.value = res.data.preferences
+    dynamicPartners.value = res.data.partners
+    dynamicSectors.value = res.data.sectors
+  } catch (err) {
+    console.error('Failed to fetch dropdown options', err)
+    $q.notify({ type: 'negative', message: 'Failed to load dropdown options', position: 'top' })
+  }
+}
+
+onMounted(() => {
+  fetchDropdownOptions()
+});
+
+const pdfLoading = ref(false)
 const patientForm = ref(null);
 
 const categoryValue = ref(null)
@@ -996,13 +1021,13 @@ const usedBrowserPatient = ref(false)
 const browserPatientEdited = ref(false)
 
 const partnerOptions = computed(() => {
-  if (categoryValue.value === 'MEDICINE') return ['PHARMACITI', 'QURESS']
-  if (categoryValue.value === 'LABORATORY') return ['PERPETUAL LAB', 'MEDILIFE', 'LEXAS', 'CITY MED']
-  if (categoryValue.value === 'HOSPITAL') return ['TAGUM GLOBAL', 'CHRIST THE KING', 'MEDICAL MISSION', 'TMC']
-  return []
+  if (!categoryValue.value) return []
+  return dynamicPartners.value
+    .filter(p => p.category === categoryValue.value)
+    .map(p => p.partner)
 })
 const hospitalBillDisplay = ref('');
- 
+
 const issuedAmountDisplay = ref('');
 const issuedAmountValue = ref(null);
 
@@ -1012,7 +1037,7 @@ function formatInputWithComma(value) {
   let cleaned = value.replace(/,/g, '');
   // Keep only digits and dot
   cleaned = cleaned.replace(/[^\d.]/g, '');
-  
+
   // Split integer and decimal parts
   const parts = cleaned.split('.');
   if (parts.length > 2) {
@@ -1025,7 +1050,7 @@ function formatInputWithComma(value) {
   // Add commas
   integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  const displayValue = decimal !== null ? `${integer}.${decimal.slice(0,2)}` : integer;
+  const displayValue = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer;
   return { displayValue, numericValue: parseFloat(cleaned) || 0 };
 }
 
@@ -1156,6 +1181,13 @@ const filteredSearchResults = computed(() => {
     })
 })
 
+const sectorValue = computed(() => {
+  if (!selectedSectorIds.value.length) return 'N/A'
+  return dynamicSectors.value
+    .filter(s => selectedSectorIds.value.includes(s.id))
+    .map(s => s.sector)
+    .join(', ')
+})
 const showCancelDialog = ref(false)
 const showExistingDialog = ref(false)
 const showEligibilityWarning = ref(false)
@@ -1407,6 +1439,15 @@ const selectPatientFromDropdown = (patient) => {
     message: 'Patient information loaded. Fill in the remaining details.',
     position: 'top'
   })
+  phoneNumberValue.value = patient.phone_number
+
+  selectedSectorIds.value = patient.sector_ids || []
+
+  $q.notify({
+    type: 'positive',
+    message: 'Patient information loaded. Fill in the remaining details.',
+    position: 'top'
+  })
 }
 
 const dateOptions = (date) => {
@@ -1432,6 +1473,8 @@ const checkForPatientEdits = () => {
     (preferenceValue.value || null) !== (originalBrowserPatient.value.preference || null) ||
     barangayValue.value !== originalBrowserPatient.value.barangay ||
     houseAddressValue.value !== originalBrowserPatient.value.house_address
+  houseAddressValue.value !== originalBrowserPatient.value.house_address ||
+    JSON.stringify([...selectedSectorIds.value].sort()) !== JSON.stringify([...(originalBrowserPatient.value.sector_ids || [])].sort())
 
   browserPatientEdited.value = edited
 }
@@ -1640,6 +1683,7 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   formData.append('firstname', firstNameValue.value)
   formData.append('middlename', middleNameValue.value || '')
   formData.append('suffix', suffixValue.value || '')
+  formData.append('sector_ids', JSON.stringify(selectedSectorIds.value))
   formData.append('birthdate', mysqlBirthdate)
   formData.append('sex', sexValue.value)
   formData.append('preference', preferenceValue.value || '')
@@ -1704,140 +1748,179 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
 }
 
 const generatePDF = async () => {
-  const pdfMap = {
-    MEDICINE: '/med.pdf',
-    LABORATORY: '/lab.pdf',
-    HOSPITAL: '/hosp.pdf',
-  }
+  pdfLoading.value = true
 
-  const pdfPath = pdfMap[categoryValue.value]
-  const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
-  const pdfDoc = await PDFDocument.load(existingPdfBytes)
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-  const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
-  const page = pdfDoc.getPages()[0]
-  page.setSize(page.getWidth(), 1200)
-  page.translateContent(0, 605)
-  const parsedDate = new Date(dateToday.value)
-  const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
-  const monthName = parsedDate.toLocaleString('default', { month: 'long' })
+  try {
+    const pdfMap = {
+      MEDICINE: '/med.pdf',
+      LABORATORY: '/lab.pdf',
+      HOSPITAL: '/hosp.pdf',
+    }
 
-  const fullNameValue =
-    lastNameValue.value + ", " + firstNameValue.value +
-    (middleNameValue.value ? " " + middleNameValue.value : "") +
-    (suffixValue.value ? " " + suffixValue.value : "");
+    const pdfPath = pdfMap[categoryValue.value]
+    const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
+    const pdfDoc = await PDFDocument.load(existingPdfBytes)
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
+    const page = pdfDoc.getPages()[0]
+    page.setSize(page.getWidth(), 1200)
+    page.translateContent(0, 605)
 
-  const clientValue = ref(null);
-  const fullAddressValue = houseAddressValue.value + ", " + barangayValue.value + ", " + cityValue.value + ", " + provinceValue.value
+    const parsedDate = new Date(dateToday.value)
+    const dayNum = parsedDate.getDate() + getDaySuffix(parsedDate.getDate())
+    const monthName = parsedDate.toLocaleString('default', { month: 'long' })
 
-  if (isChecked.value == true) {
-    clientValue.value = fullNameValue;
-  } else {
-    clientValue.value = clientLastNameValue.value + ", " + clientFirstNameValue.value +
-      (clientMiddleNameValue.value ? " " + clientMiddleNameValue.value : "") +
-      (clientSuffixValue.value ? " " + clientSuffixValue.value : "") + " / " + (relationshipValue.value ? " " + relationshipValue.value : "");
-  }
+    const fullNameValue =
+      lastNameValue.value + ", " + firstNameValue.value +
+      (middleNameValue.value ? " " + middleNameValue.value : "") +
+      (suffixValue.value ? " " + suffixValue.value : "")
 
-  const age = ageValue.value
+    let clientValue
+    const fullAddressValue = houseAddressValue.value + ", " + barangayValue.value + ", " + cityValue.value + ", " + provinceValue.value
 
-  page.drawText(glNum.value + ' / ' + partnerValue.value, {
-    x: 600,
-    y: 489,
-    size: 14,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(fullNameValue.toUpperCase(), {
-    x: 140,
-    y: 375,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(String(age), {
-    x: 400,
-    y: 375,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(sexValue.value.toUpperCase(), {
-    x: 455,
-    y: 375,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(fullAddressValue.toUpperCase(), {
-    x: 95,
-    y: 350,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(clientValue.value.toUpperCase(), {
-    x: 70,
-    y: 300,
-    size: 10,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
+    if (isChecked.value == true) {
+      clientValue = fullNameValue
+    } else {
+      clientValue = clientLastNameValue.value + ", " + clientFirstNameValue.value +
+        (clientMiddleNameValue.value ? " " + clientMiddleNameValue.value : "") +
+        (clientSuffixValue.value ? " " + clientSuffixValue.value : "") +
+        " / " + (relationshipValue.value ? " " + relationshipValue.value : "")
+    }
 
-  if (categoryValue.value == 'MEDICINE') {
-    page.drawText(amountWords, {
-      x: 245,
-      y: 273,
-      size: 10,
+    const age = ageValue.value
+
+    // GL Number and Partner
+    page.drawText(glNum.value + ' / ' + partnerValue.value, {
+      x: 600,
+      y: 489,
+      size: 14,
       color: rgb(0, 0, 0),
       font: boldFont,
     })
-  } else {
-    page.drawText(amountWords, {
-      x: 260,
-      y: 273,
-      size: 10,
+
+    // Patient Name
+    page.drawText(fullNameValue.toUpperCase(), {
+      x: 160,
+      y: 375,
+      size: 13,
       color: rgb(0, 0, 0),
       font: boldFont,
     })
-  }
 
-  page.drawText(
-    formatCurrency(issuedAmountValue.value),
-    {
-      x: 90,
-      y: 248,
-      size: 12,
+    // Age
+    if (age !== null) {
+      page.drawText(String(age), {
+        x: 545,
+        y: 375,
+        size: 13,
+        color: rgb(0, 0, 0),
+        font: boldFont,
+      })
+    }
+
+    // Sex
+    page.drawText(sexValue.value.toUpperCase(), {
+      x: 630,
+      y: 375,
+      size: 13,
       color: rgb(0, 0, 0),
       font: boldFont,
-    },
-  )
-  page.drawText(dayNum, {
-    x: 137,
-    y: 197,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(monthName.toUpperCase(), {
-    x: 225,
-    y: 197,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
-  page.drawText(issuedByValue.value.toUpperCase(), {
-    x: 340,
-    y: 65,
-    size: 12,
-    color: rgb(0, 0, 0),
-    font: boldFont,
-  })
+    })
 
-  const pdfBytes = await pdfDoc.save()
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-  const url = URL.createObjectURL(blob)
-  window.open(url)
-  setTimeout(() => URL.revokeObjectURL(url), 100)
+    // Address
+    page.drawText(fullAddressValue.toUpperCase(), {
+      x: 120,
+      y: 350,
+      size: 13,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+
+    // Client Name
+    page.drawText(clientValue.toUpperCase(), {
+      x: 70,
+      y: 300,
+      size: 13,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+
+    // Amount in Words
+    if (categoryValue.value == 'MEDICINE') {
+      page.drawText(amountWords, {
+        x: 310,
+        y: 270,
+        size: 13,
+        color: rgb(0, 0, 0),
+        font: boldFont,
+      })
+    } else {
+      page.drawText(amountWords, {
+        x: 360,
+        y: 270,
+        size: 13,
+        color: rgb(0, 0, 0),
+        font: boldFont,
+      })
+    }
+
+    // Amount in Numbers
+    page.drawText(formatCurrency(issuedAmountValue.value), {
+      x: 340,
+      y: 242,
+      size: 14,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+
+    // Day
+    page.drawText(dayNum, {
+      x: 170,
+      y: 191,
+      size: 13,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+
+    // Month
+    page.drawText(monthName.toUpperCase(), {
+      x: 315,
+      y: 191,
+      size: 13,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+
+    // Issued By
+    page.drawText(issuedByValue.value.toUpperCase(), {
+      x: 340,
+      y: 65,
+      size: 13,
+      color: rgb(0, 0, 0),
+      font: boldFont,
+    })
+
+    const pdfBytes = await pdfDoc.save()
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+
+    window.open(url)
+
+    $q.notify({
+      type: 'positive',
+      message: 'PDF generated successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('PDF generation error:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to generate PDF',
+      position: 'top'
+    })
+  } finally {
+    pdfLoading.value = false
+  }
 }
 
 function getDaySuffix(day) {
@@ -2302,5 +2385,38 @@ label span {
   font-size: 13px;
   color: #666;
   line-height: 1.4;
+}
+
+.grid-bio {
+  display: grid;
+  grid-template-columns: 1.2fr 0.6fr 0.8fr 1fr 2fr;
+  gap: 16px;
+  margin-bottom: -14px;
+  align-items: start;
+}
+
+.sector-field {
+  grid-column: 5;
+}
+
+.sector-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 8px 10px;
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  align-items: center;
+}
+
+:deep(.sector-container .q-checkbox) {
+  margin-top: 0;
+}
+
+:deep(.sector-container .q-checkbox__label) {
+  font-size: 13px;
+  font-weight: 500;
 }
 </style>

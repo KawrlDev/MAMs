@@ -215,21 +215,28 @@ onMounted(async () => {
 
 /* TITLE */
 .fieldset-title {
-  font-size: 40px;
+  font-size: 35px;
   font-weight: 700;
-  color: #1f8f2e;
+  color: #ffffff;
+  background-color: #1f8f2e;
+  padding: 8px 16px;
   margin: 0;
-  line-height: 0.5;
-  margin-top: 15px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  box-sizing: border-box;
+  line-height: 1.2;
 }
 
 .fieldset-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin: -25px -30px 20px -30px; /* ← pull it to the edges of the padded card */
+  background-color: #1f8f2e;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  padding-right: 16px; /* give the buttons some breathing room */
 }
-
 .actions {
   display: flex;
   gap: 8px;

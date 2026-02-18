@@ -6,7 +6,7 @@
 
         <!-- SEARCH -->
         <div class="col-10">
-          <q-input v-model="search" placeholder="Search by name, category, GL No., barangay, or date (YYYY-MM-DD)"
+          <q-input v-model="search" placeholder="Search by name, barangay, sector, category, UUID, GL no., or date (YYYY-MM-DD)"
             outlined dense clearable>
             <template #prepend>
               <q-icon name="search" />
@@ -27,7 +27,7 @@
   </div>
   <br>
   <div class="budget-table table-scroll">
-    <q-table title="Patient's Record" :rows="rows" :columns="columns" row-key="glNum">
+    <q-table title="Patient's Record" :rows="rows" :columns="columns" row-key="uuid">
       <template #body-cell-action="props">
         <ActionBtn :row="props.row" />
       </template>
@@ -46,11 +46,23 @@ import ActionBtn from './ActionBtn.vue'
 const router = useRouter()
 const rows = ref([])
 const search = ref('')
+const allSectors = ref([])
+
+const fetchSectors = async () => {
+  try {
+    const res = await axios.get('/api/sectors')
+    allSectors.value = res.data  // [{ id, sector }]
+  } catch (err) {
+    console.error('Failed to fetch sectors:', err)
+  }
+}
 
 const columns = [
   { name: 'name', label: "Patient's Name", field: 'name', align: 'center', sortable: true },
   { name: 'barangay', label: 'Barangay', field: 'barangay', align: 'center', sortable: true },
+  { name: 'sector', label: 'Sector', field: 'sector', align: 'center', sortable: true },
   { name: 'category', label: 'Category', field: 'category', align: 'center', sortable: true },
+  { name: 'uuid', label: 'UUID', field: 'uuid', align: 'center', sortable: true }, // Added UUID column
   { name: 'glNum', label: 'GL No.', field: 'glNum', align: 'center', sortable: true },
   { name: 'date', label: 'Date Issued', field: 'date', align: 'center', sortable: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
@@ -58,7 +70,10 @@ const columns = [
 
 const STORAGE_KEY = 'patient_list_search'
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch sectors first so mapPatientsToRows can resolve names
+  await fetchSectors()
+
   // Restore saved search filter
   const savedSearch = localStorage.getItem(STORAGE_KEY)
   if (savedSearch && savedSearch !== 'null' && savedSearch !== '') {
@@ -95,6 +110,17 @@ onBeforeUnmount(() => {
   }
 })
 
+const formatSector = (sectorIds) => {
+  if (!sectorIds || !sectorIds.length || !allSectors.value.length) return 'N/A'
+  const names = sectorIds
+    .map(id => {
+      const found = allSectors.value.find(s => s.id === id)
+      return found ? found.sector : null
+    })
+    .filter(Boolean)
+  return names.length ? names.join(', ') : 'N/A'
+}
+
 const mapPatientsToRows = (patients) => {
   return patients.map(patient => {
     const name = [
@@ -106,31 +132,31 @@ const mapPatientsToRows = (patients) => {
 
     return {
       ...patient,
+      uuid: patient.uuid, // UUID for display and row-key
       name,
       barangay: patient.barangay,
+      sector: formatSector(patient.sector_ids),
       category: patient.category,
-      glNum: patient.gl_no,
+      glNum: patient.gl_no, // Display GL number to user
       date: patient.date_issued
     }
   })
 }
+
 watch(search, async (val) => {
+  // Save to localStorage whenever search changes (only if not empty)
   if (val && val !== '') {
     localStorage.setItem(STORAGE_KEY, val)
   } else {
     localStorage.removeItem(STORAGE_KEY)
   }
+  
+  const res = await axios.get(
+    '/api/patients/search',
+    { params: { q: val || '' } }
+  )
 
-  if (!val || val.trim() === '') {
-    const res = await axios.get('/api/patients')
-    rows.value = mapPatientsToRows(res.data)
-  } else {
-    const res = await axios.get(
-      '/api/patients/search',
-      { params: { q: val } }
-    )
-    rows.value = mapPatientsToRows(res.data)
-  }
+  rows.value = mapPatientsToRows(res.data)
 })
 </script>
 
