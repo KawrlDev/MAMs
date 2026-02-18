@@ -1054,35 +1054,34 @@ function formatInputWithComma(value) {
   return { displayValue, numericValue: parseFloat(cleaned) || 0 };
 }
 
-// Hospital Bill input handlers
 const onHospitalBillInput = (value) => {
-  const { displayValue, numericValue } = formatInputWithComma(value);
-  hospitalBillDisplay.value = displayValue;
-  hospitalBillValue.value = numericValue;
-};
+  const { display, numeric } = formatWithLiveCommas(value)
+  hospitalBillDisplay.value = display
+  hospitalBillValue.value = numeric
+}
 
 const finalizeHospitalBill = () => {
-  if (!hospitalBillDisplay.value) return;
-  const num = parseFloat(hospitalBillDisplay.value.replace(/,/g, ''));
-  if (isNaN(num)) return;
-  hospitalBillDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  hospitalBillValue.value = num;
-};
+  if (!hospitalBillDisplay.value) return
+  const num = parseFloat(hospitalBillDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  hospitalBillDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  hospitalBillValue.value = num
+}
 
-// Issued Amount input handlers
+// Issued Amount
 const onIssuedAmountInput = (value) => {
-  const { displayValue, numericValue } = formatInputWithComma(value);
-  issuedAmountDisplay.value = displayValue;
-  issuedAmountValue.value = numericValue;
-};
+  const { display, numeric } = formatWithLiveCommas(value)
+  issuedAmountDisplay.value = display
+  issuedAmountValue.value = numeric
+}
 
 const finalizeIssuedAmount = () => {
-  if (!issuedAmountDisplay.value) return;
-  const num = parseFloat(issuedAmountDisplay.value.replace(/,/g, ''));
-  if (isNaN(num)) return;
-  issuedAmountDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  issuedAmountValue.value = num;
-};
+  if (!issuedAmountDisplay.value) return
+  const num = parseFloat(issuedAmountDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  issuedAmountDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  issuedAmountValue.value = num
+}
 
 const normalizePhoneNumber = (value) => {
   if (!value) return null

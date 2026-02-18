@@ -1031,58 +1031,49 @@ const hospitalBillDisplay = ref('');
 const issuedAmountDisplay = ref('');
 const issuedAmountValue = ref(null);
 
-// Function to format input live
-function formatInputWithComma(value) {
-  // Remove all commas
-  let cleaned = value.replace(/,/g, '');
-  // Keep only digits and dot
-  cleaned = cleaned.replace(/[^\d.]/g, '');
-
-  // Split integer and decimal parts
-  const parts = cleaned.split('.');
-  if (parts.length > 2) {
-    cleaned = parts[0] + '.' + parts.slice(1).join('');
+function formatWithLiveCommas(value) {
+  let cleaned = value.replace(/[^\d.]/g, '')
+  const dotIndex = cleaned.indexOf('.')
+  if (dotIndex !== -1) {
+    cleaned = cleaned.slice(0, dotIndex + 1) + cleaned.slice(dotIndex + 1).replace(/\./g, '')
   }
+  const [integer, decimal] = cleaned.split('.')
+  const formattedInteger = (integer || '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  const display = decimal !== undefined
+    ? `${formattedInteger}.${decimal.slice(0, 2)}`
+    : formattedInteger
 
-  let integer = parts[0] || '';
-  let decimal = parts[1] ?? null;
-
-  // Add commas
-  integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-  const displayValue = decimal !== null ? `${integer}.${decimal.slice(0, 2)}` : integer;
-  return { displayValue, numericValue: parseFloat(cleaned) || 0 };
+  return { display, numeric: parseFloat(cleaned) || 0 }
 }
 
-// Hospital Bill input handlers
 const onHospitalBillInput = (value) => {
-  const { displayValue, numericValue } = formatInputWithComma(value);
-  hospitalBillDisplay.value = displayValue;
-  hospitalBillValue.value = numericValue;
-};
+  const { display, numeric } = formatWithLiveCommas(value)
+  hospitalBillDisplay.value = display
+  hospitalBillValue.value = numeric
+}
 
 const finalizeHospitalBill = () => {
-  if (!hospitalBillDisplay.value) return;
-  const num = parseFloat(hospitalBillDisplay.value.replace(/,/g, ''));
-  if (isNaN(num)) return;
-  hospitalBillDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  hospitalBillValue.value = num;
-};
+  if (!hospitalBillDisplay.value) return
+  const num = parseFloat(hospitalBillDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  hospitalBillDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  hospitalBillValue.value = num
+}
 
-// Issued Amount input handlers
+// Issued Amount
 const onIssuedAmountInput = (value) => {
-  const { displayValue, numericValue } = formatInputWithComma(value);
-  issuedAmountDisplay.value = displayValue;
-  issuedAmountValue.value = numericValue;
-};
+  const { display, numeric } = formatWithLiveCommas(value)
+  issuedAmountDisplay.value = display
+  issuedAmountValue.value = numeric
+}
 
 const finalizeIssuedAmount = () => {
-  if (!issuedAmountDisplay.value) return;
-  const num = parseFloat(issuedAmountDisplay.value.replace(/,/g, ''));
-  if (isNaN(num)) return;
-  issuedAmountDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  issuedAmountValue.value = num;
-};
+  if (!issuedAmountDisplay.value) return
+  const num = parseFloat(issuedAmountDisplay.value.replace(/,/g, ''))
+  if (isNaN(num)) return
+  issuedAmountDisplay.value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  issuedAmountValue.value = num
+}
 
 const normalizePhoneNumber = (value) => {
   if (!value) return null

@@ -16,7 +16,6 @@
         <q-td :class="props.row.eligibilityClass">
           <span>
             {{ props.row.eligibilityDate }}
-
             <q-tooltip anchor="top middle" self="bottom middle" class="text-subtitle2 q-pa-xs">
               <template v-if="props.row.daysRemaining > 0">
                 Eligible in {{ props.row.daysRemaining }} day<span v-if="props.row.daysRemaining > 1">s</span>
@@ -37,12 +36,12 @@
           </q-btn>
         </q-td>
       </template>
-
     </q-table>
 
     <!-- DETAILS DIALOG -->
     <q-dialog v-model="showDetailsDialog" persistent>
-      <q-card style="min-width: 650px; max-width: 750px; max-height: 90vh; display: flex; flex-direction: column;">
+      <q-card
+        style="min-width: 650px; max-width: 750px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
 
         <!-- HEADER - stays at top -->
         <q-card-section class="bg-orange-6 text-white q-pa-md" style="flex-shrink: 0;">
@@ -256,8 +255,8 @@
           <template v-if="!editMode">
             <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closeDialog" />
             <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
-            <q-btn label="PRINT PDF" icon="print" unelevated class="dialog-print-btn"
-              @click="generatePDF" :loading="pdfLoading" />
+            <q-btn label="PRINT PDF" icon="print" unelevated class="dialog-print-btn" @click="generatePDF"
+              :loading="pdfLoading" />
           </template>
 
           <!-- EDIT MODE BUTTONS -->
@@ -266,7 +265,6 @@
             <q-btn label="SAVE" icon="save" unelevated class="dialog-cancel-btn" @click="handleSaveClick" />
           </template>
         </q-card-actions>
-
       </q-card>
     </q-dialog>
 
@@ -290,9 +288,7 @@
               <q-icon name="account_balance_wallet" color="orange" />
             </template>
             <div>
-              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance)
-              }}
-              </div>
+              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance) }}</div>
             </div>
           </q-banner>
         </q-card-section>
@@ -346,15 +342,18 @@
 
     <!-- SAVE CONFIRMATION DIALOG -->
     <q-dialog v-model="showSaveConfirmDialog" persistent>
-      <q-card style="min-width: 600px; max-width: 700px;">
-        <q-card-section class="bg-orange-6 text-white">
+      <q-card style="min-width: 600px; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
+
+        <!-- HEADER - pinned -->
+        <q-card-section class="bg-orange-6 text-white q-pa-md" style="flex-shrink: 0;">
           <div class="text-h6">
             <q-icon name="receipt_long" size="sm" class="q-mr-sm" />
             Transaction Details Changed
           </div>
         </q-card-section>
 
-        <q-card-section>
+        <!-- BODY - scrollable -->
+        <q-card-section style="flex: 1; overflow-y: auto;">
           <div class="text-subtitle1 q-mb-md">
             You have modified the transaction details. Are you sure you want to update?
           </div>
@@ -392,8 +391,7 @@
                 <strong>Client Name:</strong>
                 <span v-if="selectedRecord?.rawData?.client_lastname">
                   {{ selectedRecord.rawData.client_lastname }}, {{ selectedRecord.rawData.client_firstname }}
-                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename
-                  }}</span>
+                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename }}</span>
                   <span v-if="selectedRecord.rawData.client_suffix"> {{ selectedRecord.rawData.client_suffix }}</span>
                 </span>
                 <span v-else>N/A</span>
@@ -427,8 +425,7 @@
                 <strong>Issued By:</strong> {{ editData.issuedBy }}
               </div>
               <div class="info-item" v-if="editData.category === 'HOSPITAL'">
-                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) :
-                  'N/A' }}
+                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) : 'N/A' }}
               </div>
               <div class="info-item" :class="{ 'info-item-full': editData.category !== 'HOSPITAL' }">
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(editData.issuedAmount) }}
@@ -449,9 +446,11 @@
           </div>
         </q-card-section>
 
-        <q-separator />
+        <!-- SEPARATOR - pinned -->
+        <q-separator style="flex-shrink: 0;" />
 
-        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+        <!-- FOOTER - pinned at bottom -->
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md" style="flex-shrink: 0;">
           <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" v-close-popup />
           <q-btn label="UPDATE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmSave"
             :loading="saveLoading" />
@@ -495,19 +494,16 @@ dayjs.extend(isSameOrAfter)
 
 const route = useRoute()
 const $q = useQuasar()
-const identifier = computed(() => route.params.glNum) // This receives UUID from the route
+const identifier = computed(() => route.params.glNum)
 
-// Get user role from localStorage
 const userData = JSON.parse(localStorage.getItem('user') || '{}')
 const isAdmin = computed(() => userData?.ROLE === 'ADMIN')
 
-// Helper function to format date for display
 const formatDisplayDate = (date) => {
   if (!date) return 'N/A'
   return dayjs(date).format('YYYY-MM-DD')
 }
 
-// Helper function for currency formatting (for display)
 const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) return '0.00'
   const num = parseFloat(amount)
@@ -518,7 +514,6 @@ const formatCurrency = (amount) => {
   })
 }
 
-// Helper function for input currency formatting
 const formatInputCurrency = (amount) => {
   if (amount === null || amount === undefined || amount === '') return ''
   const num = parseFloat(amount)
@@ -529,7 +524,6 @@ const formatInputCurrency = (amount) => {
   })
 }
 
-// Helper function to parse formatted currency back to number
 const parseCurrency = (formattedValue) => {
   if (!formattedValue) return null
   const cleaned = formattedValue.replace(/,/g, '')
@@ -537,7 +531,6 @@ const parseCurrency = (formattedValue) => {
   return isNaN(num) ? null : num
 }
 
-// Update functions for currency inputs
 const updateIssuedAmount = (value) => {
   editData.value.issuedAmount = parseCurrency(value)
 }
@@ -558,7 +551,6 @@ const showCloseConfirmDialog = ref(false)
 const showPrintConfirmDialog = ref(false)
 const showInsufficientFundsDialog = ref(false)
 const eligibilityCooldownDays = ref(90)
-
 const dynamicPartners = ref([])
 
 const budgetData = ref({
@@ -610,7 +602,6 @@ const partnerOptions = computed(() => {
 
 const hasChanges = computed(() => {
   if (!selectedRecord.value) return false
-
   return selectedRecord.value.glNum !== editData.value.glNum ||
     selectedRecord.value.category !== editData.value.category ||
     selectedRecord.value.partner !== editData.value.partner ||
@@ -623,13 +614,10 @@ const hasChanges = computed(() => {
 
 const clientInfoChanged = computed(() => {
   if (!selectedRecord.value) return false
-
   const originalData = selectedRecord.value.rawData
   const originalHasClient = !!originalData.client_lastname
   const currentHasClient = !editData.value.isChecked
-
   if (originalHasClient !== currentHasClient) return true
-
   if (currentHasClient) {
     return (originalData.client_lastname || '') !== (editData.value.clientLastName || '') ||
       (originalData.client_firstname || '') !== (editData.value.clientFirstName || '') ||
@@ -637,7 +625,6 @@ const clientInfoChanged = computed(() => {
       (originalData.client_suffix || '') !== (editData.value.clientSuffix || '') ||
       (originalData.relationship || '') !== (editData.value.relationship || '')
   }
-
   return false
 })
 
@@ -647,11 +634,7 @@ const fetchDropdownOptions = async () => {
     dynamicPartners.value = res.data.partners
   } catch (err) {
     console.error('Failed to fetch dropdown options', err)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to load dropdown options',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: 'Failed to load dropdown options', position: 'top' })
   }
 }
 
@@ -703,39 +686,32 @@ const validateForm = () => {
     validationErrors.value.glNum = true
     isValid = false
   }
-
   if (!editData.value.category) {
     validationErrors.value.category = true
     isValid = false
   }
-
   if (!editData.value.partner) {
     validationErrors.value.partner = true
     isValid = false
   }
-
   if (isAdmin.value && (!editData.value.issuedBy || editData.value.issuedBy.trim() === '')) {
     validationErrors.value.issuedBy = true
     isValid = false
   }
-
   if (isAdmin.value && !editData.value.issuedDate) {
     validationErrors.value.issuedDate = true
     isValid = false
   }
-
   if (!editData.value.issuedAmount || editData.value.issuedAmount <= 0) {
     validationErrors.value.issuedAmount = true
     isValid = false
   }
-
   if (editData.value.category === 'HOSPITAL') {
     if (!editData.value.hospitalBill || editData.value.hospitalBill <= 0) {
       validationErrors.value.hospitalBill = true
       isValid = false
     }
   }
-
   if (!editData.value.isChecked) {
     if (!editData.value.clientLastName || editData.value.clientLastName.trim() === '') {
       validationErrors.value.clientLastName = true
@@ -768,7 +744,6 @@ const calculateEligibility = (dateIssued) => {
   const eligibilityDate = dayjs(dateIssued).add(eligibilityCooldownDays.value, 'day')
   const diff = eligibilityDate.diff(today, 'day')
   const isEligible = diff <= 0
-
   return {
     eligibilityDate: eligibilityDate.format('YYYY-MM-DD'),
     eligibilityClass: isEligible ? 'text-positive' : 'text-negative',
@@ -780,26 +755,13 @@ const checkBudget = async (originalAmount, newAmount) => {
   try {
     const res = await axios.get('/api/budget/current')
     const currentBudget = parseFloat(res.data.amount || 0)
-
     const difference = newAmount - originalAmount
     const projectedBalance = currentBudget - difference
-
-    budgetData.value = {
-      currentBudget,
-      originalAmount,
-      newAmount,
-      difference,
-      projectedBalance
-    }
-
+    budgetData.value = { currentBudget, originalAmount, newAmount, difference, projectedBalance }
     return projectedBalance >= 0
   } catch (error) {
     console.error('Failed to fetch budget:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to check budget',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: 'Failed to check budget', position: 'top' })
     return true
   }
 }
@@ -843,17 +805,12 @@ const viewDetails = async (uuidOrGlNo) => {
     showDetailsDialog.value = true
   } catch (err) {
     console.error('Error fetching details:', err)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to load record details',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: 'Failed to load record details', position: 'top' })
   }
 }
 
 const enterEditMode = () => {
   const data = selectedRecord.value.rawData
-
   editData.value = {
     uuid: selectedRecord.value.uuid,
     glNum: selectedRecord.value.glNum,
@@ -870,7 +827,6 @@ const enterEditMode = () => {
     relationship: selectedRecord.value.relationship,
     isChecked: !data.client_lastname
   }
-
   resetValidationErrors()
   editMode.value = true
 }
@@ -889,20 +845,9 @@ const confirmCancel = () => {
   editMode.value = false
   resetValidationErrors()
   editData.value = {
-    uuid: null,
-    glNum: null,
-    category: null,
-    partner: null,
-    issuedBy: null,
-    issuedDate: null,
-    issuedAmount: null,
-    hospitalBill: null,
-    clientLastName: null,
-    clientFirstName: null,
-    clientMiddleName: null,
-    clientSuffix: null,
-    relationship: null,
-    isChecked: false
+    uuid: null, glNum: null, category: null, partner: null, issuedBy: null,
+    issuedDate: null, issuedAmount: null, hospitalBill: null, clientLastName: null,
+    clientFirstName: null, clientMiddleName: null, clientSuffix: null, relationship: null, isChecked: false
   }
 }
 
@@ -927,7 +872,6 @@ const onCheckboxChange = () => {
     editData.value.clientMiddleName = null
     editData.value.clientSuffix = null
     editData.value.relationship = null
-
     validationErrors.value.clientLastName = false
     validationErrors.value.clientFirstName = false
     validationErrors.value.relationship = false
@@ -943,16 +887,13 @@ const confirmClose = () => {
 }
 
 const handleSaveClick = async () => {
-  if (!validateForm()) {
-    return
-  }
+  if (!validateForm()) return
 
   const originalAmount = parseFloat(selectedRecord.value.issuedAmount)
   const newAmount = parseFloat(editData.value.issuedAmount)
 
   if (originalAmount !== newAmount) {
     const hasSufficientBudget = await checkBudget(originalAmount, newAmount)
-
     if (!hasSufficientBudget) {
       showInsufficientFundsDialog.value = true
       return
@@ -965,10 +906,8 @@ const handleSaveClick = async () => {
 const loadPatientHistory = async () => {
   try {
     const res = await axios.get(`/api/patient-history/${identifier.value}`)
-
     rows.value = res.data.history.map(item => {
       const eligibility = calculateEligibility(item.date_issued)
-
       return {
         uuid: item.uuid,
         glNum: item.gl_no,
@@ -983,11 +922,7 @@ const loadPatientHistory = async () => {
     })
   } catch (err) {
     console.error('Error loading patient history:', err)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to load patient history',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: 'Failed to load patient history', position: 'top' })
   }
 }
 
@@ -995,7 +930,7 @@ const confirmSave = async () => {
   saveLoading.value = true
   try {
     const formData = new FormData()
-    formData.append('identifier', editData.value.uuid) // Use UUID as identifier
+    formData.append('identifier', editData.value.uuid)
     formData.append('update_transaction_only', '1')
     formData.append('category', editData.value.category)
     formData.append('partner', editData.value.partner)
@@ -1017,14 +952,9 @@ const confirmSave = async () => {
 
     await axios.post('/api/patient-details/update', formData)
 
-    $q.notify({
-      type: 'positive',
-      message: 'Record updated successfully',
-      position: 'top'
-    })
+    $q.notify({ type: 'positive', message: 'Record updated successfully', position: 'top' })
 
     showSaveConfirmDialog.value = false
-
     await viewDetails(editData.value.uuid)
     await loadPatientHistory()
 
@@ -1032,11 +962,7 @@ const confirmSave = async () => {
     resetValidationErrors()
   } catch (error) {
     console.error('Save error:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to update record',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: 'Failed to update record', position: 'top' })
   } finally {
     saveLoading.value = false
   }
@@ -1044,18 +970,11 @@ const confirmSave = async () => {
 
 const generatePDF = async () => {
   if (!selectedRecord.value) return
-
   pdfLoading.value = true
 
   try {
     const data = selectedRecord.value.rawData
-
-    const pdfMap = {
-      MEDICINE: '/med.pdf',
-      LABORATORY: '/lab.pdf',
-      HOSPITAL: '/hosp.pdf',
-    }
-
+    const pdfMap = { MEDICINE: '/med.pdf', LABORATORY: '/lab.pdf', HOSPITAL: '/hosp.pdf' }
     const pdfPath = pdfMap[data.category]
     const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
     const pdfDoc = await PDFDocument.load(existingPdfBytes)
@@ -1085,28 +1004,16 @@ const generatePDF = async () => {
     const fullAddressValue = data.house_address + ", " + data.barangay + ", " + data.city + ", " + data.province
     const age = calculateAge(data.birthdate)
 
-    page.drawText(data.gl_no + ' / ' + data.partner, {
-      x: 600, y: 489, size: 14, color: rgb(0, 0, 0), font: boldFont,
-    })
-    page.drawText(fullNameValue.toUpperCase(), {
-      x: 160, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
+    page.drawText(data.gl_no + ' / ' + data.partner, { x: 600, y: 489, size: 14, color: rgb(0, 0, 0), font: boldFont })
+    page.drawText(fullNameValue.toUpperCase(), { x: 160, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont })
 
     if (age !== null) {
-      page.drawText(String(age), {
-        x: 545, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont,
-      })
+      page.drawText(String(age), { x: 545, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont })
     }
 
-    page.drawText(data.sex.toUpperCase(), {
-      x: 630, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
-    page.drawText(fullAddressValue.toUpperCase(), {
-      x: 120, y: 350, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
-    page.drawText(clientValue.toUpperCase(), {
-      x: 70, y: 300, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
+    page.drawText(data.sex.toUpperCase(), { x: 630, y: 375, size: 13, color: rgb(0, 0, 0), font: boldFont })
+    page.drawText(fullAddressValue.toUpperCase(), { x: 120, y: 350, size: 13, color: rgb(0, 0, 0), font: boldFont })
+    page.drawText(clientValue.toUpperCase(), { x: 70, y: 300, size: 13, color: rgb(0, 0, 0), font: boldFont })
 
     if (data.category == 'MEDICINE') {
       page.drawText(amountWords, { x: 310, y: 270, size: 13, color: rgb(0, 0, 0), font: boldFont })
@@ -1114,23 +1021,14 @@ const generatePDF = async () => {
       page.drawText(amountWords, { x: 360, y: 270, size: 13, color: rgb(0, 0, 0), font: boldFont })
     }
 
-    page.drawText(formatCurrency(data.issued_amount), {
-      x: 340, y: 242, size: 14, color: rgb(0, 0, 0), font: boldFont,
-    })
-    page.drawText(dayNum, {
-      x: 170, y: 191, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
-    page.drawText(monthName.toUpperCase(), {
-      x: 315, y: 191, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
-    page.drawText(data.issued_by.toUpperCase(), {
-      x: 340, y: 65, size: 13, color: rgb(0, 0, 0), font: boldFont,
-    })
+    page.drawText(formatCurrency(data.issued_amount), { x: 340, y: 242, size: 14, color: rgb(0, 0, 0), font: boldFont })
+    page.drawText(dayNum, { x: 170, y: 191, size: 13, color: rgb(0, 0, 0), font: boldFont })
+    page.drawText(monthName.toUpperCase(), { x: 315, y: 191, size: 13, color: rgb(0, 0, 0), font: boldFont })
+    page.drawText(data.issued_by.toUpperCase(), { x: 340, y: 65, size: 13, color: rgb(0, 0, 0), font: boldFont })
 
     const pdfBytes = await pdfDoc.save()
     const blob = new Blob([pdfBytes], { type: 'application/pdf' })
     const url = URL.createObjectURL(blob)
-
     window.open(url)
 
     $q.notify({ type: 'positive', message: 'PDF generated successfully', position: 'top' })
@@ -1254,7 +1152,7 @@ onMounted(async () => {
 }
 
 /* ========================
-   BUTTON STYLES — matches PatientDetails exactly
+   BUTTON STYLES
 ======================== */
 .dialog-cancel-btn {
   background: #0aa64f !important;
