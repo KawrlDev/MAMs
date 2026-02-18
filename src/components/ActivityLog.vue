@@ -24,7 +24,7 @@
             style="min-width: 220px" @update:model-value="fetchLogs" />
 
           <!-- REFRESH -->
-          <q-btn icon="refresh" label="Refresh" flat dense color="white" @click="fetchLogs" />
+          <q-btn icon="refresh" label="Refresh" flat dense color="white" @click="refreshAll" />
         </div>
       </template>
 
@@ -249,6 +249,16 @@ const fetchLogs = async () => {
   } catch (err) {
     console.error('Failed to fetch activity logs:', err)
     $q.notify({ type: 'negative', message: 'Failed to load activity logs', position: 'top' })
+  } finally {
+    loading.value = false
+  }
+}
+
+const refreshAll = async () => {
+  loading.value = true
+  try {
+    await fetchActionTypes()   // refresh dropdown options
+    await fetchLogs()          // refresh table data
   } finally {
     loading.value = false
   }
