@@ -28,7 +28,8 @@
                 <q-spinner color="primary" size="20px" />
               </template>
             </q-input>
-            <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+            <div v-if="showPatientDropdown && lastNameFocused && filteredSearchResults.length > 0"
+              class="patient-dropdown">
               <div class="dropdown-header">
                 <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
                 <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -46,11 +47,16 @@
                           <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
                         </div>
                         <div class="detail-row-dropdown">
-                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A' }}</span>
-                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) : 'N/A' }}</span>
+                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                            'N/A'
+                          }}</span>
                         </div>
-                        <div class="detail-row-dropdown"><span><strong>Address:</strong> {{ formatAddress(patient) }}</span></div>
-                        <div class="detail-row-dropdown"><span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span></div>
+                        <div class="detail-row-dropdown"><span><strong>Address:</strong> {{ formatAddress(patient)
+                        }}</span></div>
+                        <div class="detail-row-dropdown"><span><strong>Phone Number:</strong> {{
+                          formatPhoneNumber(patient.phone_number) }}</span></div>
                         <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                           <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
                           <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
@@ -86,7 +92,8 @@
                 <q-spinner color="primary" size="20px" />
               </template>
             </q-input>
-            <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+            <div v-if="showPatientDropdown && firstNameFocused && filteredSearchResults.length > 0"
+              class="patient-dropdown">
               <div class="dropdown-header">
                 <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
                 <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -104,11 +111,16 @@
                           <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
                         </div>
                         <div class="detail-row-dropdown">
-                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A' }}</span>
-                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) : 'N/A' }}</span>
+                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                            'N/A'
+                          }}</span>
                         </div>
-                        <div class="detail-row-dropdown"><span><strong>Address:</strong> {{ formatAddress(patient) }}</span></div>
-                        <div class="detail-row-dropdown"><span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span></div>
+                        <div class="detail-row-dropdown"><span><strong>Address:</strong> {{ formatAddress(patient)
+                        }}</span></div>
+                        <div class="detail-row-dropdown"><span><strong>Phone Number:</strong> {{
+                          formatPhoneNumber(patient.phone_number) }}</span></div>
                         <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                           <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
                           <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
@@ -143,7 +155,8 @@
                 <q-spinner color="primary" size="20px" />
               </template>
             </q-input>
-            <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0" class="patient-dropdown">
+            <div v-if="showPatientDropdown && middleNameFocused && filteredSearchResults.length > 0"
+              class="patient-dropdown">
               <div class="dropdown-header">
                 <q-icon name="info" size="xs" color="blue" class="q-mr-xs" />
                 <span>{{ filteredSearchResults.length }} patient(s) found - Click to select</span>
@@ -161,11 +174,16 @@
                           <span><strong>Sex:</strong> {{ patient.sex || 'N/A' }}</span>
                         </div>
                         <div class="detail-row-dropdown">
-                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A' }}</span>
-                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) : 'N/A' }}</span>
+                          <span><strong>Birthdate:</strong> {{ patient.birthdate ? formatDate(patient.birthdate) : 'N/A'
+                          }}</span>
+                          <span><strong>Age:</strong> {{ patient.birthdate ? calculateAgeFromDate(patient.birthdate) :
+                            'N/A'
+                          }}</span>
                         </div>
-                        <div class="detail-row-dropdown"><span><strong>Address:</strong> {{ formatAddress(patient) }}</span></div>
-                        <div class="detail-row-dropdown"><span><strong>Phone Number:</strong> {{ formatPhoneNumber(patient.phone_number) }}</span></div>
+                        <div class="detail-row-dropdown"><span><strong>Address:</strong> {{ formatAddress(patient)
+                        }}</span></div>
+                        <div class="detail-row-dropdown"><span><strong>Phone Number:</strong> {{
+                          formatPhoneNumber(patient.phone_number) }}</span></div>
                         <div class="detail-row-dropdown" v-if="patient.last_issued_at">
                           <span><strong>Latest GL:</strong> {{ patient.gl_no }}</span>
                           <span><strong>Issued:</strong> {{ formatDate(patient.last_issued_at) }}</span>
@@ -194,7 +212,8 @@
 
           <div class="field">
             <label>Suffix</label>
-            <q-input v-model="suffixValue" dense outlined placeholder="Suffix" @update:model-value="checkForPatientEdits" />
+            <q-input v-model="suffixValue" dense outlined placeholder="Suffix"
+              @update:model-value="checkForPatientEdits" />
           </div>
         </div>
 
@@ -202,7 +221,8 @@
           <div class="field">
             <label>Birthdate <span>*</span></label>
             <q-input v-model="birthdateValue" dense outlined placeholder="DD/MM/YYYY"
-              :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" mask="##/##/####">
+              :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits"
+              mask="##/##/####">
               <template #append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -230,16 +250,17 @@
 
           <div class="field">
             <label>Preference</label>
-            <q-select v-model="preferenceValue" :options="dynamicPreferences.map(p => p.preference)"
-              label="Preference" dense outlined @update:model-value="checkForPatientEdits" />
+            <q-select v-model="preferenceValue" :options="dynamicPreferences.map(p => p.preference)" label="Preference"
+              dense outlined @update:model-value="checkForPatientEdits" />
           </div>
 
           <div class="field sector-field">
             <label>Sector</label>
             <div class="sector-container">
-              <div v-if="dynamicSectors.length === 0" class="text-grey-6 text-caption q-pa-sm">No sectors available</div>
-              <q-checkbox v-for="sector in dynamicSectors" :key="sector.id" :val="sector.id"
-                v-model="selectedSectorIds" :label="sector.sector" dense @update:model-value="checkForPatientEdits" />
+              <div v-if="dynamicSectors.length === 0" class="text-grey-6 text-caption q-pa-sm">No sectors available
+              </div>
+              <q-checkbox v-for="sector in dynamicSectors" :key="sector.id" :val="sector.id" v-model="selectedSectorIds"
+                :label="sector.sector" dense @update:model-value="checkForPatientEdits" />
             </div>
           </div>
         </div>
@@ -247,7 +268,8 @@
         <div class="grid-5">
           <div class="field">
             <label>Province</label>
-            <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined disable />
+            <q-input v-model="provinceValue" :hint="'Cannot be edited!'" :persistent-hint="true" dense outlined
+              disable />
           </div>
           <div class="field">
             <label>City</label>
@@ -260,8 +282,8 @@
           </div>
           <div class="field">
             <label>House Address <span>*</span></label>
-            <q-input v-model="houseAddressValue" dense outlined
-              :rules="[val => !!val || 'This field is required']" @update:model-value="checkForPatientEdits" />
+            <q-input v-model="houseAddressValue" dense outlined :rules="[val => !!val || 'This field is required']"
+              @update:model-value="checkForPatientEdits" />
           </div>
           <div class="field">
             <label>Phone Number <span>*</span></label>
@@ -283,15 +305,13 @@
           </div>
           <div class="field" v-if="categoryValue == 'HOSPITAL'">
             <label>Hospital Bill <span>*</span></label>
-            <q-input type="text" dense outlined v-model="hospitalBillDisplay"
-              @update:model-value="onHospitalBillInput" @blur="finalizeHospitalBill" placeholder="0.00"
-              :rules="[val => !!val || 'This field is required']" />
+            <q-input type="text" dense outlined v-model="hospitalBillDisplay" @update:model-value="onHospitalBillInput"
+              @blur="finalizeHospitalBill" placeholder="0.00" :rules="[val => !!val || 'This field is required']" />
           </div>
           <div class="field">
             <label>Issued Amount <span>*</span></label>
-            <q-input type="text" dense outlined v-model="issuedAmountDisplay"
-              @update:model-value="onIssuedAmountInput" @blur="finalizeIssuedAmount" placeholder="0.00"
-              :rules="[val => !!val || 'This field is required']" />
+            <q-input type="text" dense outlined v-model="issuedAmountDisplay" @update:model-value="onIssuedAmountInput"
+              @blur="finalizeIssuedAmount" placeholder="0.00" :rules="[val => !!val || 'This field is required']" />
           </div>
         </div>
 
@@ -343,7 +363,9 @@
             <div class="text-subtitle1 q-mb-md">You do not have enough funds for this transaction.</div>
             <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
               <template v-slot:avatar><q-icon name="account_balance_wallet" color="orange" /></template>
-              <div><div class="text-weight-bold text-red">Current Balance: ₱{{ formatCurrency(projectedBalance) }}</div></div>
+              <div>
+                <div class="text-weight-bold text-red">Current Balance: ₱{{ formatCurrency(projectedBalance) }}</div>
+              </div>
             </q-banner>
           </q-card-section>
           <q-separator />
@@ -377,16 +399,23 @@
                   </div>
                   <div class="info-grid">
                     <div class="info-item">
-                      <strong>Name:</strong> {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname }}
+                      <strong>Name:</strong> {{ selectedBrowserPatient.lastname }}, {{ selectedBrowserPatient.firstname
+                      }}
                       <span v-if="selectedBrowserPatient.middlename"> {{ selectedBrowserPatient.middlename }}</span>
                       <span v-if="selectedBrowserPatient.suffix"> {{ selectedBrowserPatient.suffix }}</span>
                     </div>
                     <div class="info-item"><strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}</div>
-                    <div class="info-item"><strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ? formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}</div>
+                    <div class="info-item"><strong>Birthdate:</strong> {{ selectedBrowserPatient.birthdate ?
+                      formatDate(selectedBrowserPatient.birthdate) : 'N/A' }}</div>
                     <div class="info-item"><strong>Sex:</strong> {{ selectedBrowserPatient.sex || 'N/A' }}</div>
-                    <div class="info-item"><strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}</div>
-                    <div class="info-item info-item-full"><strong>Address:</strong> {{ formatAddress(selectedBrowserPatient) }}</div>
-                    <div class="info-item"><strong>Phone Number:</strong> {{ formatPhoneNumber(selectedBrowserPatient.phone_number) }}</div>
+                    <div class="info-item"><strong>Preference:</strong> {{ selectedBrowserPatient.preference || 'N/A' }}
+                    </div>
+                    <div class="info-item"><strong>Sector:</strong> {{ originalSectorValue }}</div>
+                    <div class="info-item info-item-full"><strong>Address:</strong> {{
+                      formatAddress(selectedBrowserPatient)
+                    }}</div>
+                    <div class="info-item"><strong>Phone Number:</strong> {{
+                      formatPhoneNumber(selectedBrowserPatient.phone_number) }}</div>
                   </div>
                 </div>
                 <div class="comparison-arrow"><q-icon name="arrow_downward" size="lg" color="orange" /></div>
@@ -400,17 +429,24 @@
                       <span v-if="middleNameValue"> {{ middleNameValue }}</span>
                       <span v-if="suffixValue"> {{ suffixValue }}</span>
                     </div>
-                    <div class="info-item"><strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }} (unchanged)</div>
-                    <div class="info-item"><strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}</div>
+                    <div class="info-item"><strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}
+                      (unchanged)
+                    </div>
+                    <div class="info-item"><strong>Birthdate:</strong> {{ birthdateValue ?
+                      formatDate(convertToMySQLDate(birthdateValue)) : 'N/A' }}</div>
                     <div class="info-item"><strong>Sex:</strong> {{ sexValue || 'N/A' }}</div>
                     <div class="info-item"><strong>Preference:</strong> {{ preferenceValue || 'N/A' }}</div>
-                    <div class="info-item info-item-full"><strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{ provinceValue }}</div>
+                    <div class="info-item"><strong>Sector:</strong> {{ sectorValue }}</div>
+                    <div class="info-item info-item-full"><strong>Address:</strong> {{ houseAddressValue }}, {{
+                      barangayValue
+                    }}, {{ cityValue }}, {{ provinceValue }}</div>
                   </div>
                 </div>
               </div>
               <q-banner class="bg-blue-1 text-blue-9 q-mt-md">
                 <template v-slot:avatar><q-icon name="info" color="blue" /></template>
-                Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future records.
+                Updating this patient will affect Patient ID {{ selectedBrowserPatient?.patient_id }} for all future
+                records.
               </q-banner>
             </div>
 
@@ -426,14 +462,17 @@
                     <span v-if="middleNameValue"> {{ middleNameValue }}</span>
                     <span v-if="suffixValue"> {{ suffixValue }}</span>
                   </div>
-                  <div class="info-item" v-if="selectedBrowserPatient"><strong>Patient ID:</strong> {{ selectedBrowserPatient.patient_id }}</div>
+                  <div class="info-item" v-if="selectedBrowserPatient"><strong>Patient ID:</strong> {{
+                    selectedBrowserPatient.patient_id }}</div>
                   <div class="info-item"><strong>Birthdate:</strong> {{ birthdateValue || 'N/A' }}</div>
                   <div class="info-item"><strong>Age:</strong> {{ calculateAgeFromBirthdate(birthdateValue) }}</div>
                   <div class="info-item"><strong>Sex:</strong> {{ sexValue || 'N/A' }}</div>
                   <div class="info-item"><strong>Preference:</strong> {{ preferenceValue || 'N/A' }}</div>
                   <div class="info-item"><strong>Sector:</strong> {{ sectorValue }}</div>
                   <div class="info-item info-item-full">
-                    <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{ provinceValue }}
+                    <strong>Address:</strong> {{ houseAddressValue }}, {{ barangayValue }}, {{ cityValue }}, {{
+                      provinceValue
+                    }}
                   </div>
                   <div class="info-item"><strong>Phone Number:</strong> {{ formatPhoneNumber(phoneNumberValue) }}</div>
                 </div>
@@ -448,7 +487,8 @@
               <div class="info-grid">
                 <div class="info-item"><strong>Category:</strong> {{ categoryValue }}</div>
                 <div class="info-item"><strong>Partner:</strong> {{ partnerValue }}</div>
-                <div class="info-item" v-if="categoryValue === 'HOSPITAL'"><strong>Hospital Bill:</strong> ₱{{ formatCurrency(hospitalBillValue) }}</div>
+                <div class="info-item" v-if="categoryValue === 'HOSPITAL'"><strong>Hospital Bill:</strong> ₱{{
+                  formatCurrency(hospitalBillValue) }}</div>
                 <div class="info-item"><strong>Issued Amount:</strong> ₱{{ formatCurrency(issuedAmountValue) }}</div>
               </div>
             </div>
@@ -464,7 +504,8 @@
                   <span v-if="clientMiddleNameValue"> {{ clientMiddleNameValue }}</span>
                   <span v-if="clientSuffixValue"> {{ clientSuffixValue }}</span>
                 </div>
-                <div class="info-item info-item-full"><strong>Relationship to Patient:</strong> {{ relationshipValue }}</div>
+                <div class="info-item info-item-full"><strong>Relationship to Patient:</strong> {{ relationshipValue }}
+                </div>
               </div>
             </div>
             <div v-else class="patient-info-box q-mt-md">
@@ -488,16 +529,18 @@
       <q-dialog v-model="showFinalSaveDialog" persistent>
         <q-card style="min-width: 350px">
           <q-card-section>
-          <div class="text-h6">Save Changes?</div>
-        </q-card-section>
+            <div class="text-h6">Save Changes?</div>
+          </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          Are you sure you want to save these changes?
-        </q-card-section>
+          <q-card-section class="q-pt-none">
+            Are you sure you want to save these changes?
+          </q-card-section>
           <q-separator />
           <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn" @click="showFinalSaveDialog = false; pendingAction = null" />
-            <q-btn label="SAVE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmFinalSave" :loading="areYouSureLoading" />
+            <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn"
+              @click="showFinalSaveDialog = false; pendingAction = null" />
+            <q-btn label="SAVE" icon="check" unelevated class="dialog-cancel-btn" @click="confirmFinalSave"
+              :loading="areYouSureLoading" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -515,8 +558,11 @@
               <div v-if="eligibilityWarningData">
                 <div class="text-weight-bold">Last GL Number: {{ eligibilityWarningData.last_gl_no }}</div>
                 <div>Issued: {{ formatDate(eligibilityWarningData.last_issued_at) }}</div>
-                <div class="text-weight-bold text-orange-9 q-mt-sm">Eligible from: {{ formatDate(eligibilityWarningData.eligibility_date) }}</div>
-                <div class="text-caption q-mt-xs">({{ calculateDaysRemaining(eligibilityWarningData.eligibility_date) }} days remaining)</div>
+                <div class="text-weight-bold text-orange-9 q-mt-sm">Eligible from: {{
+                  formatDate(eligibilityWarningData.eligibility_date) }}</div>
+                <div class="text-caption q-mt-xs">({{ calculateDaysRemaining(eligibilityWarningData.eligibility_date) }}
+                  days
+                  remaining)</div>
               </div>
             </q-banner>
             <div class="text-body2 text-grey-8">Patients must wait 3 months between guarantee letters.</div>
@@ -531,8 +577,11 @@
       <!-- CANCEL CONFIRMATION DIALOG -->
       <q-dialog v-model="showCancelDialog">
         <q-card style="min-width: 350px">
-          <q-card-section><div class="text-h6">Close Form?</div></q-card-section>
-          <q-card-section class="q-pt-none">Are you sure you want to close? All unsaved changes will be lost.</q-card-section>
+          <q-card-section>
+            <div class="text-h6">Close Form?</div>
+          </q-card-section>
+          <q-card-section class="q-pt-none">Are you sure you want to close? All unsaved changes will be
+            lost.</q-card-section>
           <q-card-actions align="right" class="q-px-md q-pb-md">
             <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
             <q-btn unelevated icon="check" label="YES" class="dialog-cancel-btn" @click="handleCancel" />
@@ -547,7 +596,8 @@
             <div class="text-h6"><q-icon name="info" size="sm" class="q-mr-sm" />Existing Patients Found</div>
           </q-card-section>
           <q-card-section>
-            <div class="text-subtitle1 q-mb-md">One or more patients with the same name already exist in the system.</div>
+            <div class="text-subtitle1 q-mb-md">One or more patients with the same name already exist in the system.
+            </div>
             <q-banner class="bg-blue-1 text-blue-9 q-mb-md">
               <template v-slot:avatar><q-icon name="help_outline" color="blue" /></template>
               Please choose whether to link this record to an existing patient or create a new patient entry.
@@ -583,14 +633,18 @@
                 <q-icon name="link" size="md" color="blue" />
                 <div class="option-title">Use Existing Patient</div>
                 <div class="option-description">
-                  Link this record to the selected patient above. This will add a new GL record under the same Patient ID.
+                  Link this record to the selected patient above. This will add a new GL record under the same Patient
+                  ID.
                   <span v-if="!selectedExistingPatient" class="text-red"> (Please select a patient first)</span>
                 </div>
               </div>
-              <div class="option-card" @click="selectedAction = 'new'" :class="{ 'option-selected': selectedAction === 'new' }">
+              <div class="option-card" @click="selectedAction = 'new'"
+                :class="{ 'option-selected': selectedAction === 'new' }">
                 <q-icon name="person_add" size="md" color="green" />
                 <div class="option-title">Create New Patient</div>
-                <div class="option-description">Create a completely new patient with a new Patient ID. Use this if this is actually a different person.</div>
+                <div class="option-description">Create a completely new patient with a new Patient ID. Use this if this
+                  is
+                  actually a different person.</div>
               </div>
             </div>
           </q-card-section>
@@ -635,11 +689,11 @@ const preferenceOptions = computed(() => dynamicPreferences.value.map(p => p.pre
 const options = [
   ['MALE', 'FEMALE'],
   preferenceOptions,
-  ["APOKON","BINCUNGAN","BUSAON","CANOCOTAN","CUAMBOGAN","LA FILIPINA",
-   "LIBOGANON","MADAUM","MAGDUM","MAGUGPO EAST","MAGUGPO NORTH",
-   "MAGUGPO POBLACION","MAGUGPO SOUTH","MAGUGPO WEST","MANKILAM",
-   "NEW BALAMBAN","NUEVA FUERZA","PAGSABANGAN","PANDAPAN","SAN AGUSTIN",
-   "SAN ISIDRO","SAN MIGUEL (CAMP 4)","VISAYAN VILLAGE"]
+  ["APOKON", "BINCUNGAN", "BUSAON", "CANOCOTAN", "CUAMBOGAN", "LA FILIPINA",
+    "LIBOGANON", "MADAUM", "MAGDUM", "MAGUGPO EAST", "MAGUGPO NORTH",
+    "MAGUGPO POBLACION", "MAGUGPO SOUTH", "MAGUGPO WEST", "MANKILAM",
+    "NEW BALAMBAN", "NUEVA FUERZA", "PAGSABANGAN", "PANDAPAN", "SAN AGUSTIN",
+    "SAN ISIDRO", "SAN MIGUEL (CAMP 4)", "VISAYAN VILLAGE"]
 ]
 const selectedSectorIds = ref([])
 
@@ -812,6 +866,13 @@ const sectorValue = computed(() => {
   if (!selectedSectorIds.value.length) return 'N/A'
   return dynamicSectors.value.filter(s => selectedSectorIds.value.includes(s.id)).map(s => s.sector).join(', ')
 })
+
+const originalSectorValue = computed(() => {
+  const ids = originalBrowserPatient.value?.sector_ids || []
+  if (!ids.length) return 'N/A'
+  return dynamicSectors.value.filter(s => ids.includes(s.id)).map(s => s.sector).join(', ')
+})
+
 
 // ── HELPERS ──
 const formatCurrency = (amount) => {
@@ -1139,71 +1200,432 @@ function getDaySuffix(day) {
 </script>
 
 <style scoped>
-.form-header { display: flex; justify-content: space-between; align-items: center; background-color: #1f8f2e; padding: 12px 24px; margin-bottom: 0; border-top-left-radius: 4px; border-top-right-radius: 4px; }
-.form-title { font-size: 40px; font-weight: 700; color: #ffffff; margin: 0; line-height: 1.2; }
-.page-wrapper { padding: 24px; background: #f5f5f5; }
-.form-card { margin: auto; background: #ffffff; border: 1px solid #989b98; border-radius: 0 0 8px 8px; padding: 24px; box-shadow: 0 1px 5px rgba(0,0,0,0.2), 0 2px 2px rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12); }
-.section-title { margin: 15px 0 10px; font-weight: 600; }
-.section-banner { background-color: #1f8f2e; color: white; font-size: 24px; font-weight: 700; padding: 12px 20px; border-radius: 4px; margin: 24px -24px 20px -24px; display: flex; align-items: center; }
-div.category { margin-top: 20px; }
-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; display: block; }
-label span { color: red; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: -14px; }
-.grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: -14px; }
-.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-.row-1 { max-width: 300px; margin-bottom: 14px; }
-.field { position: relative; margin-bottom: 12px; }
-.field.full { grid-column: 1 / -1; }
-.patient-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #2196f3; border-radius: 4px; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 400px; overflow: hidden; }
-.dropdown-header { background: #e3f2fd; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #1976d2; border-bottom: 1px solid #bbdefb; display: flex; align-items: center; }
-.dropdown-patient-item { padding: 12px; transition: all 0.2s ease; border-bottom: 1px solid #f0f0f0; }
-.dropdown-patient-item:hover:not(.patient-ineligible) { background-color: #f5f5f5; }
-.dropdown-patient-item.patient-eligible { cursor: pointer; }
-.dropdown-patient-item.patient-ineligible { opacity: 0.6; cursor: not-allowed; background-color: #fafafa; }
-.patient-name-dropdown { font-size: 14px; font-weight: 600; color: #1f8f2e; margin-bottom: 4px; }
-.patient-details-dropdown { font-size: 11px; color: #666; }
-.detail-row-dropdown { display: flex; gap: 12px; margin-bottom: 2px; }
-.detail-row-dropdown span { color: #666; }
-.eligibility-badge-container-dropdown { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.eligibility-badge-dropdown { padding: 4px 8px; font-size: 10px; font-weight: 700; display: flex; align-items: center; }
-.eligibility-info-dropdown { display: flex; flex-direction: column; align-items: flex-end; font-size: 9px; color: #666; margin-top: 2px; }
-.patient-info-box { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; }
-.patient-info-box.highlight-changes { background: #fff3e0; border: 2px solid #ff9800; }
-.comparison-container { display: flex; flex-direction: column; gap: 12px; }
-.comparison-arrow { display: flex; justify-content: center; align-items: center; padding: 8px 0; }
-.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.info-item { font-size: 13px; color: #333; }
-.info-item strong { color: #1f8f2e; }
-.info-item-full { grid-column: 1 / -1; }
-:deep(.q-field--outlined .q-field__control) { background-color: #f3f3f3; border: 1px solid #bdbdbd; border-radius: 3px; min-height: 36px; box-shadow: none !important; }
-:deep(.q-field__control:before), :deep(.q-field__control:after) { display: none !important; }
-:deep(.q-field__native), :deep(.q-field__input), :deep(input) { outline: none !important; box-shadow: none !important; padding: 6px 10px; font-weight: 500; }
-:deep(.q-field--focused .q-field__control) { border-color: #9e9e9e !important; box-shadow: none !important; }
-:deep(.q-field--readonly .q-field__control) { background-color: #ededed; border-color: #cfcfcf; }
-:deep(.q-field--disabled .q-field__control) { background-color: #e0e0e0; border-color: #c0c0c0; color: #9e9e9e; }
-:deep(.q-checkbox) { margin-top: -20px; }
-.actions { display: flex; gap: 8px; align-items: center; margin-top: 24px; }
-.actions .q-btn { font-weight: 600; font-size: 14px; padding: 4px 12px; color: white; }
-.btn-cancel { background: #ff3b3b; display: flex; align-items: center; justify-content: center; }
-.btn-save { background: #0aa64f; }
-.btn-print { background: #0aa64f; }
-.actions .q-btn .q-icon { margin-right: 6px; }
-.centered-icon { margin: 0 auto; display: flex; align-items: center; justify-content: center; }
-.dialog-cancel-btn { background: #0aa64f !important; color: white !important; font-weight: 600; padding: 8px 20px; border-radius: 4px; }
-.dialog-goback-btn { background: #ff3b3b !important; color: white !important; font-weight: 600; padding: 8px 20px; border-radius: 4px; }
-.dialog-cancel-btn .q-icon, .dialog-goback-btn .q-icon { margin-right: 6px; }
-.dialog-actions-sticky { position: sticky; bottom: 0; background: white; border-top: 1px solid #e0e0e0; z-index: 10; }
-.options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.option-card { border: 2px solid #e0e0e0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 8px; }
-.option-card:hover { border-color: #0aa64f; background-color: #f5f5f5; }
-.option-selected { border-color: #0aa64f; background-color: #e8f5e9; border-width: 3px; }
-.option-disabled { opacity: 0.5; cursor: not-allowed; }
-.option-disabled:hover { border-color: #e0e0e0; background-color: transparent; }
-.option-title { font-weight: 700; font-size: 16px; color: #1f8f2e; }
-.option-description { font-size: 13px; color: #666; line-height: 1.4; }
-.grid-bio { display: grid; grid-template-columns: 1.2fr 0.6fr 0.8fr 1fr 2fr; gap: 16px; margin-bottom: -14px; align-items: start; }
-.sector-field { grid-column: 5; }
-.sector-container { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 10px; background-color: #f3f3f3; border: 1px solid #bdbdbd; border-radius: 3px; min-height: 36px; align-items: center; }
-:deep(.sector-container .q-checkbox) { margin-top: 0; }
-:deep(.sector-container .q-checkbox__label) { font-size: 13px; font-weight: 500; }
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f8f2e;
+  padding: 12px 24px;
+  margin-bottom: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.form-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.page-wrapper {
+  padding: 24px;
+  background: #f5f5f5;
+}
+
+.form-card {
+  margin: auto;
+  background: #ffffff;
+  border: 1px solid #989b98;
+  border-radius: 0 0 8px 8px;
+  padding: 24px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
+}
+
+.section-title {
+  margin: 15px 0 10px;
+  font-weight: 600;
+}
+
+.section-banner {
+  background-color: #1f8f2e;
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin: 24px -24px 20px -24px;
+  display: flex;
+  align-items: center;
+}
+
+div.category {
+  margin-top: 20px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+
+label span {
+  color: red;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: -14px;
+}
+
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: -14px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.row-1 {
+  max-width: 300px;
+  margin-bottom: 14px;
+}
+
+.field {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.patient-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #2196f3;
+  border-radius: 4px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.dropdown-header {
+  background: #e3f2fd;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1976d2;
+  border-bottom: 1px solid #bbdefb;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-patient-item {
+  padding: 12px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-patient-item:hover:not(.patient-ineligible) {
+  background-color: #f5f5f5;
+}
+
+.dropdown-patient-item.patient-eligible {
+  cursor: pointer;
+}
+
+.dropdown-patient-item.patient-ineligible {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #fafafa;
+}
+
+.patient-name-dropdown {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f8f2e;
+  margin-bottom: 4px;
+}
+
+.patient-details-dropdown {
+  font-size: 11px;
+  color: #666;
+}
+
+.detail-row-dropdown {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.detail-row-dropdown span {
+  color: #666;
+}
+
+.eligibility-badge-container-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.eligibility-badge-dropdown {
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.eligibility-info-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 9px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.patient-info-box {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.patient-info-box.highlight-changes {
+  background: #fff3e0;
+  border: 2px solid #ff9800;
+}
+
+.comparison-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comparison-arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.info-item {
+  font-size: 13px;
+  color: #333;
+}
+
+.info-item strong {
+  color: #1f8f2e;
+}
+
+.info-item-full {
+  grid-column: 1 / -1;
+}
+
+:deep(.q-field--outlined .q-field__control) {
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  box-shadow: none !important;
+}
+
+:deep(.q-field__control:before),
+:deep(.q-field__control:after) {
+  display: none !important;
+}
+
+:deep(.q-field__native),
+:deep(.q-field__input),
+:deep(input) {
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 6px 10px;
+  font-weight: 500;
+}
+
+:deep(.q-field--focused .q-field__control) {
+  border-color: #9e9e9e !important;
+  box-shadow: none !important;
+}
+
+:deep(.q-field--readonly .q-field__control) {
+  background-color: #ededed;
+  border-color: #cfcfcf;
+}
+
+:deep(.q-field--disabled .q-field__control) {
+  background-color: #e0e0e0;
+  border-color: #c0c0c0;
+  color: #9e9e9e;
+}
+
+:deep(.q-checkbox) {
+  margin-top: -20px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.actions .q-btn {
+  font-weight: 600;
+  font-size: 14px;
+  padding: 4px 12px;
+  color: white;
+}
+
+.btn-cancel {
+  background: #ff3b3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-save {
+  background: #0aa64f;
+}
+
+.btn-print {
+  background: #0aa64f;
+}
+
+.actions .q-btn .q-icon {
+  margin-right: 6px;
+}
+
+.centered-icon {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-cancel-btn {
+  background: #0aa64f !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-goback-btn {
+  background: #ff3b3b !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 4px;
+}
+
+.dialog-cancel-btn .q-icon,
+.dialog-goback-btn .q-icon {
+  margin-right: 6px;
+}
+
+.dialog-actions-sticky {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  z-index: 10;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.option-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-card:hover {
+  border-color: #0aa64f;
+  background-color: #f5f5f5;
+}
+
+.option-selected {
+  border-color: #0aa64f;
+  background-color: #e8f5e9;
+  border-width: 3px;
+}
+
+.option-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-disabled:hover {
+  border-color: #e0e0e0;
+  background-color: transparent;
+}
+
+.option-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1f8f2e;
+}
+
+.option-description {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.grid-bio {
+  display: grid;
+  grid-template-columns: 1.2fr 0.6fr 0.8fr 1fr 2fr;
+  gap: 16px;
+  margin-bottom: -14px;
+  align-items: start;
+}
+
+.sector-field {
+  grid-column: 5;
+}
+
+.sector-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 8px 10px;
+  background-color: #f3f3f3;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  min-height: 36px;
+  align-items: center;
+}
+
+:deep(.sector-container .q-checkbox) {
+  margin-top: 0;
+}
+
+:deep(.sector-container .q-checkbox__label) {
+  font-size: 13px;
+  font-weight: 500;
+}
 </style>
