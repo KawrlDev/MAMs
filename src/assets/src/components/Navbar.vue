@@ -84,6 +84,9 @@
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
+import { api } from "src/boot/axios";
+
+const axios = api
 
 const data = JSON.parse(localStorage.getItem('user') || '{}')
 const role = data?.ROLE || ''
@@ -98,17 +101,25 @@ const user = computed(() => {
   return userData ? JSON.parse(userData) : null;
 });
 
-const logout = () => {
-  localStorage.removeItem('user');
+const logout = async () => {
+  try {
+    // Call backend FIRST so the session is still active when the log is written
+    await axios.post('/api/logout')
+  } catch (err) {
+    // Proceed with local logout even if the request fails
+    console.error('Logout request failed:', err)
+  }
+
+  localStorage.removeItem('user')
 
   $q.notify({
     type: 'positive',
     message: 'Logged out successfully',
     position: 'top'
-  });
+  })
 
-  router.push('/login');
-};
+  router.push('/login')
+}
 </script>
 
 <style scoped>
