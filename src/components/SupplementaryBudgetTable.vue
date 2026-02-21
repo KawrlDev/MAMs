@@ -5,10 +5,10 @@
       <template #top-right>
         <div class="header-buttons">
           <!-- TRANSFER BUDGET BUTTON - Now opens popup -->
-          <q-btn icon="swap_horiz" label="TRANSFER BUDGET" class="transfer-btn" @click="openTransferDialog" />
+          <q-btn icon="swap_horiz" :label="trBudgetLabel" class="transfer-btn" @click="openTransferDialog" />
 
           <!-- ADD BUDGET BUTTON -->
-          <q-btn icon="add" label="ADD SUPPLEMENTAL BUDGET" class="add-btn" @click="openAddBudgetDialog" />
+          <q-btn icon="add" :label="addBudgetLabel" class="add-btn" @click="openAddBudgetDialog" />
         </div>
       </template>
 
@@ -31,7 +31,7 @@
 
     <!-- TRANSFER BUDGET DIALOG -->
     <q-dialog v-model="showTransferBudgetDialog" persistent>
-      <q-card style="min-width: 500px">
+      <q-card class="transfer-budget-dialog">
         <q-card-section class="dialog-header-transfer">
           <h4>TRANSFER SUPPLEMENTAL BUDGET</h4>
         </q-card-section>
@@ -116,7 +116,7 @@
 
     <!-- ADD SUPPLEMENTAL BUDGET DIALOG -->
     <q-dialog v-model="showAddBudgetDialog" persistent>
-      <q-card style="min-width: 500px">
+      <q-card class="add-budget-dialog">
         <q-card-section class="dialog-header-transfer">
           <h4>ADD SUPPLEMENTAL BUDGET</h4>
         </q-card-section>
@@ -224,6 +224,14 @@ const laboratoryDisplay = ref('')
 const hospitalDisplay = ref('')
 
 const categories = ['MEDICINE', 'LABORATORY', 'HOSPITAL']
+
+const addBudgetLabel = computed(() => {
+  return $q.screen.gt.sm ? 'ADD SUPPLEMENTAL BUDGET' : ''
+})
+
+const trBudgetLabel = computed(() => {
+  return $q.screen.gt.sm ? 'TRANSFER BUDGET' : ''
+})
 
 // Filtered FROM options, excluding the TO selection
 const filteredFromCategories = computed(() => {
@@ -844,5 +852,62 @@ const confirmAddBudget = async () => {
 .dialog-cancel-btn .q-icon,
 .dialog-goback-btn .q-icon {
   margin-right: 6px;
+}
+
+.transfer-budget-dialog {
+    min-width:500px;
+}
+
+.add-budget-dialog {
+    min-width:500px;
+}
+
+@media (min-width: 481px) and (max-width: 599px) {
+  .budget-table :deep(.q-table__title) {
+  font-size: 25px;
+}
+
+  .transfer-btn {
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
+    justify-content: center;
+    justify-self: center;
+    margin-left: 10px;
+  }
+
+  .transfer-budget-dialog {
+    min-width:0px;
+  }
+
+  .add-btn {
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
+    justify-content: center;
+    justify-self: center;
+  }
+
+  .add-budget-dialog {
+    min-width:0px;
+  }
+
+  .dialog-header-transfer h4 {
+    font-size: 18px;
+  }
+
+  .budget-block h3 {
+    font-size: 17px;
+  }
+
+  .validation-message {
+    font-size: 14px;
+  }
+
+  .dialog-cancel-btn,
+  .dialog-goback-btn {
+    padding: 6px 16px;
+    font-size: 14px;
+  }
 }
 </style>
