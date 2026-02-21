@@ -1534,4 +1534,137 @@ const getPatientNumber = (patientId) => {
 .text-grey-6 {
   color: rgba(0, 0, 0, 0.54);
 }
+@media screen and (max-width: 1200px) {
+  .filters-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .filters-group {
+    display: contents;
+  }
+
+  .filter-date {
+    grid-column: 1 / -1;
+  }
+
+  .filter-item {
+    min-width: 0;
+  }
+
+  .csv-button-wrapper {
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .csv-button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+@media screen and (max-width: 766px) {
+  .filters-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .filters-group {
+    display: contents;
+  }
+
+  .filter-date {
+    grid-column: 1 / -1;
+  }
+
+  .filter-item {
+    min-width: 0;
+  }
+
+  .csv-button-wrapper {
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .csv-button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+@media screen and (max-width: 480px) {
+  .filters-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .filters-group {
+    display: contents;
+  }
+
+  .filter-date {
+    grid-column: 1 / -1;
+  }
+
+  .filter-item {
+    min-width: 0;
+  }
+  .csv-button-wrapper {
+    min-width: 0;
+    margin-left: 130px;
+  }
+  .csv-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .table-container {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .scrollable-wrapper {
+    flex-direction: column;
+    overflow-x: auto;
+  }
+
+  .left-section {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 3px solid #1f8f2e;
+    overflow-x: auto;
+  }
+
+  .section-divider {
+    display: none;
+  }
+
+  .right-section {
+    width: 100% !important;
+    overflow-x: auto;
+  }
+
+  .horizontal-scroll {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    font-size: 11px;
+  }
+
+  .data-table thead tr:last-child th {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
 </style>
