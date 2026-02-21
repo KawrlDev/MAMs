@@ -1575,4 +1575,160 @@ label span {
   font-size: 13px;
   font-weight: 500;
 }
+@media screen and (max-width: 716px) {
+  .form-header {
+    padding: 8px 16px;
+  }
+
+  .form-title {
+    font-size: 24px;
+  }
+
+  .form-card {
+    padding: 16px;
+  }
+
+  .section-banner {
+    font-size: 16px;
+    padding: 8px 16px;
+    margin: 16px -16px 12px -16px;
+  }
+
+  .section-title {
+    font-size: 14px;
+  }
+
+  .row-1 {
+    max-width: 100%;
+  }
+
+  .grid-4 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-5 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-3 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .grid-bio {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .sector-field {
+    grid-column: 1 / -1;
+  }
+
+.actions {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.actions .q-btn {
+  flex: 1;
+  width: auto;
+}
+
+  .patient-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    z-index: 9999;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item-full {
+    grid-column: 1;
+  }
+}
+@media screen and (max-width: 480px) {
+  .form-header {
+    padding: 8px 16px;
+  }
+
+  .form-title {
+    font-size: 24px;
+  }
+
+  .form-card {
+    padding: 16px;
+  }
+
+  .section-banner {
+    font-size: 16px;
+    padding: 8px 16px;
+    margin: 16px -16px 12px -16px;
+  }
+
+  .section-title {
+    font-size: 14px;
+  }
+
+  .row-1 {
+    max-width: 100%;
+  }
+
+  .grid-4 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-5 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-3 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .grid-bio {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .sector-field {
+    grid-column: 1 / -1;
+  }
+
+  .actions {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.actions .q-btn {
+  flex: 1;
+  width: auto;
+}
+
+  .patient-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    z-index: 9999;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item-full {
+    grid-column: 1;
+  }
+}
 </style>

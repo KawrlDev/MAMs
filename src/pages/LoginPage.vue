@@ -11,9 +11,6 @@
         :loading="loading"
         :errors="errors"
       />
-
-      <div class="copyright">© 2026 MAMs</div>
-      <div class="version">V 1.2.2</div>
     </div>
   </div>
 </template>
@@ -79,26 +76,8 @@ const handleLogin = async (credentials) => {
   height: 80vh;
 }
 
-.copyright {
-  position: absolute;
-  bottom: 45px;
-  right: 470px;
-  font-size: 13px;
-  color: #666;
-  font-weight: 500;
-  user-select: none;
-}
-.version {
-  position: absolute;
-  bottom: 45px;
-  right: 400px;
-  font-size: 13px;
-  color: #666;
-  font-weight: 500;
-  user-select: none;
-}
-
 .card {
+  position: relative;
   width: 1000px;
   height: 500px;
   display: flex;
@@ -136,5 +115,103 @@ const handleLogin = async (credentials) => {
   display: block;
   width: 510px;
   height: auto;
+}
+@media screen and (max-width: 1048px) {
+  .page-wrapper {
+    height: auto;
+    min-height: 80vh;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .card {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .intro {
+    width: 100%;
+    height: auto;
+    padding: 30px 20px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .logo {
+    width: 150px;
+    margin-top: 15%;
+    margin-bottom: -13%;
+  }
+
+  .logo2 {
+    width: 340px;
+    margin-left: 0;
+  }
+}
+@media screen and (max-width: 768px) {
+  .page-wrapper {
+    height: auto;
+    min-height: 80vh;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .card {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .intro {
+    width: 100%;
+    height: auto;
+    padding: 30px 20px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .logo {
+    width: 150px;
+    margin-top: 15%;
+    margin-bottom: -13%;
+  }
+
+  .logo2 {
+    width: 340px;
+    margin-left: 0;
+  }
+}
+@media screen and (max-width: 480px) {
+  .page-wrapper {
+    height: auto;
+    min-height: 100vh;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .card {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .intro {
+    width: 100%;
+    height: auto;
+    padding: 20px 16px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .logo {
+    width: 100px;
+    margin-top: 40px;
+    margin-bottom: -50px;
+  }
+
+  .logo2 {
+    width: 200px;
+    margin-left: 0;
+  }
 }
 </style>
