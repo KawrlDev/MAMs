@@ -23,7 +23,7 @@ onMounted(() => {
         router.push('/error')
     }
 })
-</script> 
+</script>
 
 <style scoped>
 .container {
@@ -34,5 +34,13 @@ onMounted(() => {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.08);
     border-radius: 6px;
     background: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        border: none;
+        box-shadow: none;
+    }
 }
 </style>
