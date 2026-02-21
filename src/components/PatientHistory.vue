@@ -260,12 +260,12 @@
 
         <!-- FOOTER - pinned at bottom -->
         <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md" style="flex-shrink: 0;">
-          <!-- VIEW MODE BUTTONS (CLOSE removed — use X in header) -->
+          <!-- VIEW MODE BUTTONS -->
           <template v-if="!editMode">
             <q-btn label="DELETE" icon="delete" unelevated class="dialog-delete-btn" @click="showDeleteDialog = true" />
             <q-btn label="EDIT" icon="edit" unelevated class="dialog-edit-btn" @click="enterEditMode" />
-            <q-btn label="PRINT PDF" icon="print" unelevated class="dialog-print-btn" @click="generatePDF"
-              :loading="pdfLoading" />
+            <q-btn label="PRINT" icon="print" unelevated class="dialog-print-btn"
+              @click="showPrintChoiceDialog = true" />
           </template>
 
           <!-- EDIT MODE BUTTONS -->
@@ -297,9 +297,7 @@
               <q-icon name="account_balance_wallet" color="orange" />
             </template>
             <div>
-              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance)
-                }}
-              </div>
+              <div class="text-weight-bold text-red">Projected Balance: ₱{{ formatCurrency(budgetData.projectedBalance) }}</div>
             </div>
           </q-banner>
         </q-card-section>
@@ -351,21 +349,44 @@
       </q-card>
     </q-dialog>
 
-    <!-- PRINT CONFIRM DIALOG -->
-    <q-dialog v-model="showPrintConfirmDialog">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Print PDF?</div>
+    <!-- PRINT CHOICE DIALOG -->
+    <q-dialog v-model="showPrintChoiceDialog" persistent>
+      <q-card style="min-width: 420px;">
+        <q-card-section class="bg-green-7 text-white">
+          <div class="text-h6">
+            <q-icon name="print" size="sm" class="q-mr-sm" />Choose Print Type
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          Do you want to generate and print this PDF?
+        <q-card-section class="q-pt-md">
+          <div class="text-subtitle1 q-mb-md">What would you like to print?</div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="print-option-card" @click="printDetailsOnly">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <q-icon name="article" size="md" color="green-7" />
+                <span class="print-option-title" style="color: #1f8f2e;">Details Only</span>
+              </div>
+              <div class="print-option-description">
+                Print just the patient details slip for this record.
+              </div>
+            </div>
+            <div class="print-option-card" @click="printFullForm">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <q-icon name="description" size="md" color="blue-7" />
+                <span class="print-option-title" style="color: #1976d2;">Entire Form</span>
+              </div>
+              <div class="print-option-description">
+                Print the complete guarantee letter form with all sections.
+              </div>
+            </div>
+          </div>
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn unelevated icon="close" label="NO" class="dialog-goback-btn" v-close-popup />
-          <q-btn unelevated icon="print" label="YES" class="dialog-yes-btn" @click="confirmPrint"
-            :loading="pdfLoading" />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+          <q-btn label="CANCEL" icon="close" unelevated class="dialog-goback-btn"
+            @click="showPrintChoiceDialog = false" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -422,8 +443,7 @@
                 <strong>Client Name:</strong>
                 <span v-if="selectedRecord?.rawData?.client_lastname">
                   {{ selectedRecord.rawData.client_lastname }}, {{ selectedRecord.rawData.client_firstname }}
-                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename
-                    }}</span>
+                  <span v-if="selectedRecord.rawData.client_middlename"> {{ selectedRecord.rawData.client_middlename }}</span>
                   <span v-if="selectedRecord.rawData.client_suffix"> {{ selectedRecord.rawData.client_suffix }}</span>
                 </span>
                 <span v-else>N/A</span>
@@ -457,8 +477,7 @@
                 <strong>Issued By:</strong> {{ editData.issuedBy }}
               </div>
               <div class="info-item" v-if="editData.category === 'HOSPITAL'">
-                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) :
-                'N/A' }}
+                <strong>Hospital Bill:</strong> {{ editData.hospitalBill ? '₱' + formatCurrency(editData.hospitalBill) : 'N/A' }}
               </div>
               <div class="info-item" :class="{ 'info-item-full': editData.category !== 'HOSPITAL' }">
                 <strong>Issued Amount:</strong> ₱{{ formatCurrency(editData.issuedAmount) }}
@@ -611,7 +630,7 @@ const saveLoading = ref(false)
 const showSaveConfirmDialog = ref(false)
 const showCancelConfirmDialog = ref(false)
 const showCloseConfirmDialog = ref(false)
-const showPrintConfirmDialog = ref(false)
+const showPrintChoiceDialog = ref(false)
 const showInsufficientFundsDialog = ref(false)
 const eligibilityCooldownDays = ref(90)
 const dynamicPartners = ref([])
@@ -889,9 +908,15 @@ const enterEditMode = () => {
   editMode.value = true
 }
 
-const confirmPrint = async () => {
-  showPrintConfirmDialog.value = false
-  await generatePDF()
+// ── PRINT CHOICE HANDLERS ──
+const printDetailsOnly = async () => {
+  showPrintChoiceDialog.value = false
+  await generatePDF(true)
+}
+
+const printFullForm = async () => {
+  showPrintChoiceDialog.value = false
+  await generatePDF(false)
 }
 
 const cancelEdit = () => {
@@ -1027,14 +1052,17 @@ const confirmSave = async () => {
   }
 }
 
-const generatePDF = async () => {
+const generatePDF = async (detailsOnly = false) => {
   if (!selectedRecord.value) return
   pdfLoading.value = true
 
   try {
     const data = selectedRecord.value.rawData
-    const pdfMap = { MEDICINE: '/med.pdf', LABORATORY: '/lab.pdf', HOSPITAL: '/hosp.pdf' }
-    const pdfPath = pdfMap[data.category]
+
+    const fullFormMap = { MEDICINE: '/med.pdf', LABORATORY: '/lab.pdf', HOSPITAL: '/hosp.pdf' }
+    const detailsMap  = { MEDICINE: '/meddetails.pdf', LABORATORY: '/labdetails.pdf', HOSPITAL: '/hospdetails.pdf' }
+    const pdfPath = detailsOnly ? detailsMap[data.category] : fullFormMap[data.category]
+
     const existingPdfBytes = await fetch(pdfPath).then((res) => res.arrayBuffer())
     const pdfDoc = await PDFDocument.load(existingPdfBytes)
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
@@ -1245,13 +1273,42 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
-/* YES button — green */
 .dialog-yes-btn {
   background: #0aa64f !important;
   color: white !important;
   font-weight: 600;
   padding: 8px 20px;
   border-radius: 4px;
+}
+
+/* ========================
+   PRINT CHOICE CARD STYLES
+======================== */
+.print-option-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.print-option-card:hover {
+  border-color: #0aa64f;
+  background-color: #f5f5f5;
+}
+
+.print-option-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.print-option-description {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
 }
 
 /* ========================
@@ -1411,36 +1468,6 @@ onMounted(async () => {
 
 .patient-info-box .info-item-full {
   grid-column: 1 / -1;
-}
-
-.changes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.change-item {
-  font-size: 13px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.change-item strong {
-  color: #1976d2;
-  min-width: 140px;
-}
-
-.old-value {
-  color: #d32f2f;
-  font-weight: 500;
-}
-
-.new-value {
-  color: #388e3c;
-  font-weight: 600;
 }
 
 .dialog-delete-btn {

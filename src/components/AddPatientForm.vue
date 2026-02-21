@@ -19,6 +19,7 @@
         <h6 class="section-title">Patient Form</h6>
 
         <div class="grid-4">
+          <!-- LAST NAME -->
           <div class="field">
             <label>Last Name <span>*</span></label>
             <q-input v-model="lastNameValue" placeholder="Last Name" dense outlined
@@ -37,8 +38,14 @@
               <q-scroll-area style="height: 300px;">
                 <q-list separator>
                   <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                    :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)"
-                    :class="{ 'dropdown-patient-item': true, 'patient-eligible': patient.eligible, 'patient-ineligible': !patient.eligible }">
+                    :disable="patient.same_category_ineligible"
+                    @click="selectPatientFromDropdown(patient)"
+                    :class="{
+                      'dropdown-patient-item': true,
+                      'patient-eligible': patient.eligible,
+                      'patient-ineligible-same-category': patient.same_category_ineligible,
+                      'patient-ineligible-other-category': !patient.eligible && !patient.same_category_ineligible
+                    }">
                     <q-item-section>
                       <q-item-label class="patient-name-dropdown">{{ formatPatientName(patient) }}</q-item-label>
                       <q-item-label caption class="patient-details-dropdown">
@@ -63,12 +70,17 @@
                         <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
                           <q-icon name="check_circle" size="xs" class="q-mr-xs" />ELIGIBLE
                         </q-badge>
-                        <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                          <q-icon name="block" size="xs" class="q-mr-xs" />NOT ELIGIBLE
+                        <q-badge v-else-if="patient.same_category_ineligible" color="red" class="eligibility-badge-dropdown">
+                          <q-icon name="block" size="xs" class="q-mr-xs" />SAME CATEGORY
+                        </q-badge>
+                        <q-badge v-else color="orange" class="eligibility-badge-dropdown">
+                          <q-icon name="warning" size="xs" class="q-mr-xs" />OTHER CATEGORY
                         </q-badge>
                         <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
                           <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                          <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                          <small :class="patient.same_category_ineligible ? 'text-red' : 'text-orange'">
+                            {{ patient.days_remaining }} days remaining
+                          </small>
                         </div>
                       </div>
                     </q-item-section>
@@ -78,6 +90,7 @@
             </div>
           </div>
 
+          <!-- FIRST NAME -->
           <div class="field">
             <label>First Name <span>*</span></label>
             <q-input v-model="firstNameValue" dense outlined placeholder="First Name"
@@ -96,8 +109,14 @@
               <q-scroll-area style="height: 300px;">
                 <q-list separator>
                   <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                    :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)"
-                    :class="{ 'dropdown-patient-item': true, 'patient-eligible': patient.eligible, 'patient-ineligible': !patient.eligible }">
+                    :disable="patient.same_category_ineligible"
+                    @click="selectPatientFromDropdown(patient)"
+                    :class="{
+                      'dropdown-patient-item': true,
+                      'patient-eligible': patient.eligible,
+                      'patient-ineligible-same-category': patient.same_category_ineligible,
+                      'patient-ineligible-other-category': !patient.eligible && !patient.same_category_ineligible
+                    }">
                     <q-item-section>
                       <q-item-label class="patient-name-dropdown">{{ formatPatientName(patient) }}</q-item-label>
                       <q-item-label caption class="patient-details-dropdown">
@@ -122,12 +141,17 @@
                         <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
                           <q-icon name="check_circle" size="xs" class="q-mr-xs" />ELIGIBLE
                         </q-badge>
-                        <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                          <q-icon name="block" size="xs" class="q-mr-xs" />NOT ELIGIBLE
+                        <q-badge v-else-if="patient.same_category_ineligible" color="red" class="eligibility-badge-dropdown">
+                          <q-icon name="block" size="xs" class="q-mr-xs" />SAME CATEGORY
+                        </q-badge>
+                        <q-badge v-else color="orange" class="eligibility-badge-dropdown">
+                          <q-icon name="warning" size="xs" class="q-mr-xs" />OTHER CATEGORY
                         </q-badge>
                         <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
                           <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                          <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                          <small :class="patient.same_category_ineligible ? 'text-red' : 'text-orange'">
+                            {{ patient.days_remaining }} days remaining
+                          </small>
                         </div>
                       </div>
                     </q-item-section>
@@ -137,6 +161,7 @@
             </div>
           </div>
 
+          <!-- MIDDLE NAME -->
           <div class="field">
             <label>Middle Name</label>
             <q-input v-model="middleNameValue" dense outlined placeholder="Middle Name"
@@ -154,8 +179,14 @@
               <q-scroll-area style="height: 300px;">
                 <q-list separator>
                   <q-item v-for="patient in filteredSearchResults" :key="patient.patient_id" clickable
-                    :disable="!patient.eligible" @click="selectPatientFromDropdown(patient)"
-                    :class="{ 'dropdown-patient-item': true, 'patient-eligible': patient.eligible, 'patient-ineligible': !patient.eligible }">
+                    :disable="patient.same_category_ineligible"
+                    @click="selectPatientFromDropdown(patient)"
+                    :class="{
+                      'dropdown-patient-item': true,
+                      'patient-eligible': patient.eligible,
+                      'patient-ineligible-same-category': patient.same_category_ineligible,
+                      'patient-ineligible-other-category': !patient.eligible && !patient.same_category_ineligible
+                    }">
                     <q-item-section>
                       <q-item-label class="patient-name-dropdown">{{ formatPatientName(patient) }}</q-item-label>
                       <q-item-label caption class="patient-details-dropdown">
@@ -180,12 +211,17 @@
                         <q-badge v-if="patient.eligible" color="green" class="eligibility-badge-dropdown">
                           <q-icon name="check_circle" size="xs" class="q-mr-xs" />ELIGIBLE
                         </q-badge>
-                        <q-badge v-else color="red" class="eligibility-badge-dropdown">
-                          <q-icon name="block" size="xs" class="q-mr-xs" />NOT ELIGIBLE
+                        <q-badge v-else-if="patient.same_category_ineligible" color="red" class="eligibility-badge-dropdown">
+                          <q-icon name="block" size="xs" class="q-mr-xs" />SAME CATEGORY
+                        </q-badge>
+                        <q-badge v-else color="orange" class="eligibility-badge-dropdown">
+                          <q-icon name="warning" size="xs" class="q-mr-xs" />OTHER CATEGORY
                         </q-badge>
                         <div v-if="!patient.eligible && patient.eligibility_date" class="eligibility-info-dropdown">
                           <small>Eligible: {{ formatDate(patient.eligibility_date) }}</small>
-                          <small class="text-red">{{ patient.days_remaining }} days remaining</small>
+                          <small :class="patient.same_category_ineligible ? 'text-red' : 'text-orange'">
+                            {{ patient.days_remaining }} days remaining
+                          </small>
                         </div>
                       </div>
                     </q-item-section>
@@ -360,6 +396,51 @@
         </q-card>
       </q-dialog>
 
+      <!-- PREVIOUS CATEGORIES WARNING DIALOG -->
+      <q-dialog v-model="showPreviousCategoriesDialog" persistent>
+        <q-card style="min-width: 520px;">
+          <q-card-section class="bg-orange-7 text-white">
+            <div class="text-h6">
+              <q-icon name="history" size="sm" class="q-mr-sm" />Previous Issuances Found
+            </div>
+          </q-card-section>
+          <q-card-section>
+            <div class="text-subtitle1 q-mb-md">
+              This patient has existing guarantee letters under other categories that are not yet eligible for re-issuance.
+            </div>
+            <q-list bordered separator>
+              <q-item v-for="item in previousCategoriesData" :key="item.category">
+                <q-item-section>
+                  <q-item-label class="text-weight-bold text-orange-9">{{ item.category }}</q-item-label>
+                  <q-item-label caption>
+                    <div><strong>GL No:</strong> {{ item.gl_no }}</div>
+                    <div><strong>Issued:</strong> {{ formatDate(item.issued_at) }}</div>
+                    <div><strong>Eligible from:</strong> {{ formatDate(item.eligibility_date) }}</div>
+                    <div class="text-orange-8"><strong>{{ item.days_remaining }} days remaining</strong></div>
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-badge color="orange">
+                    <q-icon name="schedule" size="xs" class="q-mr-xs" />NOT YET ELIGIBLE
+                  </q-badge>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div class="text-body2 text-grey-8 q-mt-md">
+              You may still proceed since this transaction is under a different category
+              (<strong>{{ categoryValue }}</strong>).
+            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+            <q-btn label="GO BACK" icon="arrow_back" unelevated class="dialog-goback-btn"
+              @click="cancelPreviousCategories" />
+            <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
+              @click="proceedPreviousCategories" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
       <!--CONFIRM DETAILS-->
       <q-dialog v-model="showConfirmDetailsDialog" persistent>
         <q-card style="min-width: 700px; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
@@ -513,32 +594,6 @@
         </q-card>
       </q-dialog>
 
-      <!-- ELIGIBILITY WARNING DIALOG -->
-      <q-dialog v-model="showEligibilityWarning" persistent>
-        <q-card style="min-width: 500px;">
-          <q-card-section class="bg-red-6 text-white">
-            <div class="text-h6"><q-icon name="warning" size="sm" class="q-mr-sm" />Patient Not Yet Eligible</div>
-          </q-card-section>
-          <q-card-section>
-            <div class="text-subtitle1 q-mb-md">This patient is not yet eligible for a new guarantee letter.</div>
-            <q-banner class="bg-orange-1 text-orange-9 q-mb-md">
-              <template v-slot:avatar><q-icon name="schedule" color="orange" /></template>
-              <div v-if="eligibilityWarningData">
-                <div class="text-weight-bold">Last GL Number: {{ eligibilityWarningData.last_gl_no }}</div>
-                <div>Issued: {{ formatDate(eligibilityWarningData.last_issued_at) }}</div>
-                <div class="text-weight-bold text-orange-9 q-mt-sm">Eligible from: {{ formatDate(eligibilityWarningData.eligibility_date) }}</div>
-                <div class="text-caption q-mt-xs">({{ calculateDaysRemaining(eligibilityWarningData.eligibility_date) }} days remaining)</div>
-              </div>
-            </q-banner>
-            <div class="text-body2 text-grey-8">Patients must wait 3 months between guarantee letters.</div>
-          </q-card-section>
-          <q-separator />
-          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
-            <q-btn label="CLOSE" icon="close" unelevated class="dialog-goback-btn" @click="closeEligibilityWarning" />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-
       <!-- CANCEL CONFIRMATION DIALOG -->
       <q-dialog v-model="showCancelDialog">
         <q-card style="min-width: 350px">
@@ -614,6 +669,35 @@
             <q-btn label="PROCEED" icon="check" unelevated class="dialog-cancel-btn"
               :disable="!selectedAction || (selectedAction === 'existing' && !selectedExistingPatient)"
               @click="proceedWithAction" :loading="actionLoading" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <!-- PRINT CHOICE DIALOG -->
+      <q-dialog v-model="showPrintChoiceDialog" persistent>
+        <q-card style="min-width: 420px;">
+          <q-card-section class="bg-green-7 text-white">
+            <div class="text-h6"><q-icon name="print" size="sm" class="q-mr-sm" />Choose Print Type</div>
+          </q-card-section>
+          <q-card-section class="q-pt-md">
+            <div class="text-subtitle1 q-mb-md">Record saved! What would you like to print?</div>
+            <div class="options-grid">
+              <div class="option-card" @click="printDetailsOnly">
+                <q-icon name="article" size="md" color="green-7" />
+                <div class="option-title">Details Only</div>
+                <div class="option-description">Print just the patient details slip ({{ categoryValue?.toLowerCase() }}details).</div>
+              </div>
+              <div class="option-card" @click="printFullForm">
+                <q-icon name="description" size="md" color="blue-7" />
+                <div class="option-title">Entire Form</div>
+                <div class="option-description">Print the complete guarantee letter form with all sections.</div>
+              </div>
+            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-actions align="right" class="q-px-md q-pb-md q-pt-md">
+            <q-btn label="SKIP PRINTING" icon="close" unelevated class="dialog-goback-btn"
+              @click="showPrintChoiceDialog = false; router.push('/patient-records')" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -719,9 +803,10 @@ const browserPatientEdited = ref(false)
 
 // ── DIALOG REFS ──
 const showInsufficientFundsDialog = ref(false)
+const showPreviousCategoriesDialog = ref(false)
 const showConfirmDetailsDialog = ref(false)
 const showFinalSaveDialog = ref(false)
-const showEligibilityWarning = ref(false)
+const showPrintChoiceDialog = ref(false)  // NEW: shown after save when printing
 const showCancelDialog = ref(false)
 const showExistingDialog = ref(false)
 
@@ -732,7 +817,7 @@ const projectedBalance = ref(0)
 const existingPatients = ref([])
 const selectedExistingPatient = ref(null)
 const selectedAction = ref(null)
-const eligibilityWarningData = ref(null)
+const previousCategoriesData = ref(null)  // NEW
 
 const partnerOptions = computed(() => {
   if (!categoryValue.value) return []
@@ -797,6 +882,7 @@ const formatPhoneNumber = (phone) => {
 }
 
 // ── SEARCH COMPUTED ──
+// Adds same_category_ineligible flag: patient is ineligible AND their last GL was under the current category
 const filteredSearchResults = computed(() => {
   const searchField = activeSearchField.value
   let searchValue = searchField === 'lastname' ? lastNameValue.value : searchField === 'firstname' ? firstNameValue.value : middleNameValue.value
@@ -809,10 +895,18 @@ const filteredSearchResults = computed(() => {
       if (searchField === 'middlename') return (p.middlename || '').toLowerCase().startsWith(query)
       return false
     })
+    .map(p => ({
+      ...p,
+      // Hard-blocked if ineligible AND the last GL was under the same category being issued
+      same_category_ineligible: !p.eligible && p.last_category === categoryValue.value
+    }))
     .sort((a, b) => {
+      // Eligible first
       if (a.eligible && !b.eligible) return -1
       if (!a.eligible && b.eligible) return 1
-      if (!a.eligible && !b.eligible) return (a.days_remaining || 0) - (b.days_remaining || 0)
+      // Among ineligibles: other-category (selectable/orange) before same-category (blocked/red)
+      if (!a.same_category_ineligible && b.same_category_ineligible) return -1
+      if (a.same_category_ineligible && !b.same_category_ineligible) return 1
       return a.lastname.localeCompare(b.lastname)
     })
 })
@@ -901,18 +995,21 @@ const searchPatients = async (query) => {
   }
 }
 
+// ── PATIENT SELECTION ──
+// Same-category ineligibles are hard-blocked (disabled in template).
+// Other-category ineligibles are allowed — they show orange in the dropdown and will
+// trigger the previousCategoriesData warning dialog during the save flow.
 const selectPatientFromDropdown = (patient) => {
-  if (!patient.eligible) {
-    eligibilityWarningData.value = { last_gl_no: patient.gl_no, last_issued_at: patient.last_issued_at, eligibility_date: patient.eligibility_date, days_remaining: patient.days_remaining }
-    showEligibilityWarning.value = true
-    showPatientDropdown.value = false
-    return
-  }
+  // Guard: same_category_ineligible should already be disabled in the template,
+  // but we double-check here just in case.
+  if (patient.same_category_ineligible) return
+
   selectedBrowserPatient.value = patient
   originalBrowserPatient.value = { ...patient }
   showPatientDropdown.value = false
   usedBrowserPatient.value = true
   browserPatientEdited.value = false
+
   lastNameValue.value = patient.lastname
   firstNameValue.value = patient.firstname
   middleNameValue.value = patient.middlename
@@ -926,11 +1023,20 @@ const selectPatientFromDropdown = (patient) => {
   houseAddressValue.value = patient.house_address
   phoneNumberValue.value = patient.phone_number
   selectedSectorIds.value = patient.sector_ids || []
-  $q.notify({ type: 'positive', message: 'Patient information loaded. Fill in the remaining details.', position: 'top' })
+
+  if (!patient.eligible) {
+    $q.notify({
+      type: 'warning',
+      message: 'Patient is not yet eligible under their previous category but can still be issued under a different category.',
+      position: 'top',
+      timeout: 4000
+    })
+  } else {
+    $q.notify({ type: 'positive', message: 'Patient information loaded. Fill in the remaining details.', position: 'top' })
+  }
 }
 
 const dateOptions = (d) => d <= new Date().toISOString().split('T')[0].replace(/-/g, '/')
-const closeEligibilityWarning = () => { showEligibilityWarning.value = false; eligibilityWarningData.value = null }
 
 const checkForPatientEdits = () => {
   if (!usedBrowserPatient.value || !originalBrowserPatient.value) return
@@ -947,7 +1053,9 @@ const checkForPatientEdits = () => {
     JSON.stringify([...selectedSectorIds.value].sort()) !== JSON.stringify([...(originalBrowserPatient.value.sector_ids || [])].sort())
 }
 
-// ── UNIFIED 3-STEP DIALOG FLOW ──
+// ── DIALOG FLOW ──
+// Order: Budget Check → Previous Categories Warning → Confirm Details → Final Save
+
 const runBudgetCheck = async () => {
   try {
     const res = await axios.post('/api/validate-transfer', {
@@ -959,25 +1067,76 @@ const runBudgetCheck = async () => {
       projectedBalance.value = res.data.breakdown.remaining
       showInsufficientFundsDialog.value = true
     } else {
-      showConfirmDetailsDialog.value = true
+      // Budget OK — move to next step
+      await checkPreviousCategories()
     }
   } catch (error) {
     $q.notify({ type: 'negative', message: 'Failed to check budget', position: 'top' })
   }
 }
 
-const cancelInsufficientFunds = () => { showInsufficientFundsDialog.value = false; pendingAction.value = null }
-const proceedWithInsufficientFunds = () => {
+// Step 1b: Insufficient funds handlers
+const cancelInsufficientFunds = () => {
   showInsufficientFundsDialog.value = false
+  pendingAction.value = null
+}
+const proceedWithInsufficientFunds = async () => {
+  showInsufficientFundsDialog.value = false
+  // Continue to next step even though funds are low
+  await checkPreviousCategories()
+}
+
+// Step 2: Check if the selected patient has non-eligible issuances in OTHER categories.
+// Runs whenever a patient was selected from the browser dropdown.
+// Passes exclude_category so the backend doesn't return the category we're currently issuing
+// (that case is already enforced at the dropdown level via same_category_ineligible).
+const checkPreviousCategories = async () => {
+  if (selectedBrowserPatient.value) {
+    try {
+      const res = await axios.get(
+        `/api/patients/${selectedBrowserPatient.value.patient_id}/previous-categories`,
+        { params: { exclude_category: categoryValue.value } }
+      )
+      const nonEligible = res.data
+
+      if (nonEligible && nonEligible.length > 0) {
+        previousCategoriesData.value = nonEligible
+        showPreviousCategoriesDialog.value = true
+        return  // Pause here — user must acknowledge before continuing
+      }
+    } catch (err) {
+      // Surface the error visibly instead of silently swallowing it
+      console.error('Failed to fetch previous categories:', err)
+      $q.notify({ type: 'negative', message: 'Failed to check previous category issuances. Please try again.', position: 'top' })
+      return
+    }
+  }
+  // No previous category issues (or brand-new patient) — go straight to confirm details
   showConfirmDetailsDialog.value = true
 }
 
-const cancelConfirmDetails = () => { showConfirmDetailsDialog.value = false; pendingAction.value = null }
+// Step 2 handlers
+const cancelPreviousCategories = () => {
+  showPreviousCategoriesDialog.value = false
+  previousCategoriesData.value = null
+  pendingAction.value = null
+}
+const proceedPreviousCategories = () => {
+  showPreviousCategoriesDialog.value = false
+  showConfirmDetailsDialog.value = true
+}
+
+// Step 3: Confirm Details handlers
+const cancelConfirmDetails = () => {
+  showConfirmDetailsDialog.value = false
+  pendingAction.value = null
+}
 const proceedConfirmDetails = () => {
   showConfirmDetailsDialog.value = false
   showFinalSaveDialog.value = true
 }
 
+// Step 4: Final save confirmation
 const confirmFinalSave = async () => {
   showFinalSaveDialog.value = false
   areYouSureLoading.value = true
@@ -986,14 +1145,25 @@ const confirmFinalSave = async () => {
   } finally { areYouSureLoading.value = false }
 }
 
+// Step 5: Print choice (only shown when pendingAction === 'print')
+const printDetailsOnly = async () => {
+  showPrintChoiceDialog.value = false
+  await generatePDF(true)
+  router.push('/patient-records')
+}
+const printFullForm = async () => {
+  showPrintChoiceDialog.value = false
+  await generatePDF(false)
+  router.push('/patient-records')
+}
+
 const doSubmit = async () => {
-  const shouldPrint = pendingAction.value === 'print'
   if (selectedBrowserPatient.value) {
-    await submitForm(shouldPrint, selectedBrowserPatient.value.patient_id, browserPatientEdited.value)
+    await submitForm(selectedBrowserPatient.value.patient_id, browserPatientEdited.value)
   } else if (selectedExistingPatient.value) {
-    await submitForm(shouldPrint, selectedExistingPatient.value.patient_id)
+    await submitForm(selectedExistingPatient.value.patient_id)
   } else {
-    await submitForm(shouldPrint, null)
+    await submitForm(null)
   }
 }
 
@@ -1019,8 +1189,14 @@ const checkEligibilityAndProceed = async (patientId) => {
     const res = await axios.post('/api/patients/check-eligibility-by-id', { patient_id: patientId })
     if (!res.data.eligible) {
       showExistingDialog.value = false
-      eligibilityWarningData.value = res.data
-      showEligibilityWarning.value = true
+      // This patient is ineligible under their latest category — since we're in the
+      // existing dialog flow (not the browser dropdown), still block them here.
+      $q.notify({
+        type: 'negative',
+        message: `Patient is not yet eligible. Eligible from: ${formatDate(res.data.eligibility_date)} (${res.data.days_remaining} days remaining).`,
+        position: 'top',
+        timeout: 6000
+      })
       return
     }
     showExistingDialog.value = false
@@ -1030,7 +1206,12 @@ const checkEligibilityAndProceed = async (patientId) => {
   }
 }
 
-const cancelExistingDialog = () => { showExistingDialog.value = false; selectedExistingPatient.value = null; selectedAction.value = null; pendingAction.value = null }
+const cancelExistingDialog = () => {
+  showExistingDialog.value = false
+  selectedExistingPatient.value = null
+  selectedAction.value = null
+  pendingAction.value = null
+}
 const handleCancel = () => { showCancelDialog.value = false; router.push('/patient-records') }
 
 const handleSaveClick = async () => {
@@ -1044,7 +1225,7 @@ const handleSaveAndPrintClick = async () => {
   await checkExistingPatients(true)
 }
 
-const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = false) => {
+const submitForm = async (patientId = null, updatePatientInfo = false) => {
   dateToday.value = date.formatDate(new Date(), 'YYYY-MM-DD')
   const mysqlBirthdate = convertToMySQLDate(birthdateValue.value)
   if (!mysqlBirthdate) { $q.notify({ type: 'negative', message: 'Invalid birthdate format', position: 'top' }); return }
@@ -1082,8 +1263,12 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
     const res = await axios.post('/api/patients', formData)
     glNum.value = res.data.gl_no
     $q.notify({ type: 'positive', message: 'Patient record saved successfully', position: 'top' })
-    if (shouldPrint) await generatePDF()
-    router.push('/patient-records')
+    if (pendingAction.value === 'print') {
+      // Show print choice dialog — user picks details-only or full form
+      showPrintChoiceDialog.value = true
+    } else {
+      router.push('/patient-records')
+    }
   } catch (err) {
     console.error('Failed to save patient:', err)
     if (err.response?.status === 422 && err.response.data.error) {
@@ -1094,11 +1279,13 @@ const submitForm = async (shouldPrint, patientId = null, updatePatientInfo = fal
   }
 }
 
-const generatePDF = async () => {
+const generatePDF = async (detailsOnly = false) => {
   pdfLoading.value = true
   try {
-    const pdfMap = { MEDICINE: '/med.pdf', LABORATORY: '/lab.pdf', HOSPITAL: '/hosp.pdf' }
-    const existingPdfBytes = await fetch(pdfMap[categoryValue.value]).then(res => res.arrayBuffer())
+    const fullFormMap   = { MEDICINE: '/med.pdf',        LABORATORY: '/lab.pdf',        HOSPITAL: '/hosp.pdf' }
+    const detailsMap    = { MEDICINE: '/meddetails.pdf', LABORATORY: '/labdetails.pdf', HOSPITAL: '/hospdetails.pdf' }
+    const pdfFile = detailsOnly ? detailsMap[categoryValue.value] : fullFormMap[categoryValue.value]
+    const existingPdfBytes = await fetch(pdfFile).then(res => res.arrayBuffer())
     const pdfDoc = await PDFDocument.load(existingPdfBytes)
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     const amountWords = toWords(parseInt(issuedAmountValue.value)).toUpperCase() + ' PESOS'
@@ -1278,18 +1465,28 @@ label span {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.dropdown-patient-item:hover:not(.patient-ineligible) {
+/* Eligible: normal hover */
+.dropdown-patient-item.patient-eligible:hover {
   background-color: #f5f5f5;
-}
-
-.dropdown-patient-item.patient-eligible {
   cursor: pointer;
 }
 
-.dropdown-patient-item.patient-ineligible {
-  opacity: 0.6;
+/* Same-category ineligible: hard blocked, greyed out */
+.dropdown-patient-item.patient-ineligible-same-category {
+  opacity: 0.55;
   cursor: not-allowed;
   background-color: #fafafa;
+}
+
+/* Other-category ineligible: selectable, orange tint */
+.dropdown-patient-item.patient-ineligible-other-category {
+  cursor: pointer;
+  background-color: #fff8e1;
+  border-left: 3px solid #ff9800;
+}
+
+.dropdown-patient-item.patient-ineligible-other-category:hover {
+  background-color: #fff3cd;
 }
 
 .patient-name-dropdown {

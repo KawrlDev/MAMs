@@ -28,6 +28,10 @@
       <div class="actions">
         <q-btn class="btn-save" label="LOGIN" type="submit" :loading="loading" />
       </div>
+      <div class="footer">
+  <span class="copyright">© 2026 MAMs</span>
+  <span class="version">V 1.2.2</span>
+</div>
     </q-form>
   </div>
 </template>
@@ -102,4 +106,102 @@ label {
   color: white;
   font-weight: 600;
 }
+.footer {
+  display: none; /* hidden by default, only show on mobile */
+}
+@media screen and (min-width: 1048px) {
+  .footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+
+  .copyright,
+  .version {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    user-select: none;
+  }
+}
+@media screen and (max-width: 1048px) {
+  .form-card {
+    width: 100%;
+    height: auto;
+    padding: 30px 20px;
+    padding-top: 30px;
+  }
+
+  .patient-info-pill {
+    font-size: 30px;
+  }
+  .footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+
+  .copyright,
+  .version {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    user-select: none;
+  }
+}
+@media screen and (max-width: 768px) {
+  .form-card {
+    width: 100%;
+    height: auto;
+    padding: 30px 20px;
+    padding-top: 30px;
+  }
+
+  .patient-info-pill {
+    font-size: 30px;
+  }
+  .footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+
+  .copyright,
+  .version {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    user-select: none;
+  }
+}
+@media screen and (max-width: 480px) {
+  .form-card {
+    width: 100%;
+    height: auto;
+    padding: 20px 16px;
+    padding-top: 20px;
+  }
+
+  .patient-info-pill {
+    font-size: 22px;
+  }
+  .footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+
+  .copyright,
+  .version {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    user-select: none;
+  }
+}
+
 </style>

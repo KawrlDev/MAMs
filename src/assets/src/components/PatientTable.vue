@@ -219,4 +219,116 @@ watch(search, async (val) => {
   align-items: center;
   justify-content: center;
 }
+@media screen and (max-width: 1218px) {
+  .toolbar-wrapper :deep(.row) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .toolbar-wrapper :deep(.col-10) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .toolbar-wrapper :deep(.col-auto) {
+    flex-shrink: 0;
+  }
+
+  .toolbar-wrapper :deep(.q-btn) {
+    width: auto;
+    margin-left: 8px !important;
+    white-space: nowrap;
+  }
+
+  .toolbar-wrapper :deep(.q-input) {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .toolbar-wrapper :deep(.q-input input) {
+    font-size: 11px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .toolbar-wrapper :deep(.q-input input::placeholder) {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .budget-table :deep(.q-table__title) {
+    font-size: 22px;
+    padding: 8px 12px;
+  }
+
+  .budget-table :deep(thead th) {
+    font-size: 10px;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .budget-table :deep(td) {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+}
+@media screen and (max-width: 480px) {
+  .toolbar-wrapper :deep(.row) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .toolbar-wrapper :deep(.col-10) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .toolbar-wrapper :deep(.col-auto) {
+    flex-shrink: 0;
+  }
+
+  .toolbar-wrapper :deep(.q-btn) {
+    width: auto;
+    margin-left: 8px !important;
+    white-space: nowrap;
+  }
+
+  .toolbar-wrapper :deep(.q-input) {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .toolbar-wrapper :deep(.q-input input) {
+    font-size: 11px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .toolbar-wrapper :deep(.q-input input::placeholder) {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .budget-table :deep(.q-table__title) {
+    font-size: 22px;
+    padding: 8px 12px;
+  }
+
+  .budget-table :deep(thead th) {
+    font-size: 10px;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .budget-table :deep(td) {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+}
 </style>
