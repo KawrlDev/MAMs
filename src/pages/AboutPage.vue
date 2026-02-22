@@ -156,7 +156,7 @@ const members = ref([
     name: 'FRANZEN ALTHEA S. ALMENDRAS',
     role: 'FRONTEND',
     dedication: `Being part of the IT Department during our immersion was a meaningful and unforgettable experience for me. At first, everything was challenging, especially learning new tools and developing our system, but through guidance and teamwork, we were able to complete it successfully. I would like to give my sincere thanks to Sir Briones for guiding us, sharing his ideas, teaching us valuable lessons, and encouraging us to continue improving and learning. I am also grateful to our supervisor, Ma'am Jesty, and everyone in the IT Department, including Sir Jugs, Ma'am Alex, Sir JP, and Ma'am Jes, for their support throughout our immersion. I would also like to give special thanks to our team leader, Karl, for his dedication in coding our system, guiding us throughout the process, and stepping up to lead and support the team whenever needed. I would also like to thank my co-immersionists for the cooperation and memories we shared during this journey. This immersion experience will always hold a special place in my heart as one of the most valuable experiences in my senior high school journey.`,
-    photo: new URL('../assets/tea.jpg', import.meta.url).href
+    photo: new URL('../assets/tea.jpeg', import.meta.url).href
   },
   {
     name: 'ROSIE MAE B. OCLARIT',
