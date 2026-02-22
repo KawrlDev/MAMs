@@ -68,8 +68,9 @@
         <!-- Settings (ADMIN only) -->
         <q-btn v-if="role === 'ADMIN'" to="/settings" exact left rounded unelevated no-caps icon="settings"
           label="Settings" class="nav-btn" :class="{ 'active-btn': route.path === '/settings' }" />
-        
-        <q-btn icon="groups" label="ABOUT US" color="green" style="margin-left: 10px; color: palevioletred;" @click="$router.push('/about')"/>
+
+        <q-btn to="/about" exact left rounded unelevated no-caps icon="groups" label="About Us" class="nav-btn"
+          :class="{ 'active-btn': route.path === '/about' }" />
       </div>
     </q-drawer>
   </div>

@@ -128,7 +128,7 @@
 
           </p>
           <div class="thankyou-divider" />
-  <div class="thankyou-signature">— FROM THE TNTS COMPUTER PROGRAMMING immersionists</div>
+  <div class="thankyou-signature">— FROM THE TNTS COMPUTER PROGRAMMING IMMERSIONISTS</div>
         </div>
       </div>
     </div>
@@ -161,7 +161,7 @@ const members = ref([
   {
     name: 'ROSIE MAE B. OCLARIT',
     role: 'FRONTEND',
-    dedication: `First of all, I would like to thank the City Government of Tagum for allowing me to experience this milestone. I learned a lot during my 6 weeks working here. I can't fully explain the gratitude I feel, but I will surely cherish all the knowledge I gained and hopefully use it in the near future. Secondly, I would like to express my gratitude to my colleagues or should I call them NCH babies? Being with you guys made the workplace lighter. The laughter, the bond, and the chikas we shared are truly unforgettable. The project became much easier and possible to accomplish with you guys. Leadernim, thank you so much for all of your effort and hardwork. Lastly, I would like to take this opportunity to thank Ma'am Alex. This was quite unexpected but thank you for being one of my motivations to enter in the office and do my tasks. You have inspired me to pursue an IT related course in college. Thank you saurrr muchh ma'am!! 🙂`,
+    dedication: `Greetings! Before I proceed with my message, allow me to formally introduce myself. Hi, I am Rosie Mae Oclarit, one of the immersionists assigned here and one of the contributors to the successful implementation of this system. First of all, I would like to thank the City Government of Tagum for allowing me to experience this milestone. I learned a lot during my 6 weeks working here. I can't fully explain the gratitude I feel, but I will surely cherish all the knowledge I gained and hopefully use it in the near future. Secondly, I would like to express my gratitude to my colleagues or should I call them NCH babies? Being with you guys made the workplace lighter. The laughter, the bond, and the chikas we shared are truly unforgettable. The project became much easier and possible to accomplish with you guys. Leadernim, thank you so much for all of your effort and hardwork. And lastly, I would like to take this opportunity to thank Ma'am Alex (the only woman on the IT team). This was quite unexpected but thank you for being one of my motivations to enter in the office and do my tasks, ma'am. You have inspired me to pursue an IT related course in college. Thank you saurrr muchh ma'am!! :).`,
     photo: new URL('../assets/oclar.jpg', import.meta.url).href
   },
   {

@@ -33,31 +33,56 @@
 
       <div class="table-container">
         <div class="table-scroll-wrapper">
-          <q-table class="budget-table" :rows="rows" row-key="num" flat bordered dense :pagination="pagination"
-            @update:pagination="updatePagination" :rows-per-page-options="[5, 10, 15, 23]">
+          <q-table
+            class="budget-table"
+            :rows="sortedRows"
+            row-key="barangay"
+            flat bordered dense
+            :rows-per-page-options="[5, 10, 15, 23]"
+            v-model:pagination="pagination"
+          >
             <template v-slot:header>
               <tr class="sticky-header">
                 <th rowspan="2">#</th>
-                <th rowspan="2">Barangay</th>
+                <th rowspan="2" class="sortable-th" @click="setSort('barangay')">
+                  Barangay <q-icon :name="getSortIcon('barangay')" class="sort-icon" />
+                </th>
                 <th colspan="2">Medicine</th>
                 <th colspan="2">Laboratory</th>
                 <th colspan="2">Hospital</th>
-                <th rowspan="2">Total Patients</th>
-                <th rowspan="2">Total Amount</th>
+                <th rowspan="2" class="sortable-th" @click="setSort('totalPatients')">
+                  Total Patients <q-icon :name="getSortIcon('totalPatients')" class="sort-icon" />
+                </th>
+                <th rowspan="2" class="sortable-th" @click="setSort('totalAmount')">
+                  Total Amount <q-icon :name="getSortIcon('totalAmount')" class="sort-icon" />
+                </th>
               </tr>
               <tr class="sticky-header second-row">
-                <th>Patients</th>
-                <th>Amount</th>
-                <th>Patients</th>
-                <th>Amount</th>
-                <th>Patients</th>
-                <th>Amount</th>
+                <th class="sortable-th" @click="setSort('medicinePatients')">
+                  Patients <q-icon :name="getSortIcon('medicinePatients')" class="sort-icon" />
+                </th>
+                <th class="sortable-th" @click="setSort('medicineAmount')">
+                  Amount <q-icon :name="getSortIcon('medicineAmount')" class="sort-icon" />
+                </th>
+                <th class="sortable-th" @click="setSort('laboratoryPatients')">
+                  Patients <q-icon :name="getSortIcon('laboratoryPatients')" class="sort-icon" />
+                </th>
+                <th class="sortable-th" @click="setSort('laboratoryAmount')">
+                  Amount <q-icon :name="getSortIcon('laboratoryAmount')" class="sort-icon" />
+                </th>
+                <th class="sortable-th" @click="setSort('hospitalPatients')">
+                  Patients <q-icon :name="getSortIcon('hospitalPatients')" class="sort-icon" />
+                </th>
+                <th class="sortable-th" @click="setSort('hospitalAmount')">
+                  Amount <q-icon :name="getSortIcon('hospitalAmount')" class="sort-icon" />
+                </th>
               </tr>
             </template>
 
+            <!-- FIX 1 & 2: Restored body slot with correct sequential row numbering -->
             <template v-slot:body="props">
               <tr>
-                <td>{{ props.row.num }}</td>
+                <td>{{ (pagination.page - 1) * pagination.rowsPerPage + props.rowIndex + 1 }}</td>
                 <td>{{ props.row.barangay }}</td>
                 <td align="right">{{ props.row.medicinePatients }}</td>
                 <td align="right">{{ formatPeso(props.row.medicineAmount) }}</td>
@@ -91,24 +116,53 @@ const perSexChart = ref(null)
 const perAgeBracketChart = ref(null)
 const perSectorChart = ref(null)
 const rows = ref([])
+
+// FIX 3: Removed rowsNumber — caused pagination to break in non-server mode
 const pagination = ref({ rowsPerPage: 5, page: 1 })
 
-// Format PHP currency
+// ── Sorting ───────────────────────────────────────────────────────────────────
+const sortKey = ref('totalAmount')
+const sortOrder = ref('desc')
+
+const setSort = (key) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortKey.value = key
+    sortOrder.value = 'desc'
+  }
+  pagination.value.page = 1
+}
+
+const getSortIcon = (key) => {
+  if (sortKey.value !== key) return 'unfold_more'
+  return sortOrder.value === 'asc' ? 'arrow_upward' : 'arrow_downward'
+}
+
+const sortedRows = computed(() => {
+  const data = [...rows.value]
+  data.sort((a, b) => {
+    const aVal = a[sortKey.value]
+    const bVal = b[sortKey.value]
+    const cmp = typeof aVal === 'number'
+      ? aVal - bVal
+      : String(aVal).localeCompare(String(bVal))
+    return sortOrder.value === 'asc' ? cmp : -cmp
+  })
+  return data
+})
+
+// ── Formatting ────────────────────────────────────────────────────────────────
 const formatPeso = (amount) =>
   amount == null
     ? '₱0.00'
     : new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(amount)
 
-const updatePagination = (newPagination) => {
-  pagination.value = newPagination
-}
-
+// ── Data fetching & charts ────────────────────────────────────────────────────
 onMounted(async () => {
   try {
-    // Fetch barangay table
     const resBarangay = await axios.get('/api/barangay-records')
-    rows.value = resBarangay.data.map((item, index) => ({
-      num: index + 1,
+    rows.value = resBarangay.data.map((item) => ({
       barangay: item.barangay,
       medicinePatients: item.medicinePatients,
       medicineAmount: item.medicineAmount,
@@ -119,16 +173,15 @@ onMounted(async () => {
       totalPatients: item.totalPatients,
       totalAmount: item.totalAmount
     }))
+    // NOTE: rowsNumber intentionally NOT set here — q-table handles pagination
+    // from sortedRows.length automatically in non-server mode
 
-    // Fetch all sectors from the database
     const resSectors = await axios.get('/api/sectors')
-    const allSectors = resSectors.data // Array of { id, sector }
+    const allSectors = resSectors.data
 
-    // Fetch chart data
     const resChart = await axios.get('/api/amount-given')
     const chartData = resChart.data
 
-    // Wait for DOM update
     await nextTick()
 
     const pesoFormatter = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' })
@@ -161,21 +214,14 @@ onMounted(async () => {
     createDoughnut(
       perCategoryChart,
       ['Medicine', 'Laboratory', 'Hospital'],
-      [
-        parseFloat(chartData.medicine) || 0,
-        parseFloat(chartData.laboratory) || 0,
-        parseFloat(chartData.hospital) || 0
-      ],
+      [parseFloat(chartData.medicine) || 0, parseFloat(chartData.laboratory) || 0, parseFloat(chartData.hospital) || 0],
       ['#4CAF50', '#2196F3', '#FF9800']
     )
 
     createDoughnut(
       perSexChart,
       ['Male', 'Female'],
-      [
-        parseFloat(chartData.perMale) || 0,
-        parseFloat(chartData.perFemale) || 0
-      ],
+      [parseFloat(chartData.perMale) || 0, parseFloat(chartData.perFemale) || 0],
       ['#42A5F5', '#EC407A']
     )
 
@@ -194,19 +240,11 @@ onMounted(async () => {
       ['#FF6B6B', '#FFA07A', '#FFD93D', '#6BCF7F', '#4ECDC4', '#45B7D1', '#9B59B6']
     )
 
-    // ✅ NEW: Per Sector Chart - Include ALL sectors even with 0 data
     const sectorPalette = ['#FF6F61', '#6B5B95', '#88B04B', '#F7CAC9', '#45B7D1', '#FFD93D', '#FF9800', '#9B59B6', '#E74C3C', '#3498DB']
-
-    // Map all sectors to their data (0 if no data)
-    const sectorData = allSectors.map(sector => {
-      const dataKey = `sector_${sector.sector}` // Match the key from backend
-      return {
-        label: sector.sector,
-        value: parseFloat(chartData[dataKey]) || 0
-      }
-    })
-
-    // Sort by value (optional - shows highest first)
+    const sectorData = allSectors.map(sector => ({
+      label: sector.sector,
+      value: parseFloat(chartData[`sector_${sector.sector}`]) || 0
+    }))
     sectorData.sort((a, b) => b.value - a.value)
 
     createDoughnut(
@@ -222,9 +260,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ═══════════════════════════════════════════════════════════
-   ALL ORIGINAL STYLES — 100% UNTOUCHED
-═══════════════════════════════════════════════════════════ */
 .dashboard-card {
   width: 100%;
   padding: 0;
@@ -238,6 +273,7 @@ onMounted(async () => {
   overflow: hidden;
   margin-bottom: -2%;
   max-height: 1580px;
+  min-width: 600px;
 }
 
 .amount-title {
@@ -310,10 +346,9 @@ onMounted(async () => {
   font-size: 20px;
   font-weight: 700;
   color: #2e7d32;
-  margin-bottom: 15px;
+  margin-bottom: 40px;
   letter-spacing: 0.3px;
   min-height: 25px;
-  margin-bottom: 40px;
   margin-top: -2px;
 }
 
@@ -370,7 +405,7 @@ onMounted(async () => {
   width: 100%;
   border-radius: 8px;
   box-sizing: border-box;
-  height: 100px;            /* original — overridden on mobile below */
+  height: 100px;
 }
 
 .table-scroll-wrapper {
@@ -390,9 +425,9 @@ onMounted(async () => {
   max-height: none !important;
 }
 
+/* FIX 3: Changed from width: max-content to width: 100% to prevent horizontal scroll */
 .budget-table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   table-layout: fixed;
 }
 
@@ -418,11 +453,6 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-.budget-table {
-  width: 100%;
-  table-layout: fixed;
-}
-
 .budget-table td {
   padding: 8px;
   font-size: 13px;
@@ -431,24 +461,27 @@ onMounted(async () => {
   text-overflow: ellipsis;
 }
 
-.dashboard-card {
-  min-width: 600px;
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ONLY FIX: on mobile, .table-container height:100px was
-   clipping the scroll wrapper entirely. Override it to auto
-   so the scroll wrapper's own height:300px takes effect and
-   the scrollbar appears correctly — same behaviour as desktop.
-   Nothing else is touched.
-═══════════════════════════════════════════════════════════ */
+.sortable-th:hover {
+  background: #176e22 !important;
+}
+
+.sort-icon {
+  font-size: 12px;
+  vertical-align: middle;
+  margin-left: 3px;
+  opacity: 0.85;
+}
+
 @media (max-width: 1023px) {
-  /* Remove the 100px height that clips the table on mobile */
   .table-container {
     height: auto;
   }
 
-  /* Ensure the card itself doesn't clip the table via overflow:hidden */
   .dashboard-card {
     overflow: visible;
     max-height: none;
