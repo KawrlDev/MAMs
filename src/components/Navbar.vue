@@ -2,24 +2,24 @@
   <div>
     <!-- TOP HEADER -->
     <q-header elevated class="bg-green-7 text-white">
-      <q-toolbar>
+      <q-toolbar class="toolbar-responsive">
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" />
 
-        <q-toolbar-title class="row items-center q-gutter-sm">
-          <div class="row items-center q-gutter-sm cursor-pointer" @click="$router.push('/')">
-            <q-img src="~assets/logo.png" width="35px" height="50px" fit="contain" style="margin-left: -2%; margin-top: 2px;"/>
-            <q-img src="~assets/loi.png" width="90px" height="40px" style="margin-left: -5%;"/>
+        <q-toolbar-title class="row items-center q-gutter-sm toolbar-title-responsive">
+          <div class="row items-center cursor-pointer logo-wrapper" @click="$router.push('/')">
+            <q-img src="~assets/logo.png" class="logo-main" fit="contain" />
+            <q-img src="~assets/loi.png" class="logo-text" />
           </div>
         </q-toolbar-title>
 
         <!-- USER ICON WITH DROPDOWN MENU -->
-        <q-btn flat round icon="account_circle">
+        <q-btn flat round icon="account_circle" size="sm">
           <q-menu>
-            <q-list style="min-width: 200px">
+            <q-list style="min-width: 180px">
               <!-- User Info Section -->
               <q-item>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">
+                  <q-item-label class="text-weight-bold text-caption">
                     {{ user?.USERNAME || 'User' }}
                   </q-item-label>
                   <q-item-label caption>
@@ -33,9 +33,9 @@
               <!-- Logout Button -->
               <q-item clickable v-close-popup @click="logout">
                 <q-item-section avatar>
-                  <q-icon name="logout" />
+                  <q-icon name="logout" size="sm" />
                 </q-item-section>
-                <q-item-section>Logout</q-item-section>
+                <q-item-section class="text-caption">Logout</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -44,8 +44,8 @@
     </q-header>
 
     <!-- OVERLAY DRAWER -->
-    <q-drawer v-model="drawer" overlay modal side="left" :width="200" class="drawer-bg">
-      <div class="drawer-content q-pa-sm column q-gutter-sm items-center">
+    <q-drawer v-model="drawer" overlay modal side="left" :width="drawerWidth" class="drawer-bg">
+      <div class="drawer-content column q-gutter-sm items-center">
 
         <!-- Dashboard -->
         <q-btn to="/" exact left rounded unelevated no-caps icon="dashboard" label="Dashboard" class="nav-btn"
@@ -92,6 +92,11 @@ const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
 
+// Responsive drawer width
+const drawerWidth = computed(() => {
+  return window.innerWidth <= 480 ? 180 : 200
+})
+
 const user = computed(() => {
   const userData = localStorage.getItem('user');
   return userData ? JSON.parse(userData) : null;
@@ -99,12 +104,9 @@ const user = computed(() => {
 
 const logout = async () => {
   try {
-    // Call backend FIRST so the session is still active when the log is written
-    // Send username explicitly since cross-origin sessions may not resolve Auth::user()
     const userData = JSON.parse(localStorage.getItem('user') || '{}')
     await axios.post('/api/logout', { username: userData?.USERNAME ?? 'Unknown' })
   } catch (err) {
-    // Proceed with local logout even if the request fails
     console.error('Logout request failed:', err)
   }
 
@@ -121,6 +123,38 @@ const logout = async () => {
 </script>
 
 <style scoped>
+/* ── Toolbar ── */
+.toolbar-responsive {
+  min-height: 48px;
+  padding: 0 8px;
+}
+
+.toolbar-title-responsive {
+  padding: 0;
+  min-width: 0; /* prevents overflow pushing other elements */
+}
+
+/* ── Logo wrapper ── */
+.logo-wrapper {
+  gap: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.logo-main {
+  width: 30px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  width: 80px;
+  height: 36px;
+  margin-left: -4px;
+  flex-shrink: 0;
+}
+
+/* ── Drawer ── */
 .drawer-bg {
   background-color: #19ad19;
 }
@@ -128,17 +162,23 @@ const logout = async () => {
 .drawer-content {
   background-color: #60ba60;
   height: 100%;
-  padding: 20px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
 }
 
-.nav-btn,
-.test-btn {
-  margin-top: 10px;
-  min-width: 150px;
-  height: 40px;
-  padding: 6px 0;
+/* ── Nav buttons ── */
+.nav-btn {
+  margin-top: 6px;
+  min-width: 140px;
+  width: 100%;
+  max-width: 160px;
+  height: 38px;
+  padding: 4px 0;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   border-radius: 20px;
   color: white;
   border: 2px solid #ffffe0;
@@ -150,16 +190,54 @@ const logout = async () => {
 }
 
 .nav-btn .q-icon {
-  font-size: 22px;
-}
-.about-btn {
-  border-radius: 8px;
-  padding: 4px 12px;
-  background-color: rgb(255, 255, 255);
-  color: #19ad19;
+  font-size: 20px;
 }
 
-.about-btn:hover {
-  background-color: rgb(151, 252, 164);
+/* ── 480px and below ── */
+@media (max-width: 480px) {
+  .toolbar-responsive {
+    min-height: 44px;
+    padding: 0 6px;
+  }
+
+  .logo-main {
+    width: 26px;
+    height: 38px;
+  }
+
+  .logo-text {
+    width: 70px;
+    height: 30px;
+  }
+
+  .drawer-content {
+    padding: 12px 8px;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    min-width: 130px;
+    max-width: 150px;
+    height: 36px;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .nav-btn .q-icon {
+    font-size: 18px;
+  }
+}
+
+/* ── Very small screens (360px) ── */
+@media (max-width: 360px) {
+  .logo-text {
+    width: 60px;
+    height: 26px;
+  }
+
+  .logo-main {
+    width: 22px;
+    height: 32px;
+  }
 }
 </style>
